@@ -23,19 +23,24 @@ bot.command('admin', async (ctx) => {
   const userId = ctx.from.id.toString();
 
   if (!adminIds.includes(userId)) {
-    return ctx.reply(`❌ Access Denied.\nYour ID: \`${userId}\` is not in the Admin list.`);
+    return;
   }
 
   const webAppUrl = process.env.WEBAPP_URL || 'https://your-app.up.railway.app';
-  
-  await ctx.reply('🔒 *Welcome Creator*\nOpen the dashboard to manage your empire.', {
-    parse_mode: 'Markdown',
-    reply_markup: {
-      inline_keyboard: [
-        [{ text: '📊 Open Admin Dashboard', web_app: { url: webAppUrl } }]
-      ]
-    }
-  });
+
+  try {
+    await ctx.reply('🔒 *Welcome Creator*\nOpen the dashboard to manage your empire.', {
+      parse_mode: 'Markdown',
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: '📊 Open Admin Dashboard', web_app: { url: webAppUrl } }]
+        ]
+      }
+    });
+  } catch (err) {
+    console.error('[ADMIN ERROR]', err.message);
+    await ctx.reply(`⚠️ Failed to open dashboard.\nError: ${err.message}\nURL used: ${webAppUrl}`);
+  }
 });
 
 /**
