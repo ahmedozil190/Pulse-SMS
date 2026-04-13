@@ -154,30 +154,29 @@ body.loading { overflow: hidden; }
 .section-group { margin-bottom: 30px; }
 .section-title {
     display: flex; align-items: center; gap: 10px;
-    margin-bottom: 15px; color: var(--text-secondary);
-    font-size: 0.95rem; font-weight: 600;
+    margin: 25px 0 15px 0; color: var(--text-secondary);
+    font-size: 1rem; font-weight: 600;
 }
-.section-title span { font-size: 1.2rem; }
+.section-title i { font-size: 1.2rem; }
 
 .info-card {
     background: var(--bg-card);
     backdrop-filter: blur(12px);
     border: 1px solid var(--border-card);
-    border-radius: var(--radius);
-    padding: 24px 20px;
+    border-radius: 20px;
+    padding: 12px 20px;
     display: flex; justify-content: space-between; align-items: center;
+    min-height: 60px;
     margin-bottom: 10px;
     transition: transform 0.2s;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
 .info-card:hover { transform: scale(1.01); background: rgba(255, 255, 255, 0.04); }
 
 .info-label {
-    font-size: 0.65rem; font-weight: 700;
+    font-size: 0.85rem; font-weight: 700;
     color: var(--text-secondary);
-    text-transform: uppercase; letter-spacing: 1px;
 }
-.info-value { font-size: 1.8rem; font-weight: 800; line-height: 1; }
+.info-value { font-size: 1.3rem; font-weight: 800; line-height: 1; }
 
 .color-cyan { color: var(--color-cyan, #22d3ee); }
 .color-green { color: var(--success); }
