@@ -161,16 +161,13 @@ body.loading { overflow: hidden; }
 
 .info-card {
     background: var(--bg-card);
-    backdrop-filter: blur(12px);
     border: 1px solid var(--border-card);
     border-radius: 20px;
     padding: 12px 20px;
     display: flex; justify-content: space-between; align-items: center;
     min-height: 60px;
     margin-bottom: 10px;
-    transition: transform 0.2s;
 }
-.info-card:hover { transform: scale(1.01); background: rgba(255, 255, 255, 0.04); }
 
 .info-label {
     font-size: 0.85rem; font-weight: 700;
