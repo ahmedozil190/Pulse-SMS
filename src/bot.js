@@ -552,9 +552,13 @@ bot.action('action_main_menu', async (ctx) => {
  * /admin command - Opens the Mini App Dashboard
  */
 bot.command('admin', async (ctx) => {
-  const adminIds = (process.env.ADMIN_IDS || process.env.ADMIN_TELEGRAM_ID || "").split(',');
-  if (!adminIds.includes(ctx.from.id.toString())) {
-    return; // Ignore if not admin
+  const adminIds = (process.env.ADMIN_IDS || process.env.ADMIN_TELEGRAM_ID || "").split(',').map(id => id.trim());
+  const userId = ctx.from.id.toString();
+  
+  console.log(`[ADMIN ATTEMPT] User ID: ${userId}, Allowed IDs: ${adminIds}`);
+
+  if (!adminIds.includes(userId)) {
+    return ctx.reply(`❌ Access Denied.\nYour ID: \`${userId}\` is not in the Admin list.`);
   }
 
   const webAppUrl = process.env.WEBAPP_URL || 'https://your-app.up.railway.app';
