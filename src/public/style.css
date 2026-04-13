@@ -602,6 +602,28 @@ body.loading {
     border: 1px solid rgba(255, 255, 255, 0.04);
     border-radius: 20px;
     padding: 25px 15px 15px;
+    cursor: pointer;
+    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.user-container:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(96, 165, 250, 0.3);
+    transform: translateY(-5px);
+}
+
+.user-container:active {
+    transform: scale(0.98);
+}
+
+.modal .btn-ban {
+    background: linear-gradient(135deg, #ef4444, #b91c1c);
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+}
+
+.modal .btn-unban {
+    background: linear-gradient(135deg, #10b981, #059669);
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
 }
 
 .user-card-index {

@@ -210,18 +210,31 @@
         </div>
     </div>
 
-    <!-- Balance Modal -->
-    <div id="balance-modal" class="modal">
+    <!-- User Management Modal -->
+    <div id="user-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Update Balance</h3>
+                <h3>Manage User</h3>
                 <div class="close-circle" onclick="closeModal()"><i class="fas fa-times"></i></div>
             </div>
-            <p id="target-user-display" style="color:var(--text-secondary); font-size:0.8rem"></p>
-            <input type="number" id="balance-amount" step="0.01" placeholder="0.00">
-            <div class="modal-buttons">
-                <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-                <button class="btn-confirm" id="confirm-balance-btn" onclick="performBalanceUpdate()">Update</button>
+            
+            <p id="target-user-display" style="color:var(--text-secondary); font-size:0.9rem; font-weight:700; margin-bottom:20px;"></p>
+            
+            <!-- Balance Section -->
+            <div style="margin-bottom: 25px;">
+                <label style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Update Balance</label>
+                <input type="number" id="balance-amount" step="0.01" placeholder="Amount to add/subtract">
+                <button class="btn-confirm" style="width:100%" id="confirm-balance-btn" onclick="performBalanceUpdate()">Update Balance</button>
+            </div>
+
+            <div style="height: 1px; background: rgba(255,255,255,0.05); margin: 20px 0;"></div>
+
+            <!-- Status Section -->
+            <div>
+                <label style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; display: block; margin-bottom: 10px;">Account Status</label>
+                <button id="modal-ban-btn" class="gradient-btn" onclick="performToggleBanFromModal()" style="width: 100%;">
+                    <!-- Text/Icon set via JS -->
+                </button>
             </div>
         </div>
     </div>

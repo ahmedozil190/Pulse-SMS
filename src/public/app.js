@@ -181,13 +181,13 @@ function renderUsersList(users) {
         return;
     }
     list.innerHTML = users.map((u, index) => `
-        <div class="user-container">
+        <div class="user-container" onclick="openUserModal(${u.id}, '${escapeHtml(u.firstName || u.username || u.telegramId)}', ${u.balance}, ${u.isBanned})">
             <div class="user-card-index">${index + 1}</div>
-            <div class="user-row" onclick="toggleUserBan(${u.id})">
+            <div class="user-row">
                 <span class="user-row-label">Account Status</span>
                 <span class="user-row-value ${u.isBanned ? 'color-red' : 'color-green'}">${u.isBanned ? 'BANNED' : '<i class="fas fa-check"></i> ACTIVE'}</span>
             </div>
-            <div class="user-row" onclick="openBalanceModal(${u.id}, '${escapeHtml(u.firstName || u.username || u.telegramId)}')">
+            <div class="user-row">
                 <span class="user-row-label">Full Name</span>
                 <span class="user-row-value color-yellow">${escapeHtml(u.firstName || 'Unknown')}</span>
             </div>
@@ -199,18 +199,13 @@ function renderUsersList(users) {
                 <span class="user-row-label">User ID</span>
                 <span class="user-row-value color-orange">${u.telegramId}</span>
             </div>
-            <div class="user-row" onclick="openBalanceModal(${u.id}, '${escapeHtml(u.firstName || u.username || u.telegramId)}')">
+            <div class="user-row">
                 <span class="user-row-label">Balance</span>
                 <span class="user-row-value color-blue-tint">$${u.balance.toFixed(2)}</span>
             </div>
             <div class="user-row"><span class="user-row-label">Spent</span><span class="user-row-value color-red">$${(u.spent || 0).toFixed(2)}</span></div>
             <div class="user-row"><span class="user-row-label">Earned</span><span class="user-row-value color-green">$${(u.referralBalance || 0).toFixed(2)}</span></div>
             <div class="user-row"><span class="user-row-label">Orders Made</span><span class="user-row-value color-purple">${u.ordersMade || 0}</span></div>
-            <div class="data-card-actions" style="margin-top:15px; border-top:none; padding-top:0">
-                 <button class="gradient-btn" style="padding:10px; font-size:0.8rem;" onclick="openBalanceModal(${u.id}, '${escapeHtml(u.firstName || u.username || u.telegramId)}')">
-                    <i class="fas fa-wallet"></i> Edit Balance
-                 </button>
-            </div>
         </div>
     `).join('');
 }
@@ -294,15 +289,18 @@ function renderDepositsList(deposits) {
 }
 
 // HANDLERS
-window.toggleUserBan = async (userId) => {
-    if (!confirm('Toggle ban status?')) return;
+window.performToggleBanFromModal = async () => {
+    if (!currentEditingUserId) return;
     try {
         const res = await fetch('/api/admin/user-toggle-ban', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', ...getHeaders() },
-            body: JSON.stringify({ userId })
+            body: JSON.stringify({ userId: currentEditingUserId })
         });
-        if (res.ok) await refreshData();
+        if (res.ok) {
+            closeModal();
+            await refreshData();
+        }
     } catch (err) { console.error(err); }
 };
 
@@ -325,15 +323,27 @@ window.setUserFilter = (filter) => {
 };
 
 // MODALS
-window.openBalanceModal = (id, name) => {
+window.openUserModal = (id, name, balance, isBanned) => {
     currentEditingUserId = id;
-    document.getElementById('target-user-display').textContent = `User: ${name}`;
+    document.getElementById('target-user-display').textContent = `${name}`;
     document.getElementById('balance-amount').value = '';
-    document.getElementById('balance-modal').classList.add('active');
-    document.getElementById('balance-amount').focus();
+    
+    // Setup Ban/Unban Button
+    const banBtn = document.getElementById('modal-ban-btn');
+    if (isBanned) {
+        banBtn.innerHTML = '<i class="fas fa-user-check"></i> UNBAN USER';
+        banBtn.className = 'gradient-btn btn-unban';
+    } else {
+        banBtn.innerHTML = '<i class="fas fa-user-slash"></i> BAN USER';
+        banBtn.className = 'gradient-btn btn-ban';
+    }
+
+    document.getElementById('user-modal').classList.add('active');
 };
 
-window.closeModal = () => { document.getElementById('balance-modal').classList.remove('active'); };
+window.closeModal = () => { 
+    document.getElementById('user-modal').classList.remove('active'); 
+};
 
 window.performBalanceUpdate = async () => {
     const amount = parseFloat(document.getElementById('balance-amount').value);
