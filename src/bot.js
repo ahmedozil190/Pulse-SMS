@@ -61,6 +61,7 @@ async function getOrCreateUser(ctx, referrerTelegramId = null) {
           telegramId,
           username: ctx.from.username || null,
           firstName: ctx.from.first_name || null,
+          lastName: ctx.from.last_name || null,
           balance: 0.0,
           referredById
         }
@@ -68,13 +69,15 @@ async function getOrCreateUser(ctx, referrerTelegramId = null) {
     } else {
       // PROMPT SYNC: Update user info if it changed since last interaction
       const currentFirstName = ctx.from.first_name || null;
+      const currentLastName = ctx.from.last_name || null;
       const currentUsername = ctx.from.username || null;
 
-      if (user.firstName !== currentFirstName || user.username !== currentUsername) {
+      if (user.firstName !== currentFirstName || user.lastName !== currentLastName || user.username !== currentUsername) {
         user = await prisma.user.update({
           where: { id: user.id },
           data: {
             firstName: currentFirstName,
+            lastName: currentLastName,
             username: currentUsername
           }
         });
@@ -718,11 +721,22 @@ app.get('/api/admin/users', isAdminMiddleware, async (req, res) => {
     // Calculate spent for each user
     const formattedUsers = users.map(u => ({
       ...u,
+      firstName: `${u.firstName || ''} ${u.lastName || ''}`.trim() || 'Unknown',
       spent: u.orders.reduce((acc, curr) => acc + curr.price, 0),
       ordersMade: u._count.orders,
       orders: undefined, // Clear from response
       _count: undefined
     }));
+
+    // SILENT BACKGROUND SYNC: Trigger sync for the top 5 most stale users in this list
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    const staleUsers = formattedUsers
+      .filter(u => !u.updatedAt || u.updatedAt < fiveMinutesAgo)
+      .slice(0, 5);
+      
+    if (staleUsers.length > 0) {
+       syncSpecificUsers(staleUsers.map(u => u.telegramId)).catch(err => console.error('Silent sync error:', err));
+    }
 
     res.json(formattedUsers || []);
   } catch (err) {
@@ -730,6 +744,24 @@ app.get('/api/admin/users', isAdminMiddleware, async (req, res) => {
     res.status(500).json({ msg: 'Server error' });
   }
 });
+
+// Helper for silent sync
+async function syncSpecificUsers(telegramIds) {
+    for (const tid of telegramIds) {
+        try {
+            const chat = await bot.telegram.getChat(tid).catch(() => null);
+            if (!chat) continue;
+            const newFirstName = chat.first_name || chat.title || '';
+            const newLastName = chat.last_name || '';
+            const newUsername = chat.username;
+            await prisma.user.update({
+                where: { telegramId: tid },
+                data: { firstName: newFirstName, lastName: newLastName, username: newUsername, updatedAt: new Date() }
+            });
+            await new Promise(r => setTimeout(r, 500)); // Respect rate limits
+        } catch(e) {}
+    }
+}
 
 app.post('/api/admin/user-toggle-ban', isAdminMiddleware, async (req, res) => {
   const { userId } = req.body;
@@ -752,9 +784,15 @@ app.get('/api/admin/orders', isAdminMiddleware, async (req, res) => {
     const orders = await prisma.order.findMany({
       orderBy: { createdAt: 'desc' },
       take: 200,
-      include: { user: { select: { firstName: true, username: true, telegramId: true } } }
+      include: { user: { select: { firstName: true, lastName: true, username: true, telegramId: true } } }
     });
-    res.json(orders || []);
+
+    const formattedOrders = orders.map(o => ({
+        ...o,
+        user: { ...o.user, firstName: `${o.user?.firstName || ''} ${o.user?.lastName || ''}`.trim() || 'Unknown' }
+    }));
+
+    res.json(formattedOrders || []);
   } catch (err) {
     res.status(500).json({ msg: 'Server error' });
   }
@@ -765,9 +803,15 @@ app.get('/api/admin/deposits', isAdminMiddleware, async (req, res) => {
     const deposits = await prisma.deposit.findMany({
       orderBy: { createdAt: 'desc' },
       take: 200,
-      include: { user: { select: { firstName: true, username: true, telegramId: true } } }
+      include: { user: { select: { firstName: true, lastName: true, username: true, telegramId: true } } }
     });
-    res.json(deposits || []);
+
+    const formattedDeposits = deposits.map(d => ({
+        ...d,
+        user: { ...d.user, firstName: `${d.user?.firstName || ''} ${d.user?.lastName || ''}`.trim() || 'Unknown' }
+    }));
+
+    res.json(formattedDeposits || []);
   } catch (err) {
     res.status(500).json({ msg: 'Server error' });
   }

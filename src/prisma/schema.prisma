@@ -12,6 +12,7 @@ model User {
   telegramId  String    @unique
   username    String?
   firstName   String?
+  lastName    String?
   balance         Float     @default(0.0)
   referralBalance Float     @default(0.0)
   referredById    Int?
