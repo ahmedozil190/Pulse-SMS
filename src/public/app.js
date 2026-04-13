@@ -2,161 +2,312 @@ const webapp = window.Telegram.WebApp;
 webapp.expand();
 webapp.ready();
 
-// DOM Elements
-const body = document.body;
-const loader = document.getElementById('loader');
-const app = document.getElementById('app');
-const totalUsersEl = document.getElementById('total-users');
-const totalSalesEl = document.getElementById('total-sales');
-const totalRevenueEl = document.getElementById('total-revenue');
-const userListBody = document.getElementById('user-list-body');
-const userSearchInput = document.getElementById('user-search');
-const modal = document.getElementById('balance-modal');
-const modalNameDisplay = document.getElementById('target-user-display');
-const balanceInput = document.getElementById('balance-amount');
-const confirmBalanceBtn = document.getElementById('confirm-balance-btn');
-const cancelBtn = document.getElementById('cancel-btn');
-
+// ═══════════ STATE ═══════════
 let allUsers = [];
+let allOrders = [];
+let allDeposits = [];
 let currentEditingUserId = null;
+let currentOrderFilter = 'ALL';
+let currentDepositFilter = 'ALL';
 
-// Initialize
+// ═══════════ INIT ═══════════
 async function init() {
     try {
-        // Authenticate - we pass the initData to the backend for verification
-        const initData = webapp.initData;
-        
-        // Fetch stats
         await refreshData();
-        
-        // Setup Search
-        userSearchInput.addEventListener('input', (e) => {
+
+        document.getElementById('user-search').addEventListener('input', (e) => {
             filterUsers(e.target.value);
         });
 
-        // Setup Modal Buttons
-        cancelBtn.addEventListener('click', closeModal);
-        confirmBalanceBtn.addEventListener('click', performBalanceUpdate);
-
-        // Hide loader
-        body.classList.remove('loading');
-        loader.style.display = 'none';
-        app.style.display = 'block';
-
-        // Set admin name from telegram
+        // Set admin name
         if (webapp.initDataUnsafe && webapp.initDataUnsafe.user) {
-            document.getElementById('admin-name').textContent = webapp.initDataUnsafe.user.first_name;
+            const name = webapp.initDataUnsafe.user.first_name;
+            document.getElementById('sidebar-admin-name').textContent = name;
         }
 
+        // Hide loader, show app
+        document.body.classList.remove('loading');
+        document.getElementById('loader').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
     } catch (err) {
-        console.error('Initialization error:', err);
-        alert('Failed to load dashboard. Make sure you have authorized correctly.');
+        console.error('Init error:', err);
+        document.body.classList.remove('loading');
+        document.getElementById('loader').innerHTML = '<div class="loader-content"><span>⚠️ Failed to load dashboard</span></div>';
     }
+}
+
+// ═══════════ DATA FETCHING ═══════════
+function getHeaders() {
+    return { 'x-telegram-init-data': webapp.initData };
 }
 
 async function refreshData() {
     try {
-        const initData = webapp.initData;
-        
-        // Get Stats
-        const statsRes = await fetch('/api/admin/stats', {
-            headers: { 'x-telegram-init-data': initData }
-        });
+        const [statsRes, usersRes, ordersRes, depositsRes] = await Promise.all([
+            fetch('/api/admin/stats', { headers: getHeaders() }),
+            fetch('/api/admin/users', { headers: getHeaders() }),
+            fetch('/api/admin/orders', { headers: getHeaders() }),
+            fetch('/api/admin/deposits', { headers: getHeaders() })
+        ]);
+
         const stats = await statsRes.json();
-        
-        totalUsersEl.textContent = stats.totalUsers;
-        totalSalesEl.textContent = stats.successfulOrders;
-        totalRevenueEl.textContent = `${stats.totalRevenue.toFixed(2)}$`;
-
-        // Get Users
-        const usersRes = await fetch('/api/admin/users', {
-            headers: { 'x-telegram-init-data': initData }
-        });
         allUsers = await usersRes.json();
-        renderUsers(allUsers);
+        allOrders = await ordersRes.json();
+        allDeposits = await depositsRes.json();
 
+        // Update stats
+        document.getElementById('stat-total-users').textContent = stats.totalUsers || 0;
+        document.getElementById('stat-total-sales').textContent = stats.successfulOrders || 0;
+        document.getElementById('stat-total-revenue').textContent = `$${(stats.totalRevenue || 0).toFixed(2)}`;
+        document.getElementById('stat-pending-deposits').textContent = stats.pendingDeposits || 0;
+
+        // Render tables
+        renderRecentUsers(allUsers.slice(0, 5));
+        renderRecentOrders(allOrders.slice(0, 5));
+        renderUsersTable(allUsers);
+        renderOrdersTable(allOrders);
+        renderDepositsTable(allDeposits);
     } catch (err) {
         console.error('Data refresh error:', err);
     }
 }
 
-function renderUsers(users) {
-    userListBody.innerHTML = '';
-    users.forEach(user => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td><span class="user-id">${user.telegramId}</span></td>
-            <td>${user.username || user.firstName || 'Unknown'}</td>
-            <td><span class="user-balance">${user.balance.toFixed(2)}$</span></td>
-            <td class="actions">
-                <button class="edit-btn" onclick="openBalanceModal(${user.id}, '${user.username || user.firstName || user.telegramId}')">Edit</button>
-            </td>
-        `;
-        userListBody.appendChild(row);
+// ═══════════ SIDEBAR & NAVIGATION ═══════════
+window.toggleSidebar = () => {
+    document.getElementById('sidebar').classList.toggle('open');
+};
+
+window.switchPage = (pageName) => {
+    // Update nav items
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.toggle('active', item.dataset.page === pageName);
     });
+
+    // Update pages
+    document.querySelectorAll('.page').forEach(page => {
+        page.classList.toggle('active', page.id === `page-${pageName}`);
+    });
+
+    // Update title
+    const titles = { dashboard: 'Dashboard', users: 'Users', orders: 'Orders', deposits: 'Deposits' };
+    document.getElementById('page-title').textContent = titles[pageName] || 'Dashboard';
+
+    // Close sidebar on mobile
+    document.getElementById('sidebar').classList.remove('open');
+};
+
+// ═══════════ DASHBOARD RENDERERS ═══════════
+function renderRecentUsers(users) {
+    const tbody = document.getElementById('recent-users-body');
+    if (!users.length) {
+        tbody.innerHTML = '<tr><td colspan="3"><div class="empty-state"><span>👥</span>No users yet</div></td></tr>';
+        return;
+    }
+    tbody.innerHTML = users.map(u => `
+        <tr>
+            <td><strong>${u.firstName || u.username || 'Unknown'}</strong></td>
+            <td class="balance-cell">$${u.balance.toFixed(2)}</td>
+            <td style="color:var(--text-muted)">${formatDate(u.createdAt)}</td>
+        </tr>
+    `).join('');
+}
+
+function renderRecentOrders(orders) {
+    const tbody = document.getElementById('recent-orders-body');
+    if (!orders.length) {
+        tbody.innerHTML = '<tr><td colspan="4"><div class="empty-state"><span>🛒</span>No orders yet</div></td></tr>';
+        return;
+    }
+    tbody.innerHTML = orders.map(o => `
+        <tr>
+            <td>${o.user?.firstName || o.user?.username || 'User #' + o.userId}</td>
+            <td>${o.countryId || '-'}</td>
+            <td>${statusBadge(o.status)}</td>
+            <td class="balance-cell">$${o.price.toFixed(2)}</td>
+        </tr>
+    `).join('');
+}
+
+// ═══════════ USERS PAGE ═══════════
+function renderUsersTable(users) {
+    const tbody = document.getElementById('users-table-body');
+    if (!users.length) {
+        tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><span>👥</span>No users found</div></td></tr>';
+        return;
+    }
+    tbody.innerHTML = users.map(u => `
+        <tr>
+            <td class="id-cell">${u.telegramId}</td>
+            <td>${u.firstName || '-'}</td>
+            <td>${u.username ? '@' + u.username : '-'}</td>
+            <td class="balance-cell">$${u.balance.toFixed(2)}</td>
+            <td style="color:var(--text-muted)">$${(u.referralBalance || 0).toFixed(2)}</td>
+            <td style="color:var(--text-muted)">${formatDate(u.createdAt)}</td>
+            <td>
+                <button class="btn-edit" onclick="openBalanceModal(${u.id}, '${escapeHtml(u.firstName || u.username || u.telegramId)}')">Edit</button>
+            </td>
+        </tr>
+    `).join('');
 }
 
 function filterUsers(query) {
     const q = query.toLowerCase();
-    const filtered = allUsers.filter(u => 
-        u.telegramId.includes(q) || 
+    const filtered = allUsers.filter(u =>
+        u.telegramId.includes(q) ||
         (u.username && u.username.toLowerCase().includes(q)) ||
         (u.firstName && u.firstName.toLowerCase().includes(q))
     );
-    renderUsers(filtered);
+    renderUsersTable(filtered);
 }
 
-// Window functions for onclick handlers
-window.openBalanceModal = (id, name) => {
-    currentEditingUserId = id;
-    modalNameDisplay.textContent = `Update balance for: ${name}`;
-    balanceInput.value = '';
-    modal.classList.add('active');
-    balanceInput.focus();
-};
-
-function closeModal() {
-    modal.classList.remove('active');
-}
-
-async function performBalanceUpdate() {
-    const amount = parseFloat(balanceInput.value);
-    if (isNaN(amount)) {
-        webapp.showAlert('Please enter a valid number');
+// ═══════════ ORDERS PAGE ═══════════
+function renderOrdersTable(orders) {
+    const filtered = currentOrderFilter === 'ALL' ? orders : orders.filter(o => o.status === currentOrderFilter);
+    const tbody = document.getElementById('orders-table-body');
+    if (!filtered.length) {
+        tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><span>🛒</span>No orders found</div></td></tr>';
         return;
     }
+    tbody.innerHTML = filtered.map(o => `
+        <tr>
+            <td class="id-cell">#${o.id}</td>
+            <td>${o.user?.firstName || o.user?.username || 'User #' + o.userId}</td>
+            <td style="font-family:monospace">${o.phoneNumber || '-'}</td>
+            <td>${o.countryId || '-'}</td>
+            <td class="balance-cell">$${o.price.toFixed(2)}</td>
+            <td>${statusBadge(o.status)}</td>
+            <td style="color:var(--text-muted)">${formatDate(o.createdAt)}</td>
+        </tr>
+    `).join('');
+}
 
+window.filterOrders = (status) => {
+    currentOrderFilter = status;
+    document.querySelectorAll('#page-orders .filter-tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.filter === status);
+    });
+    renderOrdersTable(allOrders);
+};
+
+// ═══════════ DEPOSITS PAGE ═══════════
+function renderDepositsTable(deposits) {
+    const filtered = currentDepositFilter === 'ALL' ? deposits : deposits.filter(d => d.status === currentDepositFilter);
+    const tbody = document.getElementById('deposits-table-body');
+    if (!filtered.length) {
+        tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><span>💳</span>No deposits found</div></td></tr>';
+        return;
+    }
+    tbody.innerHTML = filtered.map(d => `
+        <tr>
+            <td class="id-cell">#${d.id}</td>
+            <td>${d.user?.firstName || d.user?.username || 'User #' + d.userId}</td>
+            <td class="balance-cell">$${d.amount.toFixed(2)}</td>
+            <td>${d.method || '-'}</td>
+            <td>${statusBadge(d.status)}</td>
+            <td style="color:var(--text-muted)">${formatDate(d.createdAt)}</td>
+            <td>
+                ${d.status === 'PENDING' ? `
+                    <button class="btn-approve" onclick="handleDeposit(${d.id}, 'APPROVED')">✓</button>
+                    <button class="btn-reject" onclick="handleDeposit(${d.id}, 'REJECTED')">✕</button>
+                ` : '-'}
+            </td>
+        </tr>
+    `).join('');
+}
+
+window.filterDeposits = (status) => {
+    currentDepositFilter = status;
+    document.querySelectorAll('#page-deposits .filter-tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.filter === status);
+    });
+    renderDepositsTable(allDeposits);
+};
+
+window.handleDeposit = async (depositId, action) => {
     try {
-        confirmBalanceBtn.disabled = true;
-        confirmBalanceBtn.textContent = 'Updating...';
-        
-        const initData = webapp.initData;
+        const res = await fetch('/api/admin/deposit-action', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...getHeaders() },
+            body: JSON.stringify({ depositId, action })
+        });
+        if (res.ok) {
+            await refreshData();
+        } else {
+            const err = await res.json();
+            alert('Error: ' + (err.msg || 'Failed'));
+        }
+    } catch (err) {
+        console.error('Deposit action error:', err);
+    }
+};
+
+// ═══════════ BALANCE MODAL ═══════════
+window.openBalanceModal = (id, name) => {
+    currentEditingUserId = id;
+    document.getElementById('target-user-display').textContent = `Updating balance for: ${name}`;
+    document.getElementById('balance-amount').value = '';
+    document.getElementById('balance-modal').classList.add('active');
+    document.getElementById('balance-amount').focus();
+};
+
+window.closeModal = () => {
+    document.getElementById('balance-modal').classList.remove('active');
+};
+
+window.performBalanceUpdate = async () => {
+    const amount = parseFloat(document.getElementById('balance-amount').value);
+    if (isNaN(amount)) {
+        alert('Please enter a valid number');
+        return;
+    }
+    const btn = document.getElementById('confirm-balance-btn');
+    try {
+        btn.disabled = true;
+        btn.textContent = 'Updating...';
+
         const res = await fetch('/api/admin/balance', {
             method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'x-telegram-init-data': initData 
-            },
-            body: JSON.stringify({ userId: currentEditingUserId, amount: amount })
+            headers: { 'Content-Type': 'application/json', ...getHeaders() },
+            body: JSON.stringify({ userId: currentEditingUserId, amount })
         });
 
         if (res.ok) {
-            webapp.showConfirm('Balance updated successfully!', () => {
-                closeModal();
-                refreshData();
-            });
+            closeModal();
+            await refreshData();
         } else {
             const err = await res.json();
-            alert(`Error: ${err.msg || 'Update failed'}`);
+            alert('Error: ' + (err.msg || 'Update failed'));
         }
     } catch (err) {
         console.error('Update error:', err);
-        alert('Network error while updating balance');
+        alert('Network error');
     } finally {
-        confirmBalanceBtn.disabled = false;
-        confirmBalanceBtn.textContent = 'Update';
+        btn.disabled = false;
+        btn.textContent = 'Update Balance';
     }
+};
+
+// ═══════════ HELPERS ═══════════
+function statusBadge(status) {
+    const map = {
+        'COMPLETED': 'badge-completed',
+        'APPROVED': 'badge-approved',
+        'PENDING': 'badge-pending',
+        'CANCELLED': 'badge-cancelled',
+        'REJECTED': 'badge-rejected'
+    };
+    return `<span class="badge ${map[status] || 'badge-pending'}">${status}</span>`;
 }
 
-// Start
+function formatDate(dateStr) {
+    if (!dateStr) return '-';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function escapeHtml(str) {
+    return String(str).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
+// ═══════════ START ═══════════
 init();

@@ -23,24 +23,19 @@ bot.command('admin', async (ctx) => {
   const userId = ctx.from.id.toString();
 
   if (!adminIds.includes(userId)) {
-    return;
+    return; // Silent fail or Access Denied
   }
 
   const webAppUrl = process.env.WEBAPP_URL || 'https://your-app.up.railway.app';
 
-  try {
-    await ctx.reply('🔒 *Welcome Creator*\nOpen the dashboard to manage your empire.', {
-      parse_mode: 'Markdown',
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: '📊 Open Admin Dashboard', web_app: { url: webAppUrl } }]
-        ]
-      }
-    });
-  } catch (err) {
-    console.error('[ADMIN ERROR]', err.message);
-    await ctx.reply(`⚠️ Failed to open dashboard.\nError: ${err.message}\nURL used: ${webAppUrl}`);
-  }
+  await ctx.reply('🔒 *Welcome Creator*\nOpen the dashboard to manage your empire.', {
+    parse_mode: 'Markdown',
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: '📊 Open Admin Dashboard', web_app: { url: webAppUrl } }]
+      ]
+    }
+  });
 });
 
 /**
@@ -666,11 +661,13 @@ app.get('/api/admin/stats', isAdminMiddleware, async (req, res) => {
       _sum: { price: true },
       where: { status: 'COMPLETED' }
     });
+    const pendingDeposits = await prisma.deposit.count({ where: { status: 'PENDING' } });
 
     res.json({
       totalUsers,
       successfulOrders,
-      totalRevenue: revenueRes._sum.price || 0
+      totalRevenue: revenueRes._sum.price || 0,
+      pendingDeposits
     });
   } catch (err) {
     res.status(500).json({ msg: 'Server error' });
@@ -681,9 +678,35 @@ app.get('/api/admin/users', isAdminMiddleware, async (req, res) => {
   try {
     const users = await prisma.user.findMany({
       orderBy: { createdAt: 'desc' },
-      take: 100
+      take: 200
     });
     res.json(users || []);
+  } catch (err) {
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+app.get('/api/admin/orders', isAdminMiddleware, async (req, res) => {
+  try {
+    const orders = await prisma.order.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 200,
+      include: { user: { select: { firstName: true, username: true, telegramId: true } } }
+    });
+    res.json(orders || []);
+  } catch (err) {
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+app.get('/api/admin/deposits', isAdminMiddleware, async (req, res) => {
+  try {
+    const deposits = await prisma.deposit.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 200,
+      include: { user: { select: { firstName: true, username: true, telegramId: true } } }
+    });
+    res.json(deposits || []);
   } catch (err) {
     res.status(500).json({ msg: 'Server error' });
   }
@@ -701,6 +724,65 @@ app.post('/api/admin/balance', isAdminMiddleware, async (req, res) => {
     res.json(updated);
   } catch (err) {
     res.status(500).json({ msg: 'Failed to update balance' });
+  }
+});
+
+app.post('/api/admin/deposit-action', isAdminMiddleware, async (req, res) => {
+  const { depositId, action } = req.body;
+  if (!['APPROVED', 'REJECTED'].includes(action)) {
+    return res.status(400).json({ msg: 'Invalid action' });
+  }
+
+  try {
+    const deposit = await prisma.deposit.findUnique({ where: { id: depositId } });
+    if (!deposit) return res.status(404).json({ msg: 'Deposit not found' });
+    if (deposit.status !== 'PENDING') return res.status(400).json({ msg: 'Deposit already processed' });
+
+    // Update deposit status
+    await prisma.deposit.update({
+      where: { id: depositId },
+      data: { status: action }
+    });
+
+    // If approved, add balance to user
+    if (action === 'APPROVED') {
+      await prisma.user.update({
+        where: { id: deposit.userId },
+        data: { balance: { increment: deposit.amount } }
+      });
+
+      // Notify the user via Telegram
+      try {
+        const user = await prisma.user.findUnique({ where: { id: deposit.userId } });
+        if (user) {
+          await bot.telegram.sendMessage(user.telegramId,
+            `✅ *Deposit Approved!*\n\n💰 Amount: $${deposit.amount.toFixed(2)}\n💎 Your new balance has been updated.\n\nThank you for your deposit!`,
+            { parse_mode: 'Markdown' }
+          );
+        }
+      } catch (notifyErr) {
+        console.error('[NOTIFY ERROR]', notifyErr.message);
+      }
+    }
+
+    if (action === 'REJECTED') {
+      try {
+        const user = await prisma.user.findUnique({ where: { id: deposit.userId } });
+        if (user) {
+          await bot.telegram.sendMessage(user.telegramId,
+            `❌ *Deposit Rejected*\n\n💰 Amount: $${deposit.amount.toFixed(2)}\n\nYour deposit request has been rejected. Please contact support if you believe this is an error.`,
+            { parse_mode: 'Markdown' }
+          );
+        }
+      } catch (notifyErr) {
+        console.error('[NOTIFY ERROR]', notifyErr.message);
+      }
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[DEPOSIT ACTION ERROR]', err);
+    res.status(500).json({ msg: 'Failed to process deposit' });
   }
 });
 

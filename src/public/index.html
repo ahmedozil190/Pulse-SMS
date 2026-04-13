@@ -8,87 +8,236 @@
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body class="loading">
+    <!-- Loader -->
     <div id="loader">
-        <div class="spinner"></div>
+        <div class="loader-content">
+            <div class="spinner"></div>
+            <span>Loading Dashboard...</span>
+        </div>
     </div>
 
     <div id="app" style="display: none;">
-        <header>
-            <div class="header-content">
-                <div class="logo">
-                    <span class="pulse-icon">🩸</span>
-                    <h1>Pulse Admin</h1>
-                </div>
-                <div id="admin-info">
-                    <span id="admin-name">Admin</span>
+        <!-- Sidebar Overlay (mobile) -->
+        <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+        <!-- Sidebar -->
+        <aside id="sidebar">
+            <div class="sidebar-header">
+                <span class="sidebar-logo">🩸</span>
+                <h2>Pulse SMS</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-page="dashboard" onclick="switchPage('dashboard')">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" data-page="users" onclick="switchPage('users')">
+                    <span class="nav-icon">👥</span>
+                    <span class="nav-text">Users</span>
+                </a>
+                <a href="#" class="nav-item" data-page="orders" onclick="switchPage('orders')">
+                    <span class="nav-icon">🛒</span>
+                    <span class="nav-text">Orders</span>
+                </a>
+                <a href="#" class="nav-item" data-page="deposits" onclick="switchPage('deposits')">
+                    <span class="nav-icon">💳</span>
+                    <span class="nav-text">Deposits</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="admin-badge">
+                    <span class="admin-avatar">👤</span>
+                    <div class="admin-details">
+                        <span id="sidebar-admin-name">Admin</span>
+                        <span class="admin-role">Administrator</span>
+                    </div>
                 </div>
             </div>
-        </header>
+        </aside>
 
-        <main>
-            <section class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon">👥</div>
-                    <div class="stat-info">
-                        <span class="stat-label">Total Users</span>
-                        <h2 id="total-users">0</h2>
-                    </div>
+        <!-- Main Content -->
+        <div id="main-wrapper">
+            <!-- Top Bar -->
+            <header id="topbar">
+                <button id="hamburger" onclick="toggleSidebar()">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <div class="topbar-title">
+                    <h1 id="page-title">Dashboard</h1>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon">🛒</div>
-                    <div class="stat-info">
-                        <span class="stat-label">Successful Sales</span>
-                        <h2 id="total-sales">0</h2>
-                    </div>
+                <div class="topbar-actions">
+                    <button class="refresh-btn" onclick="refreshData()" title="Refresh">🔄</button>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon">💰</div>
-                    <div class="stat-info">
-                        <span class="stat-label">Total Revenue</span>
-                        <h2 id="total-revenue">0.00$</h2>
-                    </div>
-                </div>
-            </section>
+            </header>
 
-            <section class="user-management">
-                <div class="section-header">
-                    <h2>User Management</h2>
+            <!-- Page: Dashboard -->
+            <main id="page-dashboard" class="page active">
+                <div class="stats-grid">
+                    <div class="stat-card stat-users">
+                        <div class="stat-icon-wrap"><span>👥</span></div>
+                        <div class="stat-info">
+                            <span class="stat-label">Total Users</span>
+                            <h2 id="stat-total-users" class="stat-value">0</h2>
+                        </div>
+                    </div>
+                    <div class="stat-card stat-sales">
+                        <div class="stat-icon-wrap"><span>✅</span></div>
+                        <div class="stat-info">
+                            <span class="stat-label">Successful Sales</span>
+                            <h2 id="stat-total-sales" class="stat-value">0</h2>
+                        </div>
+                    </div>
+                    <div class="stat-card stat-revenue">
+                        <div class="stat-icon-wrap"><span>💰</span></div>
+                        <div class="stat-info">
+                            <span class="stat-label">Total Revenue</span>
+                            <h2 id="stat-total-revenue" class="stat-value">$0.00</h2>
+                        </div>
+                    </div>
+                    <div class="stat-card stat-pending">
+                        <div class="stat-icon-wrap"><span>⏳</span></div>
+                        <div class="stat-info">
+                            <span class="stat-label">Pending Deposits</span>
+                            <h2 id="stat-pending-deposits" class="stat-value">0</h2>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Recent Users</h3>
+                            <a href="#" onclick="switchPage('users')" class="view-all">View All →</a>
+                        </div>
+                        <div class="card-body">
+                            <table>
+                                <thead><tr><th>User</th><th>Balance</th><th>Joined</th></tr></thead>
+                                <tbody id="recent-users-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Recent Orders</h3>
+                            <a href="#" onclick="switchPage('orders')" class="view-all">View All →</a>
+                        </div>
+                        <div class="card-body">
+                            <table>
+                                <thead><tr><th>User</th><th>Country</th><th>Status</th><th>Price</th></tr></thead>
+                                <tbody id="recent-orders-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Page: Users -->
+            <main id="page-users" class="page">
+                <div class="page-toolbar">
                     <div class="search-box">
-                        <input type="text" id="user-search" placeholder="Search by ID or Username...">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="user-search" placeholder="Search users by ID, name, or username...">
                     </div>
                 </div>
-                
-                <div class="user-list-container">
-                    <table id="user-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Balance</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="user-list-body">
-                            <!-- Users will be injected here -->
-                        </tbody>
-                    </table>
+                <div class="card full-card">
+                    <div class="card-body">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Telegram ID</th>
+                                    <th>Name</th>
+                                    <th>Username</th>
+                                    <th>Balance</th>
+                                    <th>Referral</th>
+                                    <th>Joined</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-table-body"></tbody>
+                        </table>
+                    </div>
                 </div>
-            </section>
-        </main>
+            </main>
+
+            <!-- Page: Orders -->
+            <main id="page-orders" class="page">
+                <div class="page-toolbar">
+                    <div class="filter-tabs">
+                        <button class="filter-tab active" data-filter="ALL" onclick="filterOrders('ALL')">All</button>
+                        <button class="filter-tab" data-filter="COMPLETED" onclick="filterOrders('COMPLETED')">Completed</button>
+                        <button class="filter-tab" data-filter="PENDING" onclick="filterOrders('PENDING')">Pending</button>
+                        <button class="filter-tab" data-filter="CANCELLED" onclick="filterOrders('CANCELLED')">Cancelled</button>
+                    </div>
+                </div>
+                <div class="card full-card">
+                    <div class="card-body">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>User</th>
+                                    <th>Phone</th>
+                                    <th>Country</th>
+                                    <th>Price</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orders-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Page: Deposits -->
+            <main id="page-deposits" class="page">
+                <div class="page-toolbar">
+                    <div class="filter-tabs">
+                        <button class="filter-tab active" data-filter="ALL" onclick="filterDeposits('ALL')">All</button>
+                        <button class="filter-tab" data-filter="PENDING" onclick="filterDeposits('PENDING')">Pending</button>
+                        <button class="filter-tab" data-filter="APPROVED" onclick="filterDeposits('APPROVED')">Approved</button>
+                        <button class="filter-tab" data-filter="REJECTED" onclick="filterDeposits('REJECTED')">Rejected</button>
+                    </div>
+                </div>
+                <div class="card full-card">
+                    <div class="card-body">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>User</th>
+                                    <th>Amount</th>
+                                    <th>Method</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="deposits-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
     </div>
 
-    <!-- Modal for adding balance -->
+    <!-- Balance Modal -->
     <div id="balance-modal" class="modal">
         <div class="modal-content">
-            <h3>Update Balance</h3>
+            <div class="modal-header">
+                <h3>💰 Update Balance</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
             <p id="target-user-display"></p>
-            <input type="number" id="balance-amount" step="0.01" placeholder="Enter amount (e.g. 5.00)">
+            <input type="number" id="balance-amount" step="0.01" placeholder="Enter amount (e.g. 5.00 or -3.00)">
             <div class="modal-buttons">
-                <button id="cancel-btn" class="secondary-btn">Cancel</button>
-                <button id="confirm-balance-btn" class="primary-btn">Update</button>
+                <button id="cancel-btn" class="btn-secondary" onclick="closeModal()">Cancel</button>
+                <button id="confirm-balance-btn" class="btn-primary" onclick="performBalanceUpdate()">Update Balance</button>
             </div>
         </div>
     </div>
