@@ -15,8 +15,30 @@ const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 // Simple session middleware
 bot.use(session());
 
-// DEBUG COMMAND - Verify Bot is alive
-bot.command('test', (ctx) => ctx.reply('✅ Bot is alive and receiving commands!'));
+/**
+ * /admin command - Opens the Mini App Dashboard
+ */
+bot.command('admin', async (ctx) => {
+  const adminIds = (process.env.ADMIN_IDS || process.env.ADMIN_TELEGRAM_ID || "").split(',').map(id => id.trim());
+  const userId = ctx.from.id.toString();
+
+  console.log(`[ADMIN ATTEMPT] User ID: ${userId}, Allowed IDs: ${adminIds}`);
+
+  if (!adminIds.includes(userId)) {
+    return ctx.reply(`❌ Access Denied.\nYour ID: \`${userId}\` is not in the Admin list.`);
+  }
+
+  const webAppUrl = process.env.WEBAPP_URL || 'https://your-app.up.railway.app';
+
+  await ctx.reply('🔒 *Welcome Creator*\nOpen the dashboard to manage your empire.', {
+    parse_mode: 'Markdown',
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: '📊 Open Admin Dashboard', web_app: { url: webAppUrl } }]
+      ]
+    }
+  });
+});
 
 /**
  * Helper to ensure user exists in Database
@@ -25,7 +47,7 @@ async function getOrCreateUser(ctx, referrerTelegramId = null) {
   try {
     const telegramId = ctx.from.id.toString();
     ctx.session = ctx.session || {};
-    
+
     let user = await prisma.user.findUnique({ where: { telegramId } });
     if (!user) {
       let referredById = null;
@@ -63,7 +85,7 @@ bot.command('start', async (ctx) => {
     if (args.length > 1 && args[1].startsWith('ref_')) {
       referrerTelegramId = args[1].replace('ref_', '');
     }
-    
+
     const user = await getOrCreateUser(ctx, referrerTelegramId);
     if (!user) {
       return ctx.reply("⚠️ Sorry, there is a technical issue with the database setup. Please try again in 1 minute.");
@@ -76,7 +98,7 @@ bot.command('start', async (ctx) => {
 
 *Choose the appropriate option from the menu:*
     `;
-    
+
     await ctx.reply(startMessage, {
       parse_mode: 'Markdown',
       reply_markup: keyboards.mainMenu.reply_markup
@@ -91,7 +113,7 @@ bot.command('start', async (ctx) => {
  */
 bot.action('action_balance', async (ctx) => {
   const user = await getOrCreateUser(ctx);
-  
+
   const totalPurchasesResult = await prisma.order.aggregate({
     _sum: { price: true },
     where: { userId: user.id, status: 'COMPLETED' }
@@ -111,15 +133,15 @@ bot.action('action_balance', async (ctx) => {
  */
 bot.action('action_stats', async (ctx) => {
   const user = await getOrCreateUser(ctx);
-  
+
   const allOrdersCount = await prisma.order.count({
     where: { userId: user.id }
   });
-  
+
   const completedCount = await prisma.order.count({
     where: { userId: user.id, status: 'COMPLETED' }
   });
-  
+
   const totalPurchasesResult = await prisma.order.aggregate({
     _sum: { price: true },
     where: { userId: user.id, status: 'COMPLETED' }
@@ -127,7 +149,7 @@ bot.action('action_stats', async (ctx) => {
   const totalSpent = (totalPurchasesResult._sum.price || 0).toFixed(2);
 
   const msg = `*📊 Your Personal Statistics*\n\n•* Active Numbers:* ${completedCount}\n• *Total Purchases:* ${allOrdersCount}\n• *Total Purchases:* ${totalSpent} $\n\n*🎯 Continue Shopping!*`;
-  
+
   await ctx.editMessageText(msg, {
     parse_mode: 'Markdown',
     reply_markup: {
@@ -154,7 +176,7 @@ bot.action('action_invite', async (ctx) => {
   const user = await getOrCreateUser(ctx);
   const botInfo = await ctx.telegram.getMe();
   const inviteLink = `https://t.me/${botInfo.username}?start=ref_${ctx.from.id}`;
-  
+
   const dateObj = new Date();
   const year = dateObj.getFullYear();
   const month = String(dateObj.getMonth() + 1).padStart(2, '0');
@@ -168,7 +190,7 @@ bot.action('action_invite', async (ctx) => {
 
   const now = new Date();
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  
+
   const startOfWeek = new Date(now);
   startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
   startOfWeek.setHours(0, 0, 0, 0);
@@ -222,7 +244,7 @@ bot.action('action_invite', async (ctx) => {
 bot.action('action_withdraw_referral', async (ctx) => {
   const user = await getOrCreateUser(ctx);
   const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
-  
+
   if (dbUser.referralBalance < 1) {
     const alertMsg = `❌ Your referral balance is insufficient.\n• Current balance: ${dbUser.referralBalance.toFixed(2)}$\n• Minimum required: 1$`;
     return ctx.answerCbQuery(alertMsg, { show_alert: true });
@@ -248,15 +270,15 @@ bot.action('action_buy_number', async (ctx) => {
 
 async function showCountrySelection(ctx, isRefresh = false) {
   const loadingMsg = isRefresh ? "🔄 Refreshing list..." : "🌍 Loading countries...";
-  
+
   if (!isRefresh) {
-    await ctx.answerCbQuery().catch(() => {});
+    await ctx.answerCbQuery().catch(() => { });
   }
 
   try {
     // 0257 is Telegram
     const response = await durianApi.getCountryDistribution('0257');
-    
+
     if (response.code === 200 && response.data) {
       // Sort and take top 20 countries with stock > 0
       const distribution = response.data;
@@ -317,7 +339,7 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
   const countryCode = ctx.match[1];
   const countryInfo = durianApi.getCountryInfo(countryCode);
 
-  await ctx.answerCbQuery().catch(() => {});
+  await ctx.answerCbQuery().catch(() => { });
 
   const percentages = ['10%', '30%', '70%', '100%'];
   for (let percent of percentages) {
@@ -325,17 +347,17 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
       reply_markup: {
         inline_keyboard: [[{ text: percent, callback_data: 'ignore' }]]
       }
-    }).catch(() => {});
+    }).catch(() => { });
     await new Promise(r => setTimeout(r, 600));
   }
 
   try {
-    const response = await durianApi.getMobile('0257', countryCode); 
-    
+    const response = await durianApi.getMobile('0257', countryCode);
+
     if (response.code === 200 && response.data) {
       const phoneNumber = response.data;
       const cleanPhone = phoneNumber.startsWith('+') ? phoneNumber.substring(1) : phoneNumber;
-      
+
       const user = await getOrCreateUser(ctx);
       await prisma.order.create({
         data: {
@@ -349,7 +371,7 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
       });
 
       const msg = `🎉 *Purchase Successful!*\n\n• *Number*: \`+${cleanPhone}\`\n• *Country*: ${countryInfo.flag} ${countryInfo.name}\n• *Code*: \`XXXXX\`\n\n*🔄 Request Code*`;
-      
+
       await ctx.editMessageText(msg, {
         parse_mode: 'Markdown',
         reply_markup: {
@@ -358,7 +380,7 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
           ]
         }
       });
-      
+
       // ... polling logic remains the same ...
       startPolling(ctx, phoneNumber, countryCode);
 
@@ -383,7 +405,7 @@ bot.action(/^check_code_(.+)_(.+)$/, async (ctx) => {
   const countryInfo = durianApi.getCountryInfo(countryCode);
   const cleanPhone = phoneNumber.startsWith('+') ? phoneNumber.substring(1) : phoneNumber;
 
-  await ctx.answerCbQuery().catch(() => {});
+  await ctx.answerCbQuery().catch(() => { });
 
   // Random animation effect "ارقام ورا بعض"
   for (let i = 0; i < 3; i++) {
@@ -397,7 +419,7 @@ bot.action(/^check_code_(.+)_(.+)$/, async (ctx) => {
         }
       });
       await new Promise(resolve => setTimeout(resolve, 600));
-    } catch(e) {}
+    } catch (e) { }
   }
 
   try {
@@ -491,18 +513,18 @@ async function startPolling(ctx, phoneNumber, countryCode) {
         const countryInfo = durianApi.getCountryInfo(countryCode);
         const cleanPhone = phoneNumber.startsWith('+') ? phoneNumber.substring(1) : phoneNumber;
         await ctx.telegram.editMessageText(
-          ctx.chat.id, 
-          ctx.callbackQuery.message.message_id, 
+          ctx.chat.id,
+          ctx.callbackQuery.message.message_id,
           null,
           `🎉 Purchase Successful\n\n• *Number*: \`+${cleanPhone}\`\n• *Country*: ${countryInfo.flag} ${countryInfo.name}\n• *Code*:  \`${smsRes.data}\`\n\n✅ You can use the code now`,
-          { 
-            parse_mode: 'Markdown', 
+          {
+            parse_mode: 'Markdown',
             reply_markup: {
               inline_keyboard: [
                 [{ text: '🛒 Buy Another Number', callback_data: 'action_buy_number' }],
                 [{ text: '📢 Activation Channel', url: 'https://t.me/your_activation_channel' }]
               ]
-            } 
+            }
           }
         );
       } else if (attempts >= maxAttempts) {
@@ -512,18 +534,18 @@ async function startPolling(ctx, phoneNumber, countryCode) {
         const countryInfo = durianApi.getCountryInfo(countryCode);
         const cleanPhone = phoneNumber.startsWith('+') ? phoneNumber.substring(1) : phoneNumber;
         await ctx.telegram.editMessageText(
-          ctx.chat.id, 
-          ctx.callbackQuery.message.message_id, 
+          ctx.chat.id,
+          ctx.callbackQuery.message.message_id,
           null,
           `🎉 Purchase Successful\n\n• *Number*: \`+${cleanPhone}\`\n• *Country*: ${countryInfo.flag} ${countryInfo.name}\n• *Code*:  \`XXXXX\`\n\n❌ *The code was not retrieved. Please try again.*`,
-          { 
-            parse_mode: 'Markdown', 
+          {
+            parse_mode: 'Markdown',
             reply_markup: {
               inline_keyboard: [
                 [{ text: '🔄 Retry', callback_data: `check_code_${countryCode}_${phoneNumber}` }],
                 [{ text: '🔙 Main Menu', callback_data: 'action_main_menu' }]
               ]
-            } 
+            }
           }
         );
       }
@@ -544,37 +566,14 @@ bot.action('action_main_menu', async (ctx) => {
 
 *Choose the appropriate option from the menu:*
   `;
-  
+
   await ctx.editMessageText(startMessage, {
     parse_mode: 'Markdown',
     reply_markup: keyboards.mainMenu.reply_markup
   });
 });
 
-/**
- * /admin command - Opens the Mini App Dashboard
- */
-bot.command('admin', async (ctx) => {
-  const adminIds = (process.env.ADMIN_IDS || process.env.ADMIN_TELEGRAM_ID || "").split(',').map(id => id.trim());
-  const userId = ctx.from.id.toString();
-  
-  console.log(`[ADMIN ATTEMPT] User ID: ${userId}, Allowed IDs: ${adminIds}`);
 
-  if (!adminIds.includes(userId)) {
-    return ctx.reply(`❌ Access Denied.\nYour ID: \`${userId}\` is not in the Admin list.`);
-  }
-
-  const webAppUrl = process.env.WEBAPP_URL || 'https://your-app.up.railway.app';
-  
-  await ctx.reply('🔒 *Welcome Creator*\nOpen the dashboard to manage your empire.', {
-    parse_mode: 'Markdown',
-    reply_markup: {
-      inline_keyboard: [
-        [{ text: '📊 Open Admin Dashboard', web_app: { url: webAppUrl } }]
-      ]
-    }
-  });
-});
 
 /**
  * Catch all text for simple testing
@@ -594,7 +593,7 @@ bot.launch().then(async () => {
       { command: 'start', description: '/start' },
       { command: 'lang', description: '/lang' }
     ]);
-  } catch(e) {
+  } catch (e) {
     console.log('Failed to set commands', e);
   }
   console.log('[BOT] Pulse SMS Bot started successfully.');
@@ -611,11 +610,11 @@ app.use(express.static(path.join(__dirname, 'public')));
  */
 function verifyTelegramWebAppData(initData) {
   if (!initData) return false;
-  
+
   const urlParams = new URLSearchParams(initData);
   const hash = urlParams.get('hash');
   const data = [];
-  
+
   urlParams.sort();
   for (const [key, value] of urlParams.entries()) {
     if (key !== 'hash') {
@@ -627,7 +626,7 @@ function verifyTelegramWebAppData(initData) {
   const secretKey = crypto.createHmac('sha256', 'WebAppData')
     .update(process.env.TELEGRAM_BOT_TOKEN)
     .digest();
-  
+
   const checkHash = crypto.createHmac('sha256', secretKey)
     .update(dataCheckString)
     .digest('hex');
@@ -664,7 +663,7 @@ app.get('/api/admin/stats', isAdminMiddleware, async (req, res) => {
       _sum: { price: true },
       where: { status: 'COMPLETED' }
     });
-    
+
     res.json({
       totalUsers,
       successfulOrders,
