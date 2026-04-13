@@ -15,27 +15,22 @@ const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 // Simple session middleware
 bot.use(session());
 
-/**
- * /admin command - Opens the Mini App Dashboard
- */
 bot.command('admin', async (ctx) => {
+  await ctx.reply('DEBUG: Admin command triggered successfully!');
+  
   const adminIds = (process.env.ADMIN_IDS || process.env.ADMIN_TELEGRAM_ID || "").split(',').map(id => id.trim());
   const userId = ctx.from.id.toString();
-
-  console.log(`[ADMIN ATTEMPT] User ID: ${userId}, Allowed IDs: ${adminIds}`);
+  
+  await ctx.reply(`Debug Info:\n- Your ID: ${userId}\n- Allowed IDs: ${JSON.stringify(adminIds)}`);
 
   if (!adminIds.includes(userId)) {
-    return ctx.reply(`❌ Access Denied.\nYour ID: \`${userId}\` is not in the Admin list.`);
+    return ctx.reply(`❌ Access Denied.`);
   }
 
   const webAppUrl = process.env.WEBAPP_URL || 'https://your-app.up.railway.app';
-
-  await ctx.reply('🔒 *Welcome Creator*\nOpen the dashboard to manage your empire.', {
-    parse_mode: 'Markdown',
+  await ctx.reply('📊 Open Admin Dashboard', {
     reply_markup: {
-      inline_keyboard: [
-        [{ text: '📊 Open Admin Dashboard', web_app: { url: webAppUrl } }]
-      ]
+      inline_keyboard: [[{ text: '📊 Open Dashboard', web_app: { url: webAppUrl } }]]
     }
   });
 });
