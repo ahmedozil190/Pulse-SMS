@@ -23,7 +23,7 @@ bot.command('admin', async (ctx) => {
   const userId = ctx.from.id.toString();
 
   if (!adminIds.includes(userId)) {
-    return; // Silent fail or Access Denied
+    return ctx.reply(`❌ Access Denied.\nYour ID: \`${userId}\` is not in the Admin list.`);
   }
 
   const webAppUrl = process.env.WEBAPP_URL || 'https://your-app.up.railway.app';
