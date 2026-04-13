@@ -847,78 +847,79 @@ app.post('/api/admin/deposit-action', isAdminMiddleware, async (req, res) => {
   }
 });
 
+app.post('/api/admin/sync-users', isAdminMiddleware, async (req, res) => {
+  try {
+    // Only trigger a batch of 50 to avoid timing out the request
+    const syncedCount = await syncUserIdentities(50, 0); // Force sync 50 regardless of updatedAt
+    res.json({ success: true, count: syncedCount });
+  } catch (err) {
+    res.status(500).json({ msg: 'Sync failed' });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`[SERVER] Admin Dashboard running on port ${PORT}`);
 });
 
 // --- BACKGROUND SYNC FOR USER IDENTITIES ---
-async function syncUserIdentities() {
-  console.log('[SYNC] Starting background user identity synchronization...');
+async function syncUserIdentities(batchSize = 20, thresholdHours = 24) {
+  console.log(`[SYNC] Starting batch sync (Size: ${batchSize}, Threshold: ${thresholdHours}h)...`);
+  let syncedCount = 0;
   try {
-    // Fetch 20 users who haven't been updated in over 24 hours
-    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const thresholdDate = new Date(Date.now() - thresholdHours * 60 * 60 * 1000);
     const usersToSync = await prisma.user.findMany({
       where: {
-        updatedAt: { lt: yesterday }
+        updatedAt: { lt: thresholdDate }
       },
       orderBy: { updatedAt: 'asc' },
-      take: 20
+      take: batchSize
     });
 
     if (usersToSync.length === 0) {
-      console.log('[SYNC] All users are already up to date.');
-      return;
+      console.log('[SYNC] No users qualify for sync at this time.');
+      return 0;
     }
 
     for (const user of usersToSync) {
       try {
-        console.log(`[SYNC] Refreshing info for User ${user.telegramId}...`);
-        const chat = await bot.telegram.getChat(user.telegramId);
+        const chat = await bot.telegram.getChat(user.telegramId).catch(() => null);
+        if (!chat) {
+          // Mark as checked to avoid re-looping immediately
+          await prisma.user.update({ where: { id: user.id }, data: { updatedAt: new Date() } });
+          continue;
+        }
         
         const newFirstName = chat.first_name || chat.title || user.firstName;
         const newUsername = chat.username || user.username;
 
-        if (user.firstName !== newFirstName || user.username !== newUsername) {
-          await prisma.user.update({
-            where: { id: user.id },
-            data: {
-              firstName: newFirstName,
-              username: newUsername
-            }
-          });
-          console.log(`[SYNC] Updated User ${user.telegramId}: ${newFirstName} (@${newUsername})`);
-        } else {
-          // Still update updatedAt to mark as checked
-          await prisma.user.update({
-            where: { id: user.id },
-            data: { updatedAt: new Date() }
-          });
-        }
+        await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            firstName: newFirstName,
+            username: newUsername,
+            updatedAt: new Date() // Explicitly update this
+          }
+        });
+        syncedCount++;
         
-        // Wait 2 seconds between requests to respect Telegram rate limits
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Small delay to prevent hitting Telegram's rate limit hard
+        await new Promise(resolve => setTimeout(resolve, 500));
       } catch (err) {
-        if (err.description && err.description.includes('chat not found')) {
-          // User might have blocked the bot, skip and mark as checked
-          await prisma.user.update({
-            where: { id: user.id },
-            data: { updatedAt: new Date() }
-          });
-        }
-        console.error(`[SYNC ERROR] Failed to sync user ${user.telegramId}:`, err.message);
+        console.error(`[SYNC ERROR] User ${user.telegramId}:`, err.message);
       }
     }
-    console.log('[SYNC] Background synchronization complete.');
+    console.log(`[SYNC] Batch complete. Synced ${syncedCount} users.`);
+    return syncedCount;
   } catch (err) {
     console.error('[SYNC CRITICAL ERROR]', err);
+    return 0;
   }
 }
 
-// Run sync every 30 minutes
-setInterval(syncUserIdentities, 30 * 60 * 1000);
-// Initial run after 1 minute of server start
-setTimeout(syncUserIdentities, 60 * 1000);
+// Run background sync every 30 minutes with more aggressive settings
+setInterval(() => syncUserIdentities(50, 4), 30 * 60 * 1000);
+setTimeout(() => syncUserIdentities(50, 4), 10 * 1000);
 
 // Enable graceful stop
 process.once('SIGINT', () => bot.stop('SIGINT'));

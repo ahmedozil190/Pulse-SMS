@@ -302,6 +302,17 @@ body.loading { overflow: hidden; }
     box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
 }
 
+.sync-btn {
+    background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--accent-blue); width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: 0.3s;
+}
+.sync-btn:hover { background: rgba(255, 255, 255, 0.1); transform: scale(1.05); }
+.sync-btn i.spinning { animation: spin 1s linear infinite; }
+
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
 /* User Card Styles */
 .user-container {
     position: relative; padding-top: 25px; margin-top: 25px;
