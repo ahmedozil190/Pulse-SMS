@@ -2,7 +2,7 @@ const webapp = window.Telegram.WebApp;
 webapp.expand();
 webapp.ready();
 
-// ═══════════ STATE ═══════════
+// STATE
 let allUsers = [];
 let allOrders = [];
 let allDeposits = [];
@@ -10,7 +10,7 @@ let currentEditingUserId = null;
 let currentOrderFilter = 'ALL';
 let currentDepositFilter = 'ALL';
 
-// ═══════════ INIT ═══════════
+// INIT
 async function init() {
     try {
         await refreshData();
@@ -19,10 +19,11 @@ async function init() {
             filterUsers(e.target.value);
         });
 
-        // Set admin name
+        // Set admin name/avatar
         if (webapp.initDataUnsafe && webapp.initDataUnsafe.user) {
-            const name = webapp.initDataUnsafe.user.first_name;
-            document.getElementById('sidebar-admin-name').textContent = name;
+            const user = webapp.initDataUnsafe.user;
+            const name = user.first_name || 'Admin';
+            document.getElementById('admin-avatar').textContent = name.substring(0, 2).toUpperCase();
         }
 
         // Hide loader, show app
@@ -36,7 +37,7 @@ async function init() {
     }
 }
 
-// ═══════════ DATA FETCHING ═══════════
+// DATA FETCHING
 function getHeaders() {
     return { 'x-telegram-init-data': webapp.initData };
 }
@@ -50,6 +51,10 @@ async function refreshData() {
             fetch('/api/admin/deposits', { headers: getHeaders() })
         ]);
 
+        if (!statsRes.ok || !usersRes.ok || !ordersRes.ok || !depositsRes.ok) {
+            throw new Error('One or more API requests failed');
+        }
+
         const stats = await statsRes.json();
         allUsers = await usersRes.json();
         allOrders = await ordersRes.json();
@@ -57,96 +62,64 @@ async function refreshData() {
 
         // Update stats
         document.getElementById('stat-total-users').textContent = stats.totalUsers || 0;
+        document.getElementById('stat-total-orders').textContent = allOrders.length || 0;
         document.getElementById('stat-total-sales').textContent = stats.successfulOrders || 0;
-        document.getElementById('stat-total-revenue').textContent = `$${(stats.totalRevenue || 0).toFixed(2)}`;
         document.getElementById('stat-pending-deposits').textContent = stats.pendingDeposits || 0;
+        document.getElementById('stat-total-revenue').textContent = `$${(stats.totalRevenue || 0).toFixed(2)}`;
 
-        // Render tables
-        renderRecentUsers(allUsers.slice(0, 5));
-        renderRecentOrders(allOrders.slice(0, 5));
-        renderUsersTable(allUsers);
-        renderOrdersTable(allOrders);
-        renderDepositsTable(allDeposits);
+        // Render lists
+        renderUsersList(allUsers);
+        renderOrdersList(allOrders);
+        renderDepositsList(allDeposits);
     } catch (err) {
         console.error('Data refresh error:', err);
+        throw err; // Re-throw to be caught by init()
     }
 }
 
-// ═══════════ SIDEBAR & NAVIGATION ═══════════
+// NAVIGATION
 window.toggleSidebar = () => {
     document.getElementById('sidebar').classList.toggle('open');
 };
 
 window.switchPage = (pageName) => {
-    // Update nav items
     document.querySelectorAll('.nav-item').forEach(item => {
         item.classList.toggle('active', item.dataset.page === pageName);
     });
 
-    // Update pages
     document.querySelectorAll('.page').forEach(page => {
         page.classList.toggle('active', page.id === `page-${pageName}`);
     });
 
-    // Update title
-    const titles = { dashboard: 'Dashboard', users: 'Users', orders: 'Orders', deposits: 'Deposits' };
-    document.getElementById('page-title').textContent = titles[pageName] || 'Dashboard';
-
-    // Close sidebar on mobile
+    const titles = { dashboard: 'Overview', users: 'Users', orders: 'Orders', deposits: 'Finance', settings: 'Settings' };
+    document.getElementById('page-title').textContent = titles[pageName] || 'Overview';
     document.getElementById('sidebar').classList.remove('open');
 };
 
-// ═══════════ DASHBOARD RENDERERS ═══════════
-function renderRecentUsers(users) {
-    const tbody = document.getElementById('recent-users-body');
+// RENDERERS
+function renderUsersList(users) {
+    const list = document.getElementById('users-list');
+    if (!list) return;
     if (!users.length) {
-        tbody.innerHTML = '<tr><td colspan="3"><div class="empty-state"><span>👥</span>No users yet</div></td></tr>';
+        list.innerHTML = '<div class="empty-state"><span>👥</span>No users yet</div>';
         return;
     }
-    tbody.innerHTML = users.map(u => `
-        <tr>
-            <td><strong>${u.firstName || u.username || 'Unknown'}</strong></td>
-            <td class="balance-cell">$${u.balance.toFixed(2)}</td>
-            <td style="color:var(--text-muted)">${formatDate(u.createdAt)}</td>
-        </tr>
-    `).join('');
-}
-
-function renderRecentOrders(orders) {
-    const tbody = document.getElementById('recent-orders-body');
-    if (!orders.length) {
-        tbody.innerHTML = '<tr><td colspan="4"><div class="empty-state"><span>🛒</span>No orders yet</div></td></tr>';
-        return;
-    }
-    tbody.innerHTML = orders.map(o => `
-        <tr>
-            <td>${o.user?.firstName || o.user?.username || 'User #' + o.userId}</td>
-            <td>${o.countryId || '-'}</td>
-            <td>${statusBadge(o.status)}</td>
-            <td class="balance-cell">$${o.price.toFixed(2)}</td>
-        </tr>
-    `).join('');
-}
-
-// ═══════════ USERS PAGE ═══════════
-function renderUsersTable(users) {
-    const tbody = document.getElementById('users-table-body');
-    if (!users.length) {
-        tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><span>👥</span>No users found</div></td></tr>';
-        return;
-    }
-    tbody.innerHTML = users.map(u => `
-        <tr>
-            <td class="id-cell">${u.telegramId}</td>
-            <td>${u.firstName || '-'}</td>
-            <td>${u.username ? '@' + u.username : '-'}</td>
-            <td class="balance-cell">$${u.balance.toFixed(2)}</td>
-            <td style="color:var(--text-muted)">$${(u.referralBalance || 0).toFixed(2)}</td>
-            <td style="color:var(--text-muted)">${formatDate(u.createdAt)}</td>
-            <td>
-                <button class="btn-edit" onclick="openBalanceModal(${u.id}, '${escapeHtml(u.firstName || u.username || u.telegramId)}')">Edit</button>
-            </td>
-        </tr>
+    list.innerHTML = users.map(u => `
+        <div class="data-card">
+            <div class="data-card-header">
+                <span class="data-card-name">${escapeHtml(u.firstName || u.username || 'Unknown')}</span>
+                <span class="data-card-id">${u.telegramId}</span>
+            </div>
+            <div class="data-card-body">
+                <div class="data-card-details">
+                    <span class="data-card-detail">Balance: <strong class="color-green">$${u.balance.toFixed(2)}</strong></span>
+                    <span class="data-card-detail">Joined: <strong>${formatDate(u.createdAt)}</strong></span>
+                </div>
+                <div class="data-card-actions">
+                    <button class="btn-edit" onclick="openBalanceModal(${u.id}, '${escapeHtml(u.firstName || u.username || u.telegramId)}')">Edit Balance</button>
+                </div>
+            </div>
+        </div>
     `).join('');
 }
 
@@ -157,27 +130,32 @@ function filterUsers(query) {
         (u.username && u.username.toLowerCase().includes(q)) ||
         (u.firstName && u.firstName.toLowerCase().includes(q))
     );
-    renderUsersTable(filtered);
+    renderUsersList(filtered);
 }
 
-// ═══════════ ORDERS PAGE ═══════════
-function renderOrdersTable(orders) {
+function renderOrdersList(orders) {
+    const list = document.getElementById('orders-list');
+    if (!list) return;
     const filtered = currentOrderFilter === 'ALL' ? orders : orders.filter(o => o.status === currentOrderFilter);
-    const tbody = document.getElementById('orders-table-body');
     if (!filtered.length) {
-        tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><span>🛒</span>No orders found</div></td></tr>';
+        list.innerHTML = '<div class="empty-state"><span>🛒</span>No orders found</div>';
         return;
     }
-    tbody.innerHTML = filtered.map(o => `
-        <tr>
-            <td class="id-cell">#${o.id}</td>
-            <td>${o.user?.firstName || o.user?.username || 'User #' + o.userId}</td>
-            <td style="font-family:monospace">${o.phoneNumber || '-'}</td>
-            <td>${o.countryId || '-'}</td>
-            <td class="balance-cell">$${o.price.toFixed(2)}</td>
-            <td>${statusBadge(o.status)}</td>
-            <td style="color:var(--text-muted)">${formatDate(o.createdAt)}</td>
-        </tr>
+    list.innerHTML = filtered.map(o => `
+        <div class="data-card">
+            <div class="data-card-header">
+                <span class="data-card-name">${escapeHtml(o.user?.firstName || o.user?.username || 'User #' + o.userId)}</span>
+                ${statusBadge(o.status)}
+            </div>
+            <div class="data-card-body">
+                <div class="data-card-details">
+                    <span class="data-card-detail">Phone: <strong>${o.phoneNumber || '-'}</strong></span>
+                    <span class="data-card-detail">Country: <strong>${o.countryId || '-'}</strong></span>
+                    <span class="data-card-detail">Price: <strong class="color-green">$${o.price.toFixed(2)}</strong></span>
+                </div>
+                <div class="data-card-detail" style="color:var(--text-muted); font-size: 0.7rem;">${formatDate(o.createdAt)}</div>
+            </div>
+        </div>
     `).join('');
 }
 
@@ -186,32 +164,37 @@ window.filterOrders = (status) => {
     document.querySelectorAll('#page-orders .filter-tab').forEach(t => {
         t.classList.toggle('active', t.dataset.filter === status);
     });
-    renderOrdersTable(allOrders);
+    renderOrdersList(allOrders);
 };
 
-// ═══════════ DEPOSITS PAGE ═══════════
-function renderDepositsTable(deposits) {
+function renderDepositsList(deposits) {
+    const list = document.getElementById('deposits-list');
+    if (!list) return;
     const filtered = currentDepositFilter === 'ALL' ? deposits : deposits.filter(d => d.status === currentDepositFilter);
-    const tbody = document.getElementById('deposits-table-body');
     if (!filtered.length) {
-        tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><span>💳</span>No deposits found</div></td></tr>';
+        list.innerHTML = '<div class="empty-state"><span>💳</span>No deposits found</div>';
         return;
     }
-    tbody.innerHTML = filtered.map(d => `
-        <tr>
-            <td class="id-cell">#${d.id}</td>
-            <td>${d.user?.firstName || d.user?.username || 'User #' + d.userId}</td>
-            <td class="balance-cell">$${d.amount.toFixed(2)}</td>
-            <td>${d.method || '-'}</td>
-            <td>${statusBadge(d.status)}</td>
-            <td style="color:var(--text-muted)">${formatDate(d.createdAt)}</td>
-            <td>
+    list.innerHTML = filtered.map(d => `
+        <div class="data-card">
+            <div class="data-card-header">
+                <span class="data-card-name">${escapeHtml(d.user?.firstName || d.user?.username || 'User #' + d.userId)}</span>
+                ${statusBadge(d.status)}
+            </div>
+            <div class="data-card-body">
+                <div class="data-card-details">
+                    <span class="data-card-detail">Amount: <strong class="color-green">$${d.amount.toFixed(2)}</strong></span>
+                    <span class="data-card-detail">Method: <strong>${d.method || '-'}</strong></span>
+                    <span class="data-card-detail">Date: <strong>${formatDate(d.createdAt)}</strong></span>
+                </div>
                 ${d.status === 'PENDING' ? `
-                    <button class="btn-approve" onclick="handleDeposit(${d.id}, 'APPROVED')">✓</button>
-                    <button class="btn-reject" onclick="handleDeposit(${d.id}, 'REJECTED')">✕</button>
-                ` : '-'}
-            </td>
-        </tr>
+                    <div class="data-card-actions">
+                        <button class="btn-confirm" style="padding:6px 12px; font-size:0.75rem" onclick="handleDeposit(${d.id}, 'APPROVED')">Approve</button>
+                        <button class="btn-cancel" style="padding:6px 12px; font-size:0.75rem; border:1px solid var(--danger); color:var(--danger)" onclick="handleDeposit(${d.id}, 'REJECTED')">Reject</button>
+                    </div>
+                ` : ''}
+            </div>
+        </div>
     `).join('');
 }
 
@@ -220,7 +203,7 @@ window.filterDeposits = (status) => {
     document.querySelectorAll('#page-deposits .filter-tab').forEach(t => {
         t.classList.toggle('active', t.dataset.filter === status);
     });
-    renderDepositsTable(allDeposits);
+    renderDepositsList(allDeposits);
 };
 
 window.handleDeposit = async (depositId, action) => {
@@ -241,10 +224,10 @@ window.handleDeposit = async (depositId, action) => {
     }
 };
 
-// ═══════════ BALANCE MODAL ═══════════
+// MODALS
 window.openBalanceModal = (id, name) => {
     currentEditingUserId = id;
-    document.getElementById('target-user-display').textContent = `Updating balance for: ${name}`;
+    document.getElementById('target-user-display').textContent = `User: ${name}`;
     document.getElementById('balance-amount').value = '';
     document.getElementById('balance-modal').classList.add('active');
     document.getElementById('balance-amount').focus();
@@ -264,13 +247,11 @@ window.performBalanceUpdate = async () => {
     try {
         btn.disabled = true;
         btn.textContent = 'Updating...';
-
         const res = await fetch('/api/admin/balance', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', ...getHeaders() },
             body: JSON.stringify({ userId: currentEditingUserId, amount })
         });
-
         if (res.ok) {
             closeModal();
             await refreshData();
@@ -283,11 +264,11 @@ window.performBalanceUpdate = async () => {
         alert('Network error');
     } finally {
         btn.disabled = false;
-        btn.textContent = 'Update Balance';
+        btn.textContent = 'Update';
     }
 };
 
-// ═══════════ HELPERS ═══════════
+// HELPERS
 function statusBadge(status) {
     const map = {
         'COMPLETED': 'badge-completed',
@@ -306,8 +287,9 @@ function formatDate(dateStr) {
 }
 
 function escapeHtml(str) {
+    if (!str) return '';
     return String(str).replace(/'/g, "\\'").replace(/"/g, '&quot;');
 }
 
-// ═══════════ START ═══════════
+// START
 init();
