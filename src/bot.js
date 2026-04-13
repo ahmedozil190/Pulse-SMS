@@ -15,6 +15,9 @@ const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 // Simple session middleware
 bot.use(session());
 
+// DEBUG COMMAND - Verify Bot is alive
+bot.command('test', (ctx) => ctx.reply('✅ Bot is alive and receiving commands!'));
+
 /**
  * Helper to ensure user exists in Database
  */
