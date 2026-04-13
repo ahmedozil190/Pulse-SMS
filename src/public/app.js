@@ -146,7 +146,12 @@ function renderUsersList(users) {
     const list = document.getElementById('users-list');
     if (!list) return;
     if (!users.length) {
-        list.innerHTML = `<div class="empty-state"><span>👥</span>No ${currentUserFilter} users found</div>`;
+        list.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-users-slash"></i>
+                <span>No users found</span>
+            </div>
+        `;
         return;
     }
 
@@ -227,7 +232,12 @@ function renderOrdersList(orders) {
     if (!list) return;
     const filtered = currentOrderFilter === 'ALL' ? orders : orders.filter(o => o.status === currentOrderFilter);
     if (!filtered.length) {
-        list.innerHTML = '<div class="empty-state"><span>🛒</span>No orders found</div>';
+        list.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-receipt"></i>
+                <span>No orders found</span>
+            </div>
+        `;
         return;
     }
     list.innerHTML = filtered.map(o => `
