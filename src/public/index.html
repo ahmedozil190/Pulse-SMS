@@ -8,64 +8,58 @@
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body class="loading">
     <div id="loader">
-        <div class="loader-content">
-            <div class="spinner"></div>
-            <span>Loading Dashboard...</span>
-        </div>
+        <div class="spinner"></div>
     </div>
 
     <div id="app" style="display: none;">
         <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
-        <!-- Sidebar -->
+        <!-- Side Menu -->
         <aside id="sidebar">
             <div class="sidebar-header">
-                <span class="sidebar-brand">Pulse SMS</span>
-                <button class="sidebar-close" onclick="toggleSidebar()">✕</button>
+                <span class="sidebar-title">Pulse Bot</span>
+                <div class="close-circle" onclick="toggleSidebar()">✕</div>
             </div>
             <nav class="sidebar-nav">
                 <a href="#" class="nav-item active" data-page="dashboard" onclick="switchPage('dashboard')">
-                    <span class="nav-icon">📊</span>
+                    <i>📊</i>
                     <span>Home</span>
                 </a>
                 <a href="#" class="nav-item" data-page="users" onclick="switchPage('users')">
-                    <span class="nav-icon">👥</span>
+                    <i>👥</i>
                     <span>Users</span>
                 </a>
                 <a href="#" class="nav-item" data-page="orders" onclick="switchPage('orders')">
-                    <span class="nav-icon">🛒</span>
+                    <i>🛒</i>
                     <span>Orders</span>
                 </a>
                 <a href="#" class="nav-item" data-page="deposits" onclick="switchPage('deposits')">
-                    <span class="nav-icon">💳</span>
+                    <i>💰</i>
                     <span>Finance</span>
                 </a>
                 <a href="#" class="nav-item" data-page="settings" onclick="switchPage('settings')">
-                    <span class="nav-icon">⚙️</span>
+                    <i>⚙️</i>
                     <span>Settings</span>
                 </a>
             </nav>
         </aside>
 
-        <!-- Main Content -->
+        <!-- Main Wrapper -->
         <div id="main-wrapper">
-            <!-- Top Bar -->
             <header id="topbar">
-                <button id="hamburger" onclick="toggleSidebar()">
-                    <span></span><span></span><span></span>
-                </button>
+                <button id="hamburger" onclick="toggleSidebar()">☰</button>
                 <h1 id="page-title">Overview</h1>
-                <div class="topbar-avatar" id="admin-avatar">AD</div>
+                <div class="avatar" id="admin-avatar">AD</div>
             </header>
 
-            <!-- Page: Dashboard / Home -->
+            <!-- Home / Dashboard -->
             <main id="page-dashboard" class="page active">
                 <div class="section-group">
-                    <div class="section-title"><span>👥</span> Users</div>
+                    <div class="section-title"><i>👥</i> <span>Users</span></div>
                     <div class="info-card">
                         <span class="info-label">TOTAL USERS</span>
                         <span class="info-value color-cyan" id="stat-total-users">0</span>
@@ -73,7 +67,7 @@
                 </div>
 
                 <div class="section-group">
-                    <div class="section-title"><span>📦</span> Orders</div>
+                    <div class="section-title"><i>📦</i> <span>Orders</span></div>
                     <div class="info-card">
                         <span class="info-label">TOTAL ORDERS</span>
                         <span class="info-value color-purple" id="stat-total-orders">0</span>
@@ -82,70 +76,62 @@
                         <span class="info-label">COMPLETED</span>
                         <span class="info-value color-green" id="stat-total-sales">0</span>
                     </div>
-                    <div class="info-card">
-                        <span class="info-label">PENDING</span>
-                        <span class="info-value color-orange" id="stat-pending-orders">0</span>
-                    </div>
-                    <div class="info-card">
-                        <span class="info-label">CANCELLED</span>
-                        <span class="info-value color-red" id="stat-cancelled-orders">0</span>
-                    </div>
                 </div>
 
                 <div class="section-group">
-                    <div class="section-title"><span>💰</span> Finance</div>
-                    <div class="info-card">
-                        <span class="info-label">TOTAL REVENUE</span>
-                        <span class="info-value color-green" id="stat-total-revenue">$0.00</span>
-                    </div>
+                    <div class="section-title"><i>💰</i> <span>Finance</span></div>
                     <div class="info-card">
                         <span class="info-label">PENDING DEPOSITS</span>
                         <span class="info-value color-orange" id="stat-pending-deposits">0</span>
                     </div>
+                    <div class="info-card">
+                        <span class="info-label">TOTAL REVENUE</span>
+                        <span class="info-value color-green" id="stat-total-revenue">$0.00</span>
+                    </div>
                 </div>
             </main>
 
-            <!-- Page: Users -->
+            <!-- Users List -->
             <main id="page-users" class="page">
                 <div class="page-toolbar">
                     <div class="search-box">
-                        <input type="text" id="user-search" placeholder="🔍 Search users...">
+                        <input type="text" id="user-search" placeholder="Search by ID or Name...">
                     </div>
                 </div>
                 <div class="data-list" id="users-list"></div>
             </main>
 
-            <!-- Page: Orders -->
+            <!-- Orders List -->
             <main id="page-orders" class="page">
                 <div class="page-toolbar">
                     <div class="filter-tabs">
                         <button class="filter-tab active" data-filter="ALL" onclick="filterOrders('ALL')">All</button>
-                        <button class="filter-tab" data-filter="COMPLETED" onclick="filterOrders('COMPLETED')">Completed</button>
-                        <button class="filter-tab" data-filter="PENDING" onclick="filterOrders('PENDING')">Pending</button>
-                        <button class="filter-tab" data-filter="CANCELLED" onclick="filterOrders('CANCELLED')">Cancelled</button>
+                        <button class="filter-tab" data-filter="COMPLETED" onclick="filterOrders('COMPLETED')">Done</button>
+                        <button class="filter-tab" data-filter="PENDING" onclick="filterOrders('PENDING')">Wait</button>
                     </div>
                 </div>
                 <div class="data-list" id="orders-list"></div>
             </main>
 
-            <!-- Page: Deposits -->
+            <!-- Deposits List -->
             <main id="page-deposits" class="page">
                 <div class="page-toolbar">
                     <div class="filter-tabs">
                         <button class="filter-tab active" data-filter="ALL" onclick="filterDeposits('ALL')">All</button>
-                        <button class="filter-tab" data-filter="PENDING" onclick="filterDeposits('PENDING')">Pending</button>
-                        <button class="filter-tab" data-filter="APPROVED" onclick="filterDeposits('APPROVED')">Approved</button>
-                        <button class="filter-tab" data-filter="REJECTED" onclick="filterDeposits('REJECTED')">Rejected</button>
+                        <button class="filter-tab" data-filter="PENDING" onclick="filterDeposits('PENDING')">Wait</button>
                     </div>
                 </div>
                 <div class="data-list" id="deposits-list"></div>
             </main>
 
-            <!-- Page: Settings -->
+            <!-- Settings -->
             <main id="page-settings" class="page">
                 <div class="section-group">
-                    <div class="section-title"><span>⚙️</span> Settings</div>
-                    <div class="info-card"><span class="info-label">Coming Soon</span><span class="info-value color-purple">🚧</span></div>
+                    <div class="section-title"><i>⚙️</i> <span>Settings</span></div>
+                    <div class="info-card">
+                        <span class="info-label">SYSTEM STATUS</span>
+                        <span class="info-value color-green">ACTIVE</span>
+                    </div>
                 </div>
             </main>
         </div>
@@ -155,11 +141,11 @@
     <div id="balance-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>💰 Update Balance</h3>
-                <button class="modal-close" onclick="closeModal()">✕</button>
+                <h3>Update Balance</h3>
+                <div class="close-circle" onclick="closeModal()">✕</div>
             </div>
-            <p id="target-user-display"></p>
-            <input type="number" id="balance-amount" step="0.01" placeholder="Enter amount (e.g. 5.00)">
+            <p id="target-user-display" style="color:var(--text-secondary); font-size:0.8rem"></p>
+            <input type="number" id="balance-amount" step="0.01" placeholder="0.00">
             <div class="modal-buttons">
                 <button class="btn-cancel" onclick="closeModal()">Cancel</button>
                 <button class="btn-confirm" id="confirm-balance-btn" onclick="performBalanceUpdate()">Update</button>
