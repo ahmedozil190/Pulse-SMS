@@ -2,8 +2,8 @@
 
 :root {
     --bg-main: #0a0b10;
-    --bg-card: rgba(255, 255, 255, 0.03);
-    --border-card: rgba(255, 255, 255, 0.08);
+    --bg-card: rgba(255, 255, 255, 0.02);
+    --border-card: rgba(255, 255, 255, 0.05);
     --sidebar-bg: #181d29;
     --sidebar-border: rgba(255, 255, 255, 0.15);
     --accent-blue: #60a5fa;
@@ -34,8 +34,8 @@ body {
     min-height: 100vh;
     overflow-x: hidden;
     background-image: 
-        radial-gradient(circle at 10% 10%, rgba(96, 165, 250, 0.05) 0%, transparent 40%),
-        radial-gradient(circle at 90% 80%, rgba(168, 85, 247, 0.07) 0%, transparent 40%);
+        radial-gradient(circle at 10% 10%, rgba(96, 165, 250, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(168, 85, 247, 0.1) 0%, transparent 40%);
 }
 
 body.loading { overflow: hidden; }
