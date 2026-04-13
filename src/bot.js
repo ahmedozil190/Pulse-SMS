@@ -65,6 +65,20 @@ async function getOrCreateUser(ctx, referrerTelegramId = null) {
           referredById
         }
       });
+    } else {
+      // PROMPT SYNC: Update user info if it changed since last interaction
+      const currentFirstName = ctx.from.first_name || null;
+      const currentUsername = ctx.from.username || null;
+      
+      if (user.firstName !== currentFirstName || user.username !== currentUsername) {
+        user = await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            firstName: currentFirstName,
+            username: currentUsername
+          }
+        });
+      }
     }
     return user;
   } catch (error) {
@@ -837,6 +851,74 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`[SERVER] Admin Dashboard running on port ${PORT}`);
 });
+
+// --- BACKGROUND SYNC FOR USER IDENTITIES ---
+async function syncUserIdentities() {
+  console.log('[SYNC] Starting background user identity synchronization...');
+  try {
+    // Fetch 20 users who haven't been updated in over 24 hours
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const usersToSync = await prisma.user.findMany({
+      where: {
+        updatedAt: { lt: yesterday }
+      },
+      orderBy: { updatedAt: 'asc' },
+      take: 20
+    });
+
+    if (usersToSync.length === 0) {
+      console.log('[SYNC] All users are already up to date.');
+      return;
+    }
+
+    for (const user of usersToSync) {
+      try {
+        console.log(`[SYNC] Refreshing info for User ${user.telegramId}...`);
+        const chat = await bot.telegram.getChat(user.telegramId);
+        
+        const newFirstName = chat.first_name || chat.title || user.firstName;
+        const newUsername = chat.username || user.username;
+
+        if (user.firstName !== newFirstName || user.username !== newUsername) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              firstName: newFirstName,
+              username: newUsername
+            }
+          });
+          console.log(`[SYNC] Updated User ${user.telegramId}: ${newFirstName} (@${newUsername})`);
+        } else {
+          // Still update updatedAt to mark as checked
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { updatedAt: new Date() }
+          });
+        }
+        
+        // Wait 2 seconds between requests to respect Telegram rate limits
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      } catch (err) {
+        if (err.description && err.description.includes('chat not found')) {
+          // User might have blocked the bot, skip and mark as checked
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { updatedAt: new Date() }
+          });
+        }
+        console.error(`[SYNC ERROR] Failed to sync user ${user.telegramId}:`, err.message);
+      }
+    }
+    console.log('[SYNC] Background synchronization complete.');
+  } catch (err) {
+    console.error('[SYNC CRITICAL ERROR]', err);
+  }
+}
+
+// Run sync every 30 minutes
+setInterval(syncUserIdentities, 30 * 60 * 1000);
+// Initial run after 1 minute of server start
+setTimeout(syncUserIdentities, 60 * 1000);
 
 // Enable graceful stop
 process.once('SIGINT', () => bot.stop('SIGINT'));
