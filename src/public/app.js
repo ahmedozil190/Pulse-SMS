@@ -324,29 +324,6 @@ window.setUserFilter = (filter) => {
     applyUserFilters();
 };
 
-window.triggerManualSync = async () => {
-    const icon = document.getElementById('sync-icon');
-    if (icon.classList.contains('spinning')) return;
-    
-    icon.classList.add('spinning');
-    try {
-        const res = await fetch('/api/admin/sync-users', {
-            method: 'POST',
-            headers: getHeaders()
-        });
-        const data = await res.json();
-        if (data.success) {
-            // Simple visual feedback
-            webapp.showAlert(`Sync Complete! Successfully checked ${data.count} users.`);
-            await refreshData();
-        }
-    } catch (err) {
-        console.error('Manual sync error:', err);
-    } finally {
-        icon.classList.remove('spinning');
-    }
-};
-
 // MODALS
 window.openBalanceModal = (id, name) => {
     currentEditingUserId = id;

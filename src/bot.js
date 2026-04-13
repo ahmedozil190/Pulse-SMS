@@ -69,7 +69,7 @@ async function getOrCreateUser(ctx, referrerTelegramId = null) {
       // PROMPT SYNC: Update user info if it changed since last interaction
       const currentFirstName = ctx.from.first_name || null;
       const currentUsername = ctx.from.username || null;
-      
+
       if (user.firstName !== currentFirstName || user.username !== currentUsername) {
         user = await prisma.user.update({
           where: { id: user.id },
@@ -674,7 +674,7 @@ app.get('/api/admin/stats', isAdminMiddleware, async (req, res) => {
     const successfulOrders = await prisma.order.count({ where: { status: 'COMPLETED' } });
     const totalOrdersCount = await prisma.order.count();
     const cancelledOrdersCount = await prisma.order.count({ where: { status: 'CANCELLED' } });
-    
+
     const revenueRes = await prisma.order.aggregate({
       _sum: { price: true },
       where: { status: 'COMPLETED' }
@@ -724,12 +724,40 @@ app.get('/api/admin/users', isAdminMiddleware, async (req, res) => {
       _count: undefined
     }));
 
+    // SILENT BACKGROUND SYNC: Trigger sync for the top 5 most stale users in this list
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    const staleUsers = formattedUsers
+      .filter(u => !u.updatedAt || u.updatedAt < fiveMinutesAgo)
+      .slice(0, 5);
+      
+    if (staleUsers.length > 0) {
+       // Fire and forget (don't await)
+       syncSpecificUsers(staleUsers.map(u => u.telegramId)).catch(err => console.error('Silent sync error:', err));
+    }
+
     res.json(formattedUsers || []);
   } catch (err) {
     console.error('Fetch users error:', err);
     res.status(500).json({ msg: 'Server error' });
   }
 });
+
+// Helper for silent sync
+async function syncSpecificUsers(telegramIds) {
+    for (const tid of telegramIds) {
+        try {
+            const chat = await bot.telegram.getChat(tid).catch(() => null);
+            if (!chat) continue;
+            const newFirstName = chat.first_name || chat.title;
+            const newUsername = chat.username;
+            await prisma.user.update({
+                where: { telegramId: tid },
+                data: { firstName: newFirstName, username: newUsername, updatedAt: new Date() }
+            });
+            await new Promise(r => setTimeout(r, 500)); // Respect rate limits
+        } catch(e) {}
+    }
+}
 
 app.post('/api/admin/user-toggle-ban', isAdminMiddleware, async (req, res) => {
   const { userId } = req.body;
@@ -847,25 +875,13 @@ app.post('/api/admin/deposit-action', isAdminMiddleware, async (req, res) => {
   }
 });
 
-app.post('/api/admin/sync-users', isAdminMiddleware, async (req, res) => {
-  try {
-    // Only trigger a batch of 50 to avoid timing out the request
-    const syncedCount = await syncUserIdentities(50, 0); // Force sync 50 regardless of updatedAt
-    res.json({ success: true, count: syncedCount });
-  } catch (err) {
-    res.status(500).json({ msg: 'Sync failed' });
-  }
-});
-
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`[SERVER] Admin Dashboard running on port ${PORT}`);
 });
 
 // --- BACKGROUND SYNC FOR USER IDENTITIES ---
-async function syncUserIdentities(batchSize = 20, thresholdHours = 24) {
-  console.log(`[SYNC] Starting batch sync (Size: ${batchSize}, Threshold: ${thresholdHours}h)...`);
-  let syncedCount = 0;
+async function syncUserIdentities(batchSize = 10, thresholdHours = 2) {
   try {
     const thresholdDate = new Date(Date.now() - thresholdHours * 60 * 60 * 1000);
     const usersToSync = await prisma.user.findMany({
@@ -876,50 +892,42 @@ async function syncUserIdentities(batchSize = 20, thresholdHours = 24) {
       take: batchSize
     });
 
-    if (usersToSync.length === 0) {
-      console.log('[SYNC] No users qualify for sync at this time.');
-      return 0;
-    }
+    if (usersToSync.length === 0) return 0;
 
     for (const user of usersToSync) {
       try {
         const chat = await bot.telegram.getChat(user.telegramId).catch(() => null);
-        if (!chat) {
-          // Mark as checked to avoid re-looping immediately
-          await prisma.user.update({ where: { id: user.id }, data: { updatedAt: new Date() } });
-          continue;
+        if (chat) {
+          const newFirstName = chat.first_name || chat.title || user.firstName;
+          const newUsername = chat.username || user.username;
+          await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              firstName: newFirstName,
+              username: newUsername,
+              updatedAt: new Date()
+            }
+          });
+        } else {
+          // Mark as checked even if failed (e.g. user blocked bot)
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { updatedAt: new Date() }
+          });
         }
-        
-        const newFirstName = chat.first_name || chat.title || user.firstName;
-        const newUsername = chat.username || user.username;
-
-        await prisma.user.update({
-          where: { id: user.id },
-          data: {
-            firstName: newFirstName,
-            username: newUsername,
-            updatedAt: new Date() // Explicitly update this
-          }
-        });
-        syncedCount++;
-        
-        // Small delay to prevent hitting Telegram's rate limit hard
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(r => setTimeout(r, 1000)); // Respect rate limits
       } catch (err) {
         console.error(`[SYNC ERROR] User ${user.telegramId}:`, err.message);
       }
     }
-    console.log(`[SYNC] Batch complete. Synced ${syncedCount} users.`);
-    return syncedCount;
   } catch (err) {
     console.error('[SYNC CRITICAL ERROR]', err);
-    return 0;
   }
 }
 
-// Run background sync every 30 minutes with more aggressive settings
-setInterval(() => syncUserIdentities(50, 4), 30 * 60 * 1000);
-setTimeout(() => syncUserIdentities(50, 4), 10 * 1000);
+// Automatic invisible sync every 1 minute
+setInterval(() => syncUserIdentities(10, 2), 60 * 1000);
+setTimeout(() => syncUserIdentities(10, 2), 5000);
 
 // Enable graceful stop
 process.once('SIGINT', () => bot.stop('SIGINT'));
