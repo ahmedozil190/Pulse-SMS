@@ -658,17 +658,31 @@ app.get('/api/admin/stats', isAdminMiddleware, async (req, res) => {
     const totalUsers = await prisma.user.count();
     const bannedUsers = await prisma.user.count({ where: { isBanned: true } });
     const successfulOrders = await prisma.order.count({ where: { status: 'COMPLETED' } });
+    const totalOrdersCount = await prisma.order.count();
+    const cancelledOrdersCount = await prisma.order.count({ where: { status: 'CANCELLED' } });
+    
     const revenueRes = await prisma.order.aggregate({
       _sum: { price: true },
       where: { status: 'COMPLETED' }
     });
+
+    const totalDepositsCount = await prisma.deposit.count();
+    const totalDepositsAmountRes = await prisma.deposit.aggregate({
+      _sum: { amount: true },
+      where: { status: 'APPROVED' }
+    });
+
     const pendingDeposits = await prisma.deposit.count({ where: { status: 'PENDING' } });
 
     res.json({
       totalUsers,
       bannedUsers,
       successfulOrders,
+      totalOrdersCount,
+      cancelledOrdersCount,
       totalRevenue: revenueRes._sum.price || 0,
+      totalDepositsCount,
+      totalDepositsAmount: totalDepositsAmountRes._sum.amount || 0,
       pendingDeposits
     });
   } catch (err) {

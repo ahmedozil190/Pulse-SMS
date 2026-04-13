@@ -37,8 +37,8 @@
                     <span>Orders</span>
                 </div>
                 <div class="nav-item" data-page="deposits" onclick="switchPage('deposits')">
-                    <i class="fas fa-dollar-sign"></i>
-                    <span>Finance</span>
+                    <i class="fas fa-wallet"></i>
+                    <span>Deposits</span>
                 </div>
                 <div class="nav-item" data-page="settings" onclick="switchPage('settings')">
                     <i class="fas fa-cog"></i>
@@ -112,7 +112,7 @@
                     <div class="search-box-v2">
                         <input type="text" id="user-search-v2" placeholder="Search users...">
                     </div>
-                    <button class="gradient-btn" onclick="triggerSearch()">
+                    <button class="gradient-btn" onclick="triggerSearch('user')">
                         <i class="fas fa-search"></i> Find
                     </button>
                 </div>
@@ -130,25 +130,68 @@
 
             <!-- Orders List -->
             <main id="page-orders" class="page">
-                <div class="page-toolbar">
-                    <div class="filter-tabs">
-                        <button class="filter-tab active" data-filter="ALL" onclick="filterOrders('ALL')">All</button>
-                        <button class="filter-tab" data-filter="COMPLETED" onclick="filterOrders('COMPLETED')">Done</button>
-                        <button class="filter-tab" data-filter="PENDING" onclick="filterOrders('PENDING')">Wait</button>
+                <!-- Order Stats -->
+                <div class="section-group">
+                    <div class="info-card">
+                        <span class="info-label">TOTAL ORDERS</span>
+                        <span class="info-value color-purple" id="order-stat-total">0</span>
+                    </div>
+                    <div class="info-card">
+                        <span class="info-label">APPROVED</span>
+                        <span class="info-value color-green" id="order-stat-approved">0</span>
+                    </div>
+                    <div class="info-card">
+                        <span class="info-label">REJECTED</span>
+                        <span class="info-value color-red" id="order-stat-rejected">0</span>
                     </div>
                 </div>
-                <div class="data-list" id="orders-list"></div>
+
+                <!-- Search Section -->
+                <div class="glass-container" style="margin-top: 25px;">
+                    <div class="search-box-v2">
+                        <input type="text" id="order-search-v2" placeholder="Search orders...">
+                    </div>
+                    <button class="gradient-btn" onclick="triggerSearch('order')">
+                        <i class="fas fa-search"></i> Find
+                    </button>
+                </div>
+
+                <!-- History Section -->
+                <div class="glass-container" style="margin-top: 25px;">
+                    <div class="section-title" style="margin-top:0">Order History</div>
+                    <div id="orders-list" class="data-list"></div>
+                </div>
             </main>
 
             <!-- Deposits List -->
             <main id="page-deposits" class="page">
-                <div class="page-toolbar">
-                    <div class="filter-tabs">
-                        <button class="filter-tab active" data-filter="ALL" onclick="filterDeposits('ALL')">All</button>
-                        <button class="filter-tab" data-filter="PENDING" onclick="filterDeposits('PENDING')">Wait</button>
+                <!-- Deposit Stats -->
+                <div class="section-group">
+                    <div class="info-card">
+                        <span class="info-label">DEPOSITS COUNT</span>
+                        <span class="info-value color-purple" id="deposit-stat-count">0</span>
+                    </div>
+                    <div class="info-card">
+                        <span class="info-label">TOTAL AMOUNT</span>
+                        <span class="info-value color-green" id="deposit-stat-amount">$0.00</span>
                     </div>
                 </div>
-                <div class="data-list" id="deposits-list"></div>
+
+                <!-- Search Section -->
+                <div class="glass-container" style="margin-top: 25px;">
+                    <div class="search-box-v2">
+                        <input type="text" id="deposit-search-v2" placeholder="Search deposits...">
+                    </div>
+                    <button class="gradient-btn" onclick="triggerSearch('deposit')">
+                        <i class="fas fa-search"></i> Find
+                    </button>
+                </div>
+
+                <!-- History Section -->
+                <div class="glass-container" style="margin-top: 25px;">
+                    <div class="section-title" style="margin-top:0">Deposit History</div>
+                    <div id="deposits-list" class="data-list"></div>
+                </div>
             </main>
 
             <!-- Settings -->

@@ -11,20 +11,23 @@ let currentOrderFilter = 'ALL';
 let currentDepositFilter = 'ALL';
 let currentUserFilter = 'active'; // 'active' or 'banned'
 let userSearchQuery = '';
+let orderSearchQuery = '';
+let depositSearchQuery = '';
 
 // INIT
 async function init() {
     try {
         await refreshData();
 
-        // Use the new search input V2 if it exists
-        const searchInput = document.getElementById('user-search-v2');
-        if (searchInput) {
-            searchInput.addEventListener('input', (e) => {
-                userSearchQuery = e.target.value;
-                applyUserFilters();
-            });
-        }
+        // Search Handlers
+        const userSearch = document.getElementById('user-search-v2');
+        if (userSearch) userSearch.addEventListener('input', (e) => { userSearchQuery = e.target.value; applyUserFilters(); });
+
+        const orderSearch = document.getElementById('order-search-v2');
+        if (orderSearch) orderSearch.addEventListener('input', (e) => { orderSearchQuery = e.target.value; applyOrderFilters(); });
+
+        const depositSearch = document.getElementById('deposit-search-v2');
+        if (depositSearch) depositSearch.addEventListener('input', (e) => { depositSearchQuery = e.target.value; applyDepositFilters(); });
 
         // Restore previous page if exists
         const lastPage = sessionStorage.getItem('admin_last_page');
@@ -66,23 +69,37 @@ async function refreshData() {
         allOrders = await ordersRes.json();
         allDeposits = await depositsRes.json();
 
-        // Update Global stats
+        // Update Overview stats
         document.getElementById('stat-total-users').textContent = stats.totalUsers || 0;
-        document.getElementById('stat-total-orders').textContent = allOrders.length || 0;
+        document.getElementById('stat-total-orders').textContent = stats.totalOrdersCount || 0;
         document.getElementById('stat-total-sales').textContent = stats.successfulOrders || 0;
         document.getElementById('stat-pending-deposits').textContent = stats.pendingDeposits || 0;
         document.getElementById('stat-total-revenue').textContent = `$${(stats.totalRevenue || 0).toFixed(2)}`;
 
-        // Update User page specific stats
+        // Update User page stats
         const uStatTotal = document.getElementById('user-stat-total');
         const uStatBanned = document.getElementById('user-stat-banned');
         if (uStatTotal) uStatTotal.textContent = stats.totalUsers || 0;
         if (uStatBanned) uStatBanned.textContent = stats.bannedUsers || 0;
 
+        // Update Order page stats
+        const oStatTotal = document.getElementById('order-stat-total');
+        const oStatApproved = document.getElementById('order-stat-approved');
+        const oStatRejected = document.getElementById('order-stat-rejected');
+        if (oStatTotal) oStatTotal.textContent = stats.totalOrdersCount || 0;
+        if (oStatApproved) oStatApproved.textContent = stats.successfulOrders || 0;
+        if (oStatRejected) oStatRejected.textContent = stats.cancelledOrdersCount || 0;
+
+        // Update Deposit page stats
+        const dStatCount = document.getElementById('deposit-stat-count');
+        const dStatAmount = document.getElementById('deposit-stat-amount');
+        if (dStatCount) dStatCount.textContent = stats.totalDepositsCount || 0;
+        if (dStatAmount) dStatAmount.textContent = `$${(stats.totalDepositsAmount || 0).toFixed(2)}`;
+
         // Render lists
         applyUserFilters();
-        renderOrdersList(allOrders);
-        renderDepositsList(allDeposits);
+        applyOrderFilters();
+        applyDepositFilters();
     } catch (err) {
         console.error('Data refresh error:', err);
         throw err;
@@ -104,24 +121,25 @@ window.switchPage = (pageName) => {
         page.classList.toggle('active', page.id === `page-${pageName}`);
     });
 
-    const titles = { dashboard: 'Overview', users: 'User Management', orders: 'Orders', deposits: 'Finance', settings: 'Settings' };
+    const titles = { dashboard: 'Overview', users: 'User Management', orders: 'Orders', deposits: 'Deposits', settings: 'Settings' };
     document.getElementById('page-title').textContent = titles[pageName] || 'Overview';
     document.getElementById('sidebar').classList.remove('open');
 };
 
-// USER MANAGEMENT LOGIC
-window.setUserFilter = (filter) => {
-    currentUserFilter = filter;
-    document.getElementById('tab-active').classList.toggle('active', filter === 'active');
-    document.getElementById('tab-banned').classList.toggle('active', filter === 'banned');
-    applyUserFilters();
+window.triggerSearch = (type) => {
+    if (type === 'user') {
+        userSearchQuery = document.getElementById('user-search-v2').value;
+        applyUserFilters();
+    } else if (type === 'order') {
+        orderSearchQuery = document.getElementById('order-search-v2').value;
+        applyOrderFilters();
+    } else if (type === 'deposit') {
+        depositSearchQuery = document.getElementById('deposit-search-v2').value;
+        applyDepositFilters();
+    }
 };
 
-window.triggerSearch = () => {
-    userSearchQuery = document.getElementById('user-search-v2').value;
-    applyUserFilters();
-};
-
+// FILTERS
 function applyUserFilters() {
     let filtered = allUsers.filter(u => {
         const isBanned = u.isBanned || false;
@@ -129,78 +147,65 @@ function applyUserFilters() {
         if (currentUserFilter === 'banned') return isBanned;
         return true;
     });
-
     if (userSearchQuery) {
         const q = userSearchQuery.toLowerCase();
-        filtered = filtered.filter(u => 
-            u.telegramId.includes(q) || 
-            (u.username && u.username.toLowerCase().includes(q)) ||
-            (u.firstName && u.firstName.toLowerCase().includes(q))
-        );
+        filtered = filtered.filter(u => u.telegramId.includes(q) || (u.username && u.username.toLowerCase().includes(q)) || (u.firstName && u.firstName.toLowerCase().includes(q)));
     }
-
     renderUsersList(filtered);
 }
 
+function applyOrderFilters() {
+    let filtered = allOrders;
+    if (orderSearchQuery) {
+        const q = orderSearchQuery.toLowerCase();
+        filtered = filtered.filter(o => (o.phoneNumber && o.phoneNumber.includes(q)) || (o.user?.telegramId && o.user.telegramId.includes(q)) || (o.user?.firstName && o.user.firstName.toLowerCase().includes(q)));
+    }
+    renderOrdersList(filtered);
+}
+
+function applyDepositFilters() {
+    let filtered = allDeposits;
+    if (depositSearchQuery) {
+        const q = depositSearchQuery.toLowerCase();
+        filtered = filtered.filter(d => (d.user?.telegramId && d.user.telegramId.includes(q)) || (d.user?.firstName && d.user.firstName.toLowerCase().includes(q)) || (d.method && d.method.toLowerCase().includes(q)));
+    }
+    renderDepositsList(filtered);
+}
+
+// RENDERERS
 function renderUsersList(users) {
     const list = document.getElementById('users-list');
     if (!list) return;
     if (!users.length) {
-        list.innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-users-slash"></i>
-                <span>No users found</span>
-            </div>
-        `;
+        list.innerHTML = `<div class="empty-state"><i class="fas fa-users-slash"></i><span>No users found</span></div>`;
         return;
     }
-
     list.innerHTML = users.map((u, index) => `
         <div class="user-container">
             <div class="user-card-index">${index + 1}</div>
-            
             <div class="user-row" onclick="toggleUserBan(${u.id})">
                 <span class="user-row-label">Account Status</span>
-                <span class="user-row-value ${u.isBanned ? 'color-red' : 'color-green'}">
-                    ${u.isBanned ? 'BANNED' : '<i class="fas fa-check"></i> ACTIVE'}
-                </span>
+                <span class="user-row-value ${u.isBanned ? 'color-red' : 'color-green'}">${u.isBanned ? 'BANNED' : '<i class="fas fa-check"></i> ACTIVE'}</span>
             </div>
-
             <div class="user-row" onclick="openBalanceModal(${u.id}, '${escapeHtml(u.firstName || u.username || u.telegramId)}')">
                 <span class="user-row-label">Full Name</span>
-                <span class="user-row-value color-yellow">${escapeHtml(u.firstName || 'Unknown')} ${u.isAdmin ? '(Admin)' : ''}</span>
+                <span class="user-row-value color-yellow">${escapeHtml(u.firstName || 'Unknown')}</span>
             </div>
-
             <div class="user-row">
                 <span class="user-row-label">Username</span>
                 <span class="user-row-value color-blue-tint">@${escapeHtml(u.username || 'none')}</span>
             </div>
-
             <div class="user-row">
                 <span class="user-row-label">User ID</span>
                 <span class="user-row-value color-orange">${u.telegramId}</span>
             </div>
-
             <div class="user-row" onclick="openBalanceModal(${u.id}, '${escapeHtml(u.firstName || u.username || u.telegramId)}')">
                 <span class="user-row-label">Balance</span>
                 <span class="user-row-value color-blue-tint">$${u.balance.toFixed(2)}</span>
             </div>
-
-            <div class="user-row">
-                <span class="user-row-label">Spent</span>
-                <span class="user-row-value color-red">$${(u.spent || 0).toFixed(2)}</span>
-            </div>
-
-            <div class="user-row">
-                <span class="user-row-label">Earned</span>
-                <span class="user-row-value color-green">$${(u.referralBalance || 0).toFixed(2)}</span>
-            </div>
-
-            <div class="user-row">
-                <span class="user-row-label">Orders Made</span>
-                <span class="user-row-value color-purple">${u.ordersMade || 0}</span>
-            </div>
-
+            <div class="user-row"><span class="user-row-label">Spent</span><span class="user-row-value color-red">$${(u.spent || 0).toFixed(2)}</span></div>
+            <div class="user-row"><span class="user-row-label">Earned</span><span class="user-row-value color-green">$${(u.referralBalance || 0).toFixed(2)}</span></div>
+            <div class="user-row"><span class="user-row-label">Orders Made</span><span class="user-row-value color-purple">${u.ordersMade || 0}</span></div>
             <div class="data-card-actions" style="margin-top:15px; border-top:none; padding-top:0">
                  <button class="gradient-btn" style="padding:10px; font-size:0.8rem;" onclick="openBalanceModal(${u.id}, '${escapeHtml(u.firstName || u.username || u.telegramId)}')">
                     <i class="fas fa-wallet"></i> Edit Balance
@@ -210,99 +215,95 @@ function renderUsersList(users) {
     `).join('');
 }
 
+function renderOrdersList(orders) {
+    const list = document.getElementById('orders-list');
+    if (!list) return;
+    if (!orders.length) {
+        list.innerHTML = `<div class="empty-state"><i class="fas fa-receipt"></i><span>No orders found</span></div>`;
+        return;
+    }
+    list.innerHTML = orders.map((o, index) => `
+        <div class="user-container">
+            <div class="user-card-index">${index + 1}</div>
+            <div class="user-row">
+                <span class="user-row-label">Status</span>
+                <span class="user-row-value ${o.status === 'COMPLETED' ? 'color-green' : o.status === 'CANCELLED' ? 'color-red' : 'color-orange'}">${o.status}</span>
+            </div>
+            <div class="user-row">
+                <span class="user-row-label">User</span>
+                <span class="user-row-value color-yellow">${escapeHtml(o.user?.firstName || 'User #' + o.userId)}</span>
+            </div>
+            <div class="user-row">
+                <span class="user-row-label">Phone</span>
+                <span class="user-row-value color-blue-tint">${o.phoneNumber || '-'}</span>
+            </div>
+            <div class="user-row">
+                <span class="user-row-label">Country</span>
+                <span class="user-row-value">${o.countryId || '-'}</span>
+            </div>
+            <div class="user-row">
+                <span class="user-row-label">Price</span>
+                <span class="user-row-value color-green">$${o.price.toFixed(2)}</span>
+            </div>
+            <div class="user-row">
+                <span class="user-row-label">Date</span>
+                <span class="user-row-value" style="font-size:0.8rem">${formatDate(o.createdAt)}</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderDepositsList(deposits) {
+    const list = document.getElementById('deposits-list');
+    if (!list) return;
+    if (!deposits.length) {
+        list.innerHTML = `<div class="empty-state"><i class="fas fa-wallet"></i><span>No deposits found</span></div>`;
+        return;
+    }
+    list.innerHTML = deposits.map((d, index) => `
+        <div class="user-container">
+            <div class="user-card-index">${index + 1}</div>
+            <div class="user-row">
+                <span class="user-row-label">Status</span>
+                <span class="user-row-value ${d.status === 'APPROVED' ? 'color-green' : d.status === 'REJECTED' ? 'color-red' : 'color-orange'}">${d.status}</span>
+            </div>
+            <div class="user-row">
+                <span class="user-row-label">User</span>
+                <span class="user-row-value color-yellow">${escapeHtml(d.user?.firstName || 'User #' + d.userId)}</span>
+            </div>
+            <div class="user-row">
+                <span class="user-row-label">Amount</span>
+                <span class="user-row-value color-green">$${d.amount.toFixed(2)}</span>
+            </div>
+            <div class="user-row">
+                <span class="user-row-label">Method</span>
+                <span class="user-row-value color-blue-tint">${d.method || '-'}</span>
+            </div>
+            <div class="user-row">
+                <span class="user-row-label">Date</span>
+                <span class="user-row-value" style="font-size:0.8rem">${formatDate(d.createdAt)}</span>
+            </div>
+            ${d.status === 'PENDING' ? `
+                <div class="data-card-actions" style="margin-top:15px; border-top:none; display:flex; gap:10px;">
+                    <button class="gradient-btn" style="background:#10b981; padding:8px" onclick="handleDeposit(${d.id}, 'APPROVED')">Approve</button>
+                    <button class="gradient-btn" style="background:transparent; border:1px solid #ef4444; color:#ef4444; padding:8px" onclick="handleDeposit(${d.id}, 'REJECTED')">Reject</button>
+                </div>
+            ` : ''}
+        </div>
+    `).join('');
+}
+
+// HANDLERS
 window.toggleUserBan = async (userId) => {
-    if (!confirm('Are you sure you want to toggle ban status for this user?')) return;
+    if (!confirm('Toggle ban status?')) return;
     try {
         const res = await fetch('/api/admin/user-toggle-ban', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', ...getHeaders() },
             body: JSON.stringify({ userId })
         });
-        if (res.ok) {
-            await refreshData();
-        }
-    } catch (err) {
-        console.error('Ban toggle error:', err);
-    }
-};
-
-// RENDERERS FOR OTHER PAGES
-function renderOrdersList(orders) {
-    const list = document.getElementById('orders-list');
-    if (!list) return;
-    const filtered = currentOrderFilter === 'ALL' ? orders : orders.filter(o => o.status === currentOrderFilter);
-    if (!filtered.length) {
-        list.innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-receipt"></i>
-                <span>No orders found</span>
-            </div>
-        `;
-        return;
-    }
-    list.innerHTML = filtered.map(o => `
-        <div class="data-card">
-            <div class="data-card-header">
-                <span class="data-card-name">${escapeHtml(o.user?.firstName || o.user?.username || 'User #' + o.userId)}</span>
-                ${statusBadge(o.status)}
-            </div>
-            <div class="data-card-body">
-                <div class="data-card-details">
-                    <span class="data-card-detail">Phone: <strong>${o.phoneNumber || '-'}</strong></span>
-                    <span class="data-card-detail">Country: <strong>${o.countryId || '-'}</strong></span>
-                    <span class="data-card-detail">Price: <strong class="color-green">$${o.price.toFixed(2)}</strong></span>
-                </div>
-                <div class="data-card-detail" style="color:var(--text-muted); font-size: 0.7rem;">${formatDate(o.createdAt)}</div>
-            </div>
-        </div>
-    `).join('');
-}
-
-window.filterOrders = (status) => {
-    currentOrderFilter = status;
-    document.querySelectorAll('#page-orders .filter-tab').forEach(t => {
-        t.classList.toggle('active', t.dataset.filter === status);
-    });
-    renderOrdersList(allOrders);
-};
-
-function renderDepositsList(deposits) {
-    const list = document.getElementById('deposits-list');
-    if (!list) return;
-    const filtered = currentDepositFilter === 'ALL' ? deposits : deposits.filter(d => d.status === currentDepositFilter);
-    if (!filtered.length) {
-        list.innerHTML = '<div class="empty-state"><span>💳</span>No deposits found</div>';
-        return;
-    }
-    list.innerHTML = filtered.map(d => `
-        <div class="data-card">
-            <div class="data-card-header">
-                <span class="data-card-name">${escapeHtml(d.user?.firstName || d.user?.username || 'User #' + d.userId)}</span>
-                ${statusBadge(d.status)}
-            </div>
-            <div class="data-card-body">
-                <div class="data-card-details">
-                    <span class="data-card-detail">Amount: <strong class="color-green">$${d.amount.toFixed(2)}</strong></span>
-                    <span class="data-card-detail">Method: <strong>${d.method || '-'}</strong></span>
-                    <span class="data-card-detail">Date: <strong>${formatDate(d.createdAt)}</strong></span>
-                </div>
-                ${d.status === 'PENDING' ? `
-                    <div class="data-card-actions">
-                        <button class="btn-edit" style="padding:6px 12px; font-size:0.75rem; background:var(--success)" onclick="handleDeposit(${d.id}, 'APPROVED')">Approve</button>
-                        <button class="btn-cancel" style="padding:6px 12px; font-size:0.75rem; border:1px solid var(--danger); color:var(--danger)" onclick="handleDeposit(${d.id}, 'REJECTED')">Reject</button>
-                    </div>
-                ` : ''}
-            </div>
-        </div>
-    `).join('');
-}
-
-window.filterDeposits = (status) => {
-    currentDepositFilter = status;
-    document.querySelectorAll('#page-deposits .filter-tab').forEach(t => {
-        t.classList.toggle('active', t.dataset.filter === status);
-    });
-    renderDepositsList(allDeposits);
+        if (res.ok) await refreshData();
+    } catch (err) { console.error(err); }
 };
 
 window.handleDeposit = async (depositId, action) => {
@@ -312,15 +313,15 @@ window.handleDeposit = async (depositId, action) => {
             headers: { 'Content-Type': 'application/json', ...getHeaders() },
             body: JSON.stringify({ depositId, action })
         });
-        if (res.ok) {
-            await refreshData();
-        } else {
-            const err = await res.json();
-            alert('Error: ' + (err.msg || 'Failed'));
-        }
-    } catch (err) {
-        console.error('Deposit action error:', err);
-    }
+        if (res.ok) await refreshData(); else alert('Failed');
+    } catch (err) { console.error(err); }
+};
+
+window.setUserFilter = (filter) => {
+    currentUserFilter = filter;
+    document.getElementById('tab-active').classList.toggle('active', filter === 'active');
+    document.getElementById('tab-banned').classList.toggle('active', filter === 'banned');
+    applyUserFilters();
 };
 
 // MODALS
@@ -332,53 +333,22 @@ window.openBalanceModal = (id, name) => {
     document.getElementById('balance-amount').focus();
 };
 
-window.closeModal = () => {
-    document.getElementById('balance-modal').classList.remove('active');
-};
+window.closeModal = () => { document.getElementById('balance-modal').classList.remove('active'); };
 
 window.performBalanceUpdate = async () => {
     const amount = parseFloat(document.getElementById('balance-amount').value);
-    if (isNaN(amount)) {
-        alert('Please enter a valid number');
-        return;
-    }
-    const btn = document.getElementById('confirm-balance-btn');
+    if (isNaN(amount)) return;
     try {
-        btn.disabled = true;
-        btn.textContent = 'Updating...';
         const res = await fetch('/api/admin/balance', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', ...getHeaders() },
             body: JSON.stringify({ userId: currentEditingUserId, amount })
         });
-        if (res.ok) {
-            closeModal();
-            await refreshData();
-        } else {
-            const err = await res.json();
-            alert('Error: ' + (err.msg || 'Update failed'));
-        }
-    } catch (err) {
-        console.error('Update error:', err);
-        alert('Network error');
-    } finally {
-        btn.disabled = false;
-        btn.textContent = 'Update';
-    }
+        if (res.ok) { closeModal(); await refreshData(); }
+    } catch (err) { console.error(err); }
 };
 
 // HELPERS
-function statusBadge(status) {
-    const map = {
-        'COMPLETED': 'badge-completed',
-        'APPROVED': 'badge-approved',
-        'PENDING': 'badge-pending',
-        'CANCELLED': 'badge-cancelled',
-        'REJECTED': 'badge-rejected'
-    };
-    return `<span class="badge ${map[status] || 'badge-pending'}">${status}</span>`;
-}
-
 function formatDate(dateStr) {
     if (!dateStr) return '-';
     const d = new Date(dateStr);
