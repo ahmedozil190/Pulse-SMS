@@ -11,10 +11,10 @@ RUN npm install
 
 COPY . .
 
-# Generate Prisma Client
-RUN npx prisma generate
+# Generate Prisma Client using the new schema location
+RUN npx prisma generate --schema=src/prisma/schema.prisma
 
 EXPOSE 3000
 
-# Push the Prisma schema to the database on startup to ensure tables exist
-CMD npx prisma db push --accept-data-loss && npm start
+# Push the Prisma schema to the database on startup using the explicit schema path
+CMD npx prisma db push --accept-data-loss --schema=src/prisma/schema.prisma && npm start
