@@ -17,8 +17,6 @@
     </div>
 
     <div id="app" style="display: none;">
-        <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
-
         <!-- Side Menu -->
         <aside id="sidebar">
             <div class="sidebar-header">
@@ -48,6 +46,7 @@
                 </div>
             </nav>
         </aside>
+        <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
         <!-- Main Wrapper -->
         <div id="main-wrapper">
@@ -143,7 +142,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Update Balance</h3>
-                <div class="close-circle" onclick="closeModal()">✕</div>
+                <div class="close-circle" onclick="closeModal()"><i class="fas fa-times"></i></div>
             </div>
             <p id="target-user-display" style="color:var(--text-secondary); font-size:0.8rem"></p>
             <input type="number" id="balance-amount" step="0.01" placeholder="0.00">

@@ -26,6 +26,12 @@ async function init() {
             document.getElementById('admin-avatar').textContent = name.substring(0, 2).toUpperCase();
         }
 
+        // Restore previous page if exists (sessionStorage survives refresh but resets on fresh start)
+        const lastPage = sessionStorage.getItem('admin_last_page');
+        if (lastPage && lastPage !== 'dashboard') {
+            switchPage(lastPage);
+        }
+
         // Hide loader, show app
         document.body.classList.remove('loading');
         document.getElementById('loader').style.display = 'none';
@@ -73,7 +79,7 @@ async function refreshData() {
         renderDepositsList(allDeposits);
     } catch (err) {
         console.error('Data refresh error:', err);
-        throw err; // Re-throw to be caught by init()
+        throw err;
     }
 }
 
@@ -83,6 +89,7 @@ window.toggleSidebar = () => {
 };
 
 window.switchPage = (pageName) => {
+    sessionStorage.setItem('admin_last_page', pageName);
     document.querySelectorAll('.nav-item').forEach(item => {
         item.classList.toggle('active', item.dataset.page === pageName);
     });
@@ -189,7 +196,7 @@ function renderDepositsList(deposits) {
                 </div>
                 ${d.status === 'PENDING' ? `
                     <div class="data-card-actions">
-                        <button class="btn-confirm" style="padding:6px 12px; font-size:0.75rem" onclick="handleDeposit(${d.id}, 'APPROVED')">Approve</button>
+                        <button class="btn-edit" style="padding:6px 12px; font-size:0.75rem; background:var(--success)" onclick="handleDeposit(${d.id}, 'APPROVED')">Approve</button>
                         <button class="btn-cancel" style="padding:6px 12px; font-size:0.75rem; border:1px solid var(--danger); color:var(--danger)" onclick="handleDeposit(${d.id}, 'REJECTED')">Reject</button>
                     </div>
                 ` : ''}
