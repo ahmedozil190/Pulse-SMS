@@ -141,6 +141,7 @@ window.triggerSearch = (type) => {
 
 // FILTERS
 function applyUserFilters() {
+    if (!allUsers) return;
     let filtered = allUsers.filter(u => {
         const isBanned = u.isBanned || false;
         if (currentUserFilter === 'active') return !isBanned;
@@ -149,7 +150,12 @@ function applyUserFilters() {
     });
     if (userSearchQuery) {
         const q = userSearchQuery.toLowerCase();
-        filtered = filtered.filter(u => u.telegramId.includes(q) || (u.username && u.username.toLowerCase().includes(q)) || (u.firstName && u.firstName.toLowerCase().includes(q)));
+        filtered = filtered.filter(u => {
+            const tid = String(u.telegramId || '').toLowerCase();
+            const uname = String(u.username || '').toLowerCase();
+            const fname = String(u.firstName || '').toLowerCase();
+            return tid.includes(q) || uname.includes(q) || fname.includes(q);
+        });
     }
     renderUsersList(filtered);
 }
@@ -181,7 +187,7 @@ function renderUsersList(users) {
         return;
     }
     list.innerHTML = users.map((u, index) => `
-        <div class="user-container" onclick="openUserModal(${u.id}, '${escapeHtml(u.firstName || u.username || u.telegramId)}', ${u.balance}, ${u.isBanned})">
+        <div class="user-container" onclick="openUserModal(${u.id}, '${escapeHtml(u.firstName || 'Unknown')}', '${escapeHtml(u.username || 'none')}', ${u.balance}, ${u.isBanned})">
             <div class="user-card-index">${index + 1}</div>
             <div class="user-row">
                 <span class="user-row-label">Account Status</span>
@@ -323,9 +329,14 @@ window.setUserFilter = (filter) => {
 };
 
 // MODALS
-window.openUserModal = (id, name, balance, isBanned) => {
+window.openUserModal = (id, name, username, balance, isBanned) => {
     currentEditingUserId = id;
-    document.getElementById('target-user-display').textContent = `${name}`;
+    
+    // Set Info Headers
+    document.getElementById('modal-user-name').textContent = name;
+    document.getElementById('modal-user-handle').textContent = `@${username}`;
+    document.getElementById('modal-user-balance').textContent = `$${parseFloat(balance).toFixed(2)}`;
+    
     document.getElementById('balance-amount').value = '';
     
     // Setup Ban/Unban Button
@@ -345,9 +356,18 @@ window.closeModal = () => {
     document.getElementById('user-modal').classList.remove('active'); 
 };
 
-window.performBalanceUpdate = async () => {
-    const amount = parseFloat(document.getElementById('balance-amount').value);
-    if (isNaN(amount)) return;
+window.performBalanceUpdate = async (operation) => {
+    let amount = parseFloat(document.getElementById('balance-amount').value);
+    if (isNaN(amount) || amount <= 0) {
+        alert('Please enter a valid positive amount.');
+        return;
+    }
+    
+    // Adjust based on operation
+    if (operation === 'subtract') {
+        amount = -amount;
+    }
+    
     try {
         const res = await fetch('/api/admin/balance', {
             method: 'POST',

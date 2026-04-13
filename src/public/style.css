@@ -608,13 +608,86 @@ body.loading {
 
 .user-container:hover {
     background: rgba(255, 255, 255, 0.03);
-    border-color: rgba(255, 255, 255, 0.1);
-    transform: scale(1.015);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.08); /* Minimal border */
+    transform: scale(1.02); /* Grow slightly */
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
 }
 
 .user-container:active {
     transform: scale(0.99);
+}
+
+.modal-info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.modal-info-item {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 12px;
+    padding: 12px 8px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.modal-info-label {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.modal-info-value {
+    font-size: 0.85rem;
+    font-weight: 800;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.balance-adjust-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.adjust-btn {
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    color: white;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-plus {
+    background: linear-gradient(135deg, #10b981, #059669);
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.btn-minus {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+}
+
+.adjust-btn:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+
+.adjust-btn:active {
+    transform: scale(0.95);
 }
 
 .modal .btn-ban {
@@ -627,24 +700,6 @@ body.loading {
     background: linear-gradient(135deg, #10b981, #059669);
     border: 1px solid rgba(16, 185, 129, 0.4);
     box-shadow: 0 8px 25px rgba(16, 185, 129, 0.25);
-}
-
-.modal-group {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 15px;
-    border-radius: 16px;
-    margin-bottom: 20px;
-}
-
-.modal-label {
-    display: block;
-    font-size: 0.72rem;
-    color: var(--text-muted);
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 12px;
 }
 
 .user-card-index {
