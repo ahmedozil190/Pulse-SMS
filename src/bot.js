@@ -19,49 +19,68 @@ bot.use(session());
  * Helper to ensure user exists in Database
  */
 async function getOrCreateUser(ctx, referrerTelegramId = null) {
-  const telegramId = ctx.from.id.toString();
-  let user = await prisma.user.findUnique({ where: { telegramId } });
-  if (!user) {
-    let referredById = null;
-    if (referrerTelegramId && referrerTelegramId !== telegramId) {
-      const referrerUser = await prisma.user.findUnique({ where: { telegramId: referrerTelegramId } });
-      if (referrerUser) {
-        referredById = referrerUser.id;
+  try {
+    const telegramId = ctx.from.id.toString();
+    ctx.session = ctx.session || {};
+    
+    let user = await prisma.user.findUnique({ where: { telegramId } });
+    if (!user) {
+      let referredById = null;
+      if (referrerTelegramId && referrerTelegramId !== telegramId) {
+        const referrerUser = await prisma.user.findUnique({ where: { telegramId: referrerTelegramId } });
+        if (referrerUser) {
+          referredById = referrerUser.id;
+        }
       }
-    }
 
-    user = await prisma.user.create({
-      data: {
-        telegramId,
-        username: ctx.from.username || null,
-        firstName: ctx.from.first_name || null,
-        balance: 0.0,
-        referredById
-      }
-    });
+      user = await prisma.user.create({
+        data: {
+          telegramId,
+          username: ctx.from.username || null,
+          firstName: ctx.from.first_name || null,
+          balance: 0.0,
+          referredById
+        }
+      });
+    }
+    return user;
+  } catch (error) {
+    console.error('[DATABASE ERROR] Failed to get/create user:', error.message);
+    return null;
   }
-  return user;
 }
 
 /**
  * /start command
  */
 bot.command('start', async (ctx) => {
-  const args = ctx.message.text.split(' ');
-  let referrerTelegramId = null;
-  if (args.length > 1 && args[1].startsWith('ref_')) {
-    referrerTelegramId = args[1].replace('ref_', '');
-  }
-  await getOrCreateUser(ctx, referrerTelegramId);
-  const startMessage = `
+  try {
+    const args = (ctx.message.text || "").split(' ');
+    let referrerTelegramId = null;
+    if (args.length > 1 && args[1].startsWith('ref_')) {
+      referrerTelegramId = args[1].replace('ref_', '');
+    }
+    
+    const user = await getOrCreateUser(ctx, referrerTelegramId);
+    if (!user) {
+      return ctx.reply("⚠️ Sorry, there is a technical issue with the database setup. Please try again in 1 minute.");
+    }
+
+    const startMessage = `
 🔰 *Welcome to International Numbers Store* 🔰
 
 *Pulse SMS 🩸 👋*
 
 *Choose the appropriate option from the menu:*
-  `;
-  
-  await ctx.replyWithMarkdown(startMessage, keyboards.mainMenu);
+    `;
+    
+    await ctx.reply(startMessage, {
+      parse_mode: 'Markdown',
+      reply_markup: keyboards.mainMenu.reply_markup
+    });
+  } catch (err) {
+    console.error('[START COMMAND ERROR]', err);
+  }
 });
 
 /**
