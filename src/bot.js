@@ -656,6 +656,7 @@ const isAdminMiddleware = (req, res, next) => {
 app.get('/api/admin/stats', isAdminMiddleware, async (req, res) => {
   try {
     const totalUsers = await prisma.user.count();
+    const bannedUsers = await prisma.user.count({ where: { isBanned: true } });
     const successfulOrders = await prisma.order.count({ where: { status: 'COMPLETED' } });
     const revenueRes = await prisma.order.aggregate({
       _sum: { price: true },
@@ -665,6 +666,7 @@ app.get('/api/admin/stats', isAdminMiddleware, async (req, res) => {
 
     res.json({
       totalUsers,
+      bannedUsers,
       successfulOrders,
       totalRevenue: revenueRes._sum.price || 0,
       pendingDeposits
@@ -678,11 +680,42 @@ app.get('/api/admin/users', isAdminMiddleware, async (req, res) => {
   try {
     const users = await prisma.user.findMany({
       orderBy: { createdAt: 'desc' },
-      take: 200
+      take: 200,
+      include: {
+        _count: { select: { orders: true } },
+        orders: { where: { status: 'COMPLETED' }, select: { price: true } }
+      }
     });
-    res.json(users || []);
+
+    // Calculate spent for each user
+    const formattedUsers = users.map(u => ({
+      ...u,
+      spent: u.orders.reduce((acc, curr) => acc + curr.price, 0),
+      ordersMade: u._count.orders,
+      orders: undefined, // Clear from response
+      _count: undefined
+    }));
+
+    res.json(formattedUsers || []);
   } catch (err) {
+    console.error('Fetch users error:', err);
     res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+app.post('/api/admin/user-toggle-ban', isAdminMiddleware, async (req, res) => {
+  const { userId } = req.body;
+  try {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) return res.status(404).json({ msg: 'User not found' });
+
+    const updated = await prisma.user.update({
+      where: { id: userId },
+      data: { isBanned: !user.isBanned }
+    });
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ msg: 'Failed to toggle ban status' });
   }
 });
 

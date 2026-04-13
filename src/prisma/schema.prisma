@@ -17,6 +17,7 @@ model User {
   referredById    Int?
   referredBy      User?     @relation("Referrals", fields: [referredById], references: [id])
   referrals       User[]    @relation("Referrals")
+  isBanned    Boolean   @default(false)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   orders          Order[]
