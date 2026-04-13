@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pulse SMS - Admin Dashboard</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="loading">
+    <div id="loader">
+        <div class="spinner"></div>
+    </div>
+
+    <div id="app" style="display: none;">
+        <header>
+            <div class="header-content">
+                <div class="logo">
+                    <span class="pulse-icon">🩸</span>
+                    <h1>Pulse Admin</h1>
+                </div>
+                <div id="admin-info">
+                    <span id="admin-name">Admin</span>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-info">
+                        <span class="stat-label">Total Users</span>
+                        <h2 id="total-users">0</h2>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🛒</div>
+                    <div class="stat-info">
+                        <span class="stat-label">Successful Sales</span>
+                        <h2 id="total-sales">0</h2>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-info">
+                        <span class="stat-label">Total Revenue</span>
+                        <h2 id="total-revenue">0.00$</h2>
+                    </div>
+                </div>
+            </section>
+
+            <section class="user-management">
+                <div class="section-header">
+                    <h2>User Management</h2>
+                    <div class="search-box">
+                        <input type="text" id="user-search" placeholder="Search by ID or Username...">
+                    </div>
+                </div>
+                
+                <div class="user-list-container">
+                    <table id="user-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Balance</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="user-list-body">
+                            <!-- Users will be injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal for adding balance -->
+    <div id="balance-modal" class="modal">
+        <div class="modal-content">
+            <h3>Update Balance</h3>
+            <p id="target-user-display"></p>
+            <input type="number" id="balance-amount" step="0.01" placeholder="Enter amount (e.g. 5.00)">
+            <div class="modal-buttons">
+                <button id="cancel-btn" class="secondary-btn">Cancel</button>
+                <button id="confirm-balance-btn" class="primary-btn">Update</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

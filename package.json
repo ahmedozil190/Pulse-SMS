@@ -1,0 +1,21 @@
+{
+  "name": "pulse-sms-bot",
+  "version": "1.0.0",
+  "description": "Telegram bot for selling virtual numbers using Durian RCS API",
+  "main": "src/bot.js",
+  "scripts": {
+    "start": "node src/bot.js",
+    "dev": "node src/bot.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.0.0",
+    "axios": "^1.6.0",
+    "cors": "^2.8.6",
+    "dotenv": "^16.3.1",
+    "express": "^5.2.1",
+    "telegraf": "^4.15.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.0.0"
+  }
+}

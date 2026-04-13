@@ -1,0 +1,49 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id          Int       @id @default(autoincrement())
+  telegramId  String    @unique
+  username    String?
+  firstName   String?
+  balance         Float     @default(0.0)
+  referralBalance Float     @default(0.0)
+  referredById    Int?
+  referredBy      User?     @relation("Referrals", fields: [referredById], references: [id])
+  referrals       User[]    @relation("Referrals")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  orders          Order[]
+  deposits        Deposit[]
+}
+
+model Order {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  serviceId   String   // The pid (Project ID from Durian)
+  countryId   String   // The cuy (Country Code from Durian)
+  phoneNumber String
+  price       Float    // How much the user was charged
+  status      String   @default("PENDING") // PENDING, COMPLETED, CANCELLED
+  smsCode     String?  // The received SMS code
+  serial      String?  // Durian serial (1 or 2)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Deposit {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  amount      Float
+  method      String   // e.g. 'MANUAL', 'CRYPTO'
+  status      String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  createdAt   DateTime @default(now())
+}
