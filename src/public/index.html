@@ -218,20 +218,20 @@
                 <div class="close-circle" onclick="closeModal()"><i class="fas fa-times"></i></div>
             </div>
             
-            <p id="target-user-display" style="color:var(--text-secondary); font-size:0.9rem; font-weight:700; margin-bottom:20px;"></p>
+            <p id="target-user-display" style="color:var(--text-secondary); font-size:0.95rem; font-weight:800; margin-bottom:25px; text-center: center"></p>
             
             <!-- Balance Section -->
-            <div style="margin-bottom: 25px;">
-                <label style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Update Balance</label>
-                <input type="number" id="balance-amount" step="0.01" placeholder="Amount to add/subtract">
-                <button class="btn-confirm" style="width:100%" id="confirm-balance-btn" onclick="performBalanceUpdate()">Update Balance</button>
+            <div class="modal-group">
+                <label class="modal-label">Financial Management</label>
+                <input type="number" id="balance-amount" step="0.01" placeholder="Amount (e.g. 5.00 or -5.00)" style="margin-top:0">
+                <button class="btn-confirm" style="width:100%; margin-top:5px" id="confirm-balance-btn" onclick="performBalanceUpdate()">
+                    <i class="fas fa-wallet"></i> Update Balance
+                </button>
             </div>
 
-            <div style="height: 1px; background: rgba(255,255,255,0.05); margin: 20px 0;"></div>
-
             <!-- Status Section -->
-            <div>
-                <label style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; display: block; margin-bottom: 10px;">Account Status</label>
+            <div class="modal-group" style="margin-bottom: 10px;">
+                <label class="modal-label">Security & Status</label>
                 <button id="modal-ban-btn" class="gradient-btn" onclick="performToggleBanFromModal()" style="width: 100%;">
                     <!-- Text/Icon set via JS -->
                 </button>
