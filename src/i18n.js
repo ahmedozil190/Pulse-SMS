@@ -91,12 +91,12 @@ const buttons = {
     invite: "🗽 دعوه صديقك"
   },
   fa: {
-    buy_number: "خرید شماره 🛒",
-    my_balance: "موجودی من 💰",
-    deposit: "شارژ حساب 💳",
-    my_stats: "آمار من 📊",
-    notifications: "تنظیمات هشدارها ⚙️",
-    invite: "ادعُ أصدقاءك 🗽"
+    buy_number: "🛒 خرید شماره",
+    my_balance: "💰 موجودی من",
+    deposit: "💳 شارژ حساب",
+    my_stats: "📊 آمار من",
+    notifications: "⚙️ تنظیمات هشدارها",
+    invite: "🗽 ادعُ أصدقاءك"
   },
   bn: {
     buy_number: "🛒 নম্বর কিনুন",
