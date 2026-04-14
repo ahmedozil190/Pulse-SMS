@@ -178,7 +178,7 @@ bot.command('lang', (ctx) => {
       await ctx.answerCbQuery(ctx.t('lang_set_success', { lang: langNames[lang] || lang }));
       
       // Send fresh start message in new language
-      const msg = ctx.t('welcome_user', { name: escapeHTML(ctx.from.first_name || 'User') });
+      const msg = ctx.t('welcome_bot');
       await ctx.reply(msg, {
         parse_mode: 'HTML',
         reply_markup: keyboards.mainMenu(lang).reply_markup
