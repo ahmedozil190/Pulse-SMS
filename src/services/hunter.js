@@ -3,6 +3,7 @@ const durianApi = require('../api/durian');
 class HunterService {
   constructor() {
     this.liveDistribution = {};
+    this.freshArrivals = {}; // { code: expiryTimestamp }
     this.lastUpdated = null;
     this.interval = null;
     this.pid = '0257'; // Telegram Project ID
@@ -26,33 +27,36 @@ class HunterService {
   }
 
   /**
-   * Stop the poller
-   */
-  stop() {
-    if (this.interval) {
-      clearInterval(this.interval);
-      this.interval = null;
-    }
-  }
-
-  /**
-   * Fetch current stock from API
+   * Fetch current stock from API and detect fresh arrivals
    */
   async poll() {
     try {
       const response = await durianApi.getCountryDistribution(this.pid);
       if (response.code === 200 && response.data) {
-        // Filter out zero stock immediately to keep the 'Live' state clean
-        const newData = {};
-        Object.keys(response.data).forEach(code => {
-          if (response.data[code] > 0) {
-            newData[code] = response.data[code];
+        const newData = response.data;
+        const oldData = this.liveDistribution;
+        const now = Date.now();
+
+        // Detect stock increases (Fresh Arrivals)
+        Object.keys(newData).forEach(code => {
+          const newStock = newData[code];
+          const oldStock = oldData[code] || 0;
+
+          // If stock increased and it's not a huge jump (avoid initial load noise)
+          if (newStock > oldStock && Object.keys(oldData).length > 0) {
+            this.freshArrivals[code] = now + (2 * 60 * 1000); // Mark as fresh for 2 minutes
           }
         });
-        
+
+        // Cleanup expired fresh arrivals
+        Object.keys(this.freshArrivals).forEach(code => {
+          if (this.freshArrivals[code] < now) {
+            delete this.freshArrivals[code];
+          }
+        });
+
         this.liveDistribution = newData;
         this.lastUpdated = new Date();
-        // console.log(`[Hunter] Live distribution updated. Found ${Object.keys(newData).length} active countries.`);
       }
     } catch (error) {
       console.error('[Hunter] Polling error:', error.message);
@@ -64,6 +68,13 @@ class HunterService {
    */
   getLiveDistribution() {
     return this.liveDistribution;
+  }
+
+  /**
+   * Check if a country has fresh arrivals (FIRE icon)
+   */
+  isFresh(code) {
+    return !!this.freshArrivals[code];
   }
 }
 

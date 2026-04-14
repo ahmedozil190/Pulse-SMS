@@ -1,6 +1,7 @@
 const { Markup } = require('telegraf');
 const durianApi = require('./api/durian');
 const i18n = require('./i18n');
+const hunter = require('./services/hunter');
 
 const keyboards = {
   mainMenu: (lang) => Markup.inlineKeyboard([
@@ -32,20 +33,33 @@ const keyboards = {
   ]),
 
   /**
-   * Generates a dynamic keyboard for countries
+   * Generates a dynamic keyboard for countries (Elite Hunting Style)
    * @param {Object} distribution - Data returned from API { code: stock }
    */
   buildCountryKeyboard: (distribution, lang) => {
     const buttons = [];
+    
+    // 1. Filter for 'Real-time' Low Stock (1-25) to match professional hunting bots
     const codes = Object.keys(distribution)
-      .filter(c => c !== "" && distribution[c] > 0)
-      .sort((a, b) => distribution[b] - distribution[a])
-      .slice(0, 50); 
+      .filter(c => c !== "" && distribution[c] > 0 && distribution[c] <= 25)
+      .sort((a, b) => {
+        // 2. Sort Logic: Fresh Arrivals (🔥) first, then by highest stock
+        const aFresh = hunter.isFresh(a) ? 1 : 0;
+        const bFresh = hunter.isFresh(b) ? 1 : 0;
+        if (aFresh !== bFresh) return bFresh - aFresh;
+        return distribution[b] - distribution[a];
+      })
+      .slice(0, 50);
 
     codes.forEach(code => {
       const info = durianApi.getCountryInfo(code);
       const stock = distribution[code];
-      const label = `${info.flag} ${info.name} (${stock})`;
+      const isFresh = hunter.isFresh(code);
+      
+      // 3. Match Competitor Label: Flag Name (Stock) 0.25$
+      const fire = isFresh ? '🔥 ' : '';
+      const label = `${fire}${info.flag} ${info.name} (${stock}) 0.25$`;
+      
       buttons.push(Markup.button.callback(label, `select_country_${code}`));
     });
 
@@ -54,6 +68,7 @@ const keyboards = {
       rows.push(buttons.slice(i, i + 2));
     }
 
+    // Add navigation buttons
     rows.push([Markup.button.callback(i18n.t(lang, 'refresh_btn'), 'action_refresh_countries')]);
     rows.push([Markup.button.callback(i18n.t(lang, 'back_btn'), 'action_main_menu')]);
 

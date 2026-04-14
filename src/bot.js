@@ -408,6 +408,11 @@ async function showCountrySelection(ctx, isRefresh = false) {
       reply_markup: keyboards.buildCountryKeyboard(liveDist, ctx.state.lang).reply_markup
     });
   } catch (error) {
+    // Ignore "message is not modified" error which happens on rapid refresh
+    if (error.description && error.description.includes('message is not modified')) {
+      return ctx.answerCbQuery(ctx.t('refresh_btn') + ': ' + ctx.t('stats_header').split('\n')[0].replace('📊 ', '')).catch(() => {});
+    }
+
     console.error("Error loading countries:", error);
     await ctx.editMessageText(`❌ System error while loading countries.`, {
       reply_markup: keyboards.backToMain(ctx.state.lang).reply_markup
