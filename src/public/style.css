@@ -636,49 +636,54 @@ body.loading {
 
 .balance-adjust-row {
     display: flex;
-    gap: 10px;
+    gap: 12px;
     align-items: center;
-    background: rgba(0, 0, 0, 0.1);
-    padding: 8px;
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.02);
+    padding: 6px;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .balance-adjust-row input {
     flex: 1;
+    min-width: 0; /* Prevents overflow */
     background: transparent;
     border: none;
-    padding: 10px 15px;
+    padding: 12px 15px;
     font-weight: 800;
     color: white;
+    font-size: 1rem;
 }
 
-.balance-adjust-row input:focus {
-    box-shadow: none;
+.adjust-actions {
+    display: flex;
+    gap: 8px;
+    padding-right: 6px;
 }
 
 .adjust-btn {
-    width: 45px;
-    height: 45px;
-    border-radius: 12px;
+    width: 40px;
+    height: 40px;
+    border-radius: 14px;
     border: none;
     cursor: pointer;
-    font-size: 1.1rem;
+    font-size: 1rem;
     color: white;
-    transition: 0.2s;
+    transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .btn-plus {
     background: linear-gradient(135deg, #10b981, #059669);
-    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
 }
 
 .btn-minus {
     background: linear-gradient(135deg, #ef4444, #dc2626);
-    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
 }
 
 .adjust-btn:hover {

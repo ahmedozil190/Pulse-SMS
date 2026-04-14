@@ -213,11 +213,6 @@
     <!-- User Management Modal -->
     <div id="user-modal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3>Manage User</h3>
-                <div class="close-circle" onclick="closeModal()"><i class="fas fa-times"></i></div>
-            </div>
-            
             <!-- Info Header (Vertical, No Labels) -->
             <div class="user-info-stack">
                 <div class="modal-info-item-v2 color-yellow" id="modal-user-name">-</div>
@@ -229,22 +224,29 @@
             <div class="modal-group">
                 <label class="modal-label">Adjust Balance</label>
                 <div class="balance-adjust-row">
-                    <input type="number" id="balance-amount" step="0.01" placeholder="Enter amount..." style="margin-top:0">
-                    <button class="adjust-btn btn-plus" onclick="performBalanceUpdate('add')" title="Add to balance">
-                        <i class="fas fa-plus"></i>
-                    </button>
-                    <button class="adjust-btn btn-minus" onclick="performBalanceUpdate('subtract')" title="Remove from balance">
-                        <i class="fas fa-minus"></i>
-                    </button>
+                    <input type="number" id="balance-amount" step="0.01" placeholder="Enter amount...">
+                    <div class="adjust-actions">
+                        <button class="adjust-btn btn-plus" onclick="performBalanceUpdate('add')" title="Add to balance">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <button class="adjust-btn btn-minus" onclick="performBalanceUpdate('subtract')" title="Remove from balance">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <!-- Status Section -->
-            <div class="modal-group" style="padding: 0; background: transparent; border: none; margin-bottom: 5px;">
+            <div class="modal-group" style="padding: 0; background: transparent; border: none; margin-bottom: 15px;">
                 <button id="modal-ban-btn" class="gradient-btn" onclick="performToggleBanFromModal()" style="width: 100%;">
                     <!-- Text/Icon set via JS -->
                 </button>
             </div>
+
+            <!-- Close Action -->
+            <button class="gradient-btn btn-close-modal" onclick="closeModal()" style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); box-shadow: none;">
+                <i class="fas fa-times"></i> Close Window
+            </button>
         </div>
     </div>
 
