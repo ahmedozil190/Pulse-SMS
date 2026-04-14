@@ -136,7 +136,8 @@
                     </div>
 
                     <!-- Find Button -->
-                    <button onclick="triggerSearch('user')" class="gradient-btn" id="btn-find-users"
+                    </div>
+                    <button class="gradient-btn" onclick="triggerSearch('user')" id="btn-find-users"
                         style="width: 100%; padding: 15px; background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); border: none; border-radius: 14px; color: #fff; font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 15px rgba(96, 165, 250, 0.2); margin-bottom: 12px;">
                         <i class="fas fa-search"></i> Find
                     </button>
@@ -230,21 +231,17 @@
 
             <!-- Countries List -->
             <main id="page-countries" class="page">
-                <!-- Country Stats -->
-                <div class="user-stats-row">
-                    <div class="info-card">
-                        <span class="info-label">TOTAL COUNTRIES</span>
+                <!-- Country Stats Section -->
+                <div class="user-stats-row" style="display: flex; gap: 10px; margin-bottom: 20px;">
+                    <div class="info-card" style="flex: 1; margin: 0;">
+                        <span class="info-label">TOTAL</span>
                         <span class="info-value color-blue" id="country-stat-total">0</span>
                     </div>
-                </div>
-                <div class="user-stats-row">
-                    <div class="info-card">
+                    <div class="info-card" style="flex: 1; margin: 0;">
                         <span class="info-label">ACTIVE</span>
                         <span class="info-value color-green" id="country-stat-active">0</span>
                     </div>
-                </div>
-                <div class="user-stats-row">
-                    <div class="info-card">
+                    <div class="info-card" style="flex: 1; margin: 0;">
                         <span class="info-label">INACTIVE</span>
                         <span class="info-value color-red" id="country-stat-inactive">0</span>
                     </div>
@@ -255,24 +252,19 @@
                     style="padding: 18px; margin-top: -2px; margin-bottom: 25px; background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 20px;">
                     <!-- Search Input -->
                     <div class="search-box-v2" style="margin-bottom: 14px; margin-top: 0;">
-                        <style>
-                            #country-search-v2::placeholder {
-                                color: var(--text-secondary) !important;
-                                opacity: 0.7;
-                            }
-                        </style>
                         <input type="text" id="country-search-v2" placeholder="Search countries..."
                             style="width: 100%; padding: 14px; background: #0f1116; border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 12px; color: #fff; font-size: 0.95rem; outline: none; transition: 0.3s; margin-bottom: 2px;">
                     </div>
 
-                    <!-- Find Button (Optional trigger if user clicks find) -->
-                    <button onclick="renderCountries()" class="gradient-btn" id="btn-find-countries"
+                    <!-- Find Button -->
+                    <button onclick="triggerSearch('country')" class="gradient-btn" id="btn-find-countries"
                         style="width: 100%; padding: 15px; background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); border: none; border-radius: 14px; color: #fff; font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 15px rgba(96, 165, 250, 0.2); margin-bottom: 12px;">
                         <i class="fas fa-search"></i> Find
                     </button>
                     
+                    <!-- Reset Search Button -->
                     <div id="reset-country-search-container" style="display: none;">
-                        <button onclick="document.getElementById('country-search-v2').value=''; countrySearchQuery=''; renderCountries();" class="tab-btn"
+                        <button onclick="resetSearch('country')" class="tab-btn"
                             style="width: 100%; padding: 15px; background: #1a1d24 !important; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; color: #94a3b8; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: 0.3s; margin-bottom: 20px;">
                             Reset
                         </button>
@@ -282,6 +274,7 @@
                 <div class="glass-container" style="margin-top: 25px;" id="country-management-section">
                     <div class="section-title" style="margin-top:0">Country Configuration</div>
                     <div id="countries-list" class="data-list"></div>
+                    <div id="country-pagination" class="pagination-container"></div>
                 </div>
             </main>
 
@@ -295,6 +288,48 @@
                     </div>
                 </div>
             </main>
+        </div>
+    </div>
+
+    <!-- Country Management Modal -->
+    <div id="country-modal" class="modal">
+        <div class="modal-content">
+            <!-- Info Header -->
+            <div class="user-info-stack">
+                <div class="modal-info-item-v2 color-yellow" id="modal-country-name">-</div>
+                <div class="modal-info-item-v2 color-blue-tint" id="modal-country-code">-</div>
+                <div class="modal-info-item-v2 color-green" id="modal-country-stock">Stock: 0</div>
+            </div>
+
+            <!-- Price Adjustment Section -->
+            <div class="modal-group">
+                <label class="input-label" style="display:flex; justify-content:space-between;">
+                    <span>Custom Price ($)</span>
+                </label>
+                <div class="flex" style="gap: 15px; flex-direction: column;">
+                    <div class="search-box-v2" style="margin: 0; position: relative;">
+                        <input type="number" id="country-price-input" step="0.01" min="0" placeholder="e.g. 0.25"
+                            style="width: 100%; border:none; outline:none; background:transparent; color:#fff; font-size:1rem; padding:15px; padding-left:30px;">
+                        <span style="position: absolute; left: 15px; top: 15px; color: #94a3b8;">$</span>
+                    </div>
+                    <button class="gradient-btn" style="width:100%" onclick="saveCountryPrice()">
+                        <i class="fas fa-save"></i> Save Price
+                    </button>
+                </div>
+            </div>
+
+            <!-- Status Section -->
+            <div class="modal-group modal-status-group">
+                <button id="modal-country-toggle-btn" class="gradient-btn" onclick="toggleCountryVisibility()"
+                    style="width: 100%;">
+                    <!-- Text set via JS -->
+                </button>
+            </div>
+
+            <!-- Close Action -->
+            <button class="btn-close-modal" onclick="closeCountryModal()">
+                Close
+            </button>
         </div>
     </div>
 

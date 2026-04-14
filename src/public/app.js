@@ -20,6 +20,12 @@ let countrySearchQuery = '';
 let currentUserPage = 1;
 const usersPerPage = 5;
 
+let currentCountryPage = 1;
+const countriesPerPage = 10;
+
+let currentEditingCountryCode = null;
+let currentEditingCountryEnabled = false;
+
 // INIT
 async function init() {
     try {
@@ -36,7 +42,10 @@ async function init() {
         if (depositSearch) depositSearch.addEventListener('input', (e) => { depositSearchQuery = e.target.value; applyDepositFilters(); });
 
         const countrySearch = document.getElementById('country-search-v2');
-        if (countrySearch) countrySearch.addEventListener('input', (e) => { countrySearchQuery = e.target.value; renderCountries(); });
+        if (countrySearch) {
+            // Only update query, don't trigger render automatically
+            countrySearch.addEventListener('input', (e) => { countrySearchQuery = e.target.value; });
+        }
 
         // Restore previous page if exists
         const lastPage = sessionStorage.getItem('admin_last_page');
@@ -164,6 +173,13 @@ window.triggerSearch = (type) => {
         
         currentUserPage = 1; // Reset to page 1 on new search
         applyUserFilters();
+    } else if (type === 'country') {
+        countrySearchQuery = document.getElementById('country-search-v2').value;
+        const resetBtn = document.getElementById('reset-country-search-container');
+        if (resetBtn) resetBtn.style.display = countrySearchQuery.trim() ? 'block' : 'none';
+        
+        currentCountryPage = 1;
+        renderCountries();
     } else if (type === 'order') {
         orderSearchQuery = document.getElementById('order-search-v2').value;
         applyOrderFilters();
@@ -183,6 +199,15 @@ window.resetSearch = (type) => {
         
         currentUserPage = 1;
         applyUserFilters();
+    } else if (type === 'country') {
+        const input = document.getElementById('country-search-v2');
+        if (input) input.value = '';
+        countrySearchQuery = '';
+        const resetBtn = document.getElementById('reset-country-search-container');
+        if (resetBtn) resetBtn.style.display = 'none';
+        
+        currentCountryPage = 1;
+        renderCountries();
     }
 };
 
@@ -237,9 +262,6 @@ function renderUsersList(users) {
         return;
     }
 
-    const totalPages = Math.ceil(users.length / usersPerPage);
-    if (currentUserPage > totalPages) currentUserPage = totalPages || 1;
-
     const start = (currentUserPage - 1) * usersPerPage;
     const paginated = users.slice(start, start + usersPerPage);
 
@@ -274,14 +296,21 @@ function renderUsersList(users) {
         </div>
     `}).join('');
 
-    renderUserPagination(users.length);
+    renderPagination(
+        Math.ceil(users.length / usersPerPage),
+        currentUserPage,
+        (newPage) => {
+            currentUserPage = newPage;
+            const target = document.getElementById('user-management-section');
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            renderUsersList(users);
+        },
+        document.getElementById('user-pagination')
+    );
 }
 
-function renderUserPagination(totalCount) {
-    const container = document.getElementById('user-pagination');
-    if (!container) return; // Safety check
-    
-    const totalPages = Math.ceil(totalCount / usersPerPage);
+function renderPagination(totalPages, currentPage, onPageChange, container) {
+    if (!container) return;
     
     if (totalPages <= 1) {
         container.innerHTML = '';
@@ -289,14 +318,18 @@ function renderUserPagination(totalCount) {
     }
 
     container.innerHTML = `
-        <button class="pagination-btn" ${currentUserPage === 1 ? 'disabled' : ''} onclick="changeUserPage(-1)">
+        <button class="pagination-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="window.paginationCallback(${currentPage - 1})">
             <i class="fas fa-chevron-left"></i>
         </button>
-        <div class="pagination-text">Page ${currentUserPage} of ${totalPages}</div>
-        <button class="pagination-btn" ${currentUserPage === totalPages ? 'disabled' : ''} onclick="changeUserPage(1)">
+        <div class="pagination-text">Page ${currentPage} of ${totalPages}</div>
+        <button class="pagination-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="window.paginationCallback(${currentPage + 1})">
             <i class="fas fa-chevron-right"></i>
         </button>
     `;
+    
+    window.paginationCallback = (page) => {
+        onPageChange(page);
+    };
 }
 
 window.changeUserPage = (delta) => {
@@ -410,11 +443,9 @@ function renderDepositsList(deposits) {
 // --- COUNTRIES LOGIC ---
 window.renderCountries = () => {
     const list = document.getElementById('countries-list');
+    const paginationContainer = document.getElementById('country-pagination');
     if (!list) return;
     
-    // Convert back to standard list display
-    list.style.display = 'block';
-    list.style.padding = '0';
     list.innerHTML = '';
 
     const query = (countrySearchQuery || '').toLowerCase();
@@ -425,19 +456,30 @@ window.renderCountries = () => {
 
     if (filtered.length === 0) {
         list.innerHTML = `<div class="empty-state">No countries found</div>`;
+        if (paginationContainer) paginationContainer.innerHTML = '';
         return;
     }
 
-    filtered.forEach((c, index) => {
-        const isLive = c.stock > 0;
+    const totalPages = Math.ceil(filtered.length / countriesPerPage);
+    if (currentCountryPage > totalPages) currentCountryPage = totalPages || 1;
+
+    const start = (currentCountryPage - 1) * countriesPerPage;
+    const paginated = filtered.slice(start, start + countriesPerPage);
+
+    list.innerHTML = paginated.map((c, index) => {
+        const globalIndex = start + index + 1;
+        const isLive = (c.stock || 0) > 0;
+        const safeName = escapeHtml(c.name).replace(/'/g, "\\'");
         
-        list.innerHTML += `
-        <div class="user-container">
-            <div class="user-card-index">${index + 1}</div>
+        return `
+        <div class="user-container" style="cursor: pointer;" onclick="openCountryModal('${c.code}', '${safeName}', ${c.stock || 0}, ${c.isEnabled}, ${c.price})">
+            <div class="user-card-index">${globalIndex}</div>
             
             <div class="user-row">
                 <span class="user-row-label">Status</span>
-                <span class="user-row-value ${c.isEnabled ? 'color-green' : 'color-red'}">${c.isEnabled ? 'ACTIVE' : 'INACTIVE'}</span>
+                <span class="user-row-value ${c.isEnabled ? 'color-green' : 'color-red'}">
+                    ${c.isEnabled ? '<i class="fas fa-check"></i> ACTIVE' : 'INACTIVE'}
+                </span>
             </div>
             
             <div class="user-row">
@@ -449,60 +491,102 @@ window.renderCountries = () => {
                 <span class="user-row-label">Code</span>
                 <span class="user-row-value color-blue-tint">${c.code.toUpperCase()}</span>
             </div>
-            
+
             <div class="user-row">
                 <span class="user-row-label">Avail</span>
-                <span class="user-row-value" style="font-weight: 700; color: ${isLive ? '#30d158' : '#A0A0A5'}">${c.stock || 0}</span>
+                <span class="user-row-value" style="font-weight: 700; color: ${isLive ? '#30d158' : '#64748b'}">
+                    ${c.stock || 0}
+                </span>
             </div>
-
-            <div class="data-card-actions" style="margin-top:15px; border-top:1px solid rgba(255,255,255,0.05); padding-top:15px; display:flex; gap:10px; align-items:center;">
-                <!-- Price Input -->
-                <div style="position: relative; flex: 1;">
-                    <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #8e8e93; font-size: 13px; font-weight: 600;">$</span>
-                    <input type="number" step="0.01" min="0" value="${c.price}" 
-                           onchange="updateCountryConfig('${c.code}', 'price', this.value)"
-                           style="width: 100%; box-sizing: border-box; background: #1c1c1e; border: 1px solid #3a3a3c; color: white; border-radius: 8px; padding: 10px 10px 10px 24px; font-size: 14px; font-weight: 600; outline: none;">
-                </div>
-                
-                <!-- Toggle Button -->
-                <button class="gradient-btn" onclick="updateCountryConfig('${c.code}', 'isEnabled', ${!c.isEnabled})"
-                        style="flex: 1; padding: 10px; background: ${c.isEnabled ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)'}; border: 1px solid ${c.isEnabled ? '#ef4444' : '#10b981'}; color: ${c.isEnabled ? '#ef4444' : '#10b981'}; box-shadow: none;">
-                    ${c.isEnabled ? 'Hide' : 'Show'}
-                </button>
+            
+            <div class="user-row">
+                <span class="user-row-label">Price</span>
+                <span class="user-row-value color-orange">$${parseFloat(c.price || 0).toFixed(2)}</span>
             </div>
         </div>
         `;
-    });
+    }).join('');
+
+    renderPagination(
+        totalPages,
+        currentCountryPage,
+        (newPage) => {
+            currentCountryPage = newPage;
+            const target = document.getElementById('country-management-section');
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            renderCountries();
+        },
+        paginationContainer
+    );
 };
 
-window.updateCountryConfig = async (code, field, value) => {
-    try {
-        const payload = { code };
-        if (field === 'price') {
-            const parsed = parseFloat(value);
-            if (isNaN(parsed) || parsed < 0) return alert('Invalid price');
-            payload.price = parsed;
-        } else if (field === 'isEnabled') {
-            payload.isEnabled = value;
-        }
+window.openCountryModal = (code, name, stock, isEnabled, price) => {
+    currentEditingCountryCode = code;
+    currentEditingCountryEnabled = isEnabled;
+    
+    document.getElementById('modal-country-name').textContent = name;
+    document.getElementById('modal-country-code').textContent = code.toUpperCase();
+    document.getElementById('modal-country-stock').textContent = `Stock: ${stock}`;
+    document.getElementById('country-price-input').value = price;
+    
+    const toggleBtn = document.getElementById('modal-country-toggle-btn');
+    if (isEnabled) {
+        toggleBtn.textContent = 'Hide Country (Disable)';
+        toggleBtn.className = 'gradient-btn btn-ban';
+    } else {
+        toggleBtn.textContent = 'Show Country (Enable)';
+        toggleBtn.className = 'gradient-btn btn-unban';
+    }
 
+    document.getElementById('country-modal').classList.add('active');
+};
+
+window.closeCountryModal = () => {
+    document.getElementById('country-modal').classList.remove('active');
+    currentEditingCountryCode = null;
+};
+
+window.saveCountryPrice = async () => {
+    if (!currentEditingCountryCode) return;
+    const priceStr = document.getElementById('country-price-input').value;
+    const price = parseFloat(priceStr);
+    
+    if (isNaN(price) || price < 0) {
+        alert('Please enter a valid price.');
+        return;
+    }
+    
+    try {
         const res = await fetch('/api/admin/countries/update', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                ...getHeaders()
-            },
-            body: JSON.stringify(payload)
+            headers: { 'Content-Type': 'application/json', ...getHeaders() },
+            body: JSON.stringify({ code: currentEditingCountryCode, price })
         });
+        if (res.ok) {
+            closeCountryModal();
+            webapp.HapticFeedback.notificationOccurred('success');
+            await refreshData();
+        } else {
+            alert('Failed to update country price.');
+        }
+    } catch (err) { console.error(err); }
+};
 
-        if (!res.ok) throw new Error('Failed to update config');
-        
-        webapp.HapticFeedback.notificationOccurred('success');
-        await refreshData();
-    } catch (err) {
-        webapp.HapticFeedback.notificationOccurred('error');
-        alert('Update failed. Please try again.');
-    }
+window.toggleCountryVisibility = async () => {
+    if (!currentEditingCountryCode) return;
+    try {
+        const newStatus = !currentEditingCountryEnabled;
+        const res = await fetch('/api/admin/countries/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...getHeaders() },
+            body: JSON.stringify({ code: currentEditingCountryCode, isEnabled: newStatus })
+        });
+        if (res.ok) {
+            closeCountryModal();
+            webapp.HapticFeedback.notificationOccurred('success');
+            await refreshData();
+        }
+    } catch (err) { console.error(err); }
 };
 
 // HANDLERS
