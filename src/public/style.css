@@ -610,7 +610,7 @@ body.loading {
     background: rgba(255, 255, 255, 0.03);
     border-color: rgba(255, 255, 255, 0.08); /* Minimal border */
     transform: scale(1.02); /* Grow slightly */
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+    box-shadow: none; /* Removed shadow as requested */
 }
 
 .user-container:active {
@@ -826,4 +826,4 @@ input[type=number] {
     .info-value {
         font-size: 1.5rem;
     }
-}
+}$paginationStyles

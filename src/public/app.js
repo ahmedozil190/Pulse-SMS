@@ -9,10 +9,11 @@ let allDeposits = [];
 let currentEditingUserId = null;
 let currentOrderFilter = 'ALL';
 let currentDepositFilter = 'ALL';
-let currentUserFilter = 'active'; // 'active' or 'banned'
-let userSearchQuery = '';
-let orderSearchQuery = '';
 let depositSearchQuery = '';
+
+// Pagination State
+let currentUserPage = 1;
+const usersPerPage = 5;
 
 // INIT
 async function init() {
@@ -157,6 +158,7 @@ function applyUserFilters() {
             return tid.includes(q) || uname.includes(q) || fname.includes(q);
         });
     }
+    currentUserPage = 1; // Reset to first page on filter/search change
     renderUsersList(filtered);
 }
 
@@ -182,13 +184,24 @@ function applyDepositFilters() {
 function renderUsersList(users) {
     const list = document.getElementById('users-list');
     if (!list) return;
+    
     if (!users.length) {
         list.innerHTML = `<div class="empty-state"><i class="fas fa-users-slash"></i><span>No users found</span></div>`;
+        document.getElementById('user-pagination').innerHTML = '';
         return;
     }
-    list.innerHTML = users.map((u, index) => `
+
+    const totalPages = Math.ceil(users.length / usersPerPage);
+    if (currentUserPage > totalPages) currentUserPage = totalPages || 1;
+
+    const start = (currentUserPage - 1) * usersPerPage;
+    const paginated = users.slice(start, start + usersPerPage);
+
+    list.innerHTML = paginated.map((u, index) => {
+        const globalIndex = start + index + 1;
+        return `
         <div class="user-container" onclick="openUserModal(${u.id}, '${escapeHtml(u.firstName || 'Unknown')}', '${escapeHtml(u.username || 'none')}', ${u.balance}, ${u.isBanned})">
-            <div class="user-card-index">${index + 1}</div>
+            <div class="user-card-index">${globalIndex}</div>
             <div class="user-row">
                 <span class="user-row-label">Account Status</span>
                 <span class="user-row-value ${u.isBanned ? 'color-red' : 'color-green'}">${u.isBanned ? 'BANNED' : '<i class="fas fa-check"></i> ACTIVE'}</span>
@@ -213,7 +226,56 @@ function renderUsersList(users) {
             <div class="user-row"><span class="user-row-label">Earned</span><span class="user-row-value color-green">$${(u.referralBalance || 0).toFixed(2)}</span></div>
             <div class="user-row"><span class="user-row-label">Orders Made</span><span class="user-row-value color-purple">${u.ordersMade || 0}</span></div>
         </div>
-    `).join('');
+    `}).join('');
+
+    renderUserPagination(users.length);
+}
+
+function renderUserPagination(totalCount) {
+    const container = document.getElementById('user-pagination');
+    const totalPages = Math.ceil(totalCount / usersPerPage);
+    
+    if (totalPages <= 1) {
+        container.innerHTML = '';
+        return;
+    }
+
+    container.innerHTML = `
+        <button class="pagination-btn" ${currentUserPage === 1 ? 'disabled' : ''} onclick="changeUserPage(-1)">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <div class="pagination-text">Page ${currentUserPage} of ${totalPages}</div>
+        <button class="pagination-btn" ${currentUserPage === totalPages ? 'disabled' : ''} onclick="changeUserPage(1)">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    `;
+}
+
+window.changeUserPage = (delta) => {
+    currentUserPage += delta;
+    // Re-apply filters to get the current list and re-render
+    applyUserFiltersPaginated();
+};
+
+function applyUserFiltersPaginated() {
+    // Helper to render without resetting page to 1
+    if (!allUsers) return;
+    let filtered = allUsers.filter(u => {
+        const isBanned = u.isBanned || false;
+        if (currentUserFilter === 'active') return !isBanned;
+        if (currentUserFilter === 'banned') return isBanned;
+        return true;
+    });
+    if (userSearchQuery) {
+        const q = userSearchQuery.toLowerCase();
+        filtered = filtered.filter(u => {
+            const tid = String(u.telegramId || '').toLowerCase();
+            const uname = String(u.username || '').toLowerCase();
+            const fname = String(u.firstName || '').toLowerCase();
+            return tid.includes(q) || uname.includes(q) || fname.includes(q);
+        });
+    }
+    renderUsersList(filtered);
 }
 
 function renderOrdersList(orders) {
