@@ -83,20 +83,20 @@ const buttons = {
     invite: "🗽 Invite Friend"
   },
   ar: {
-    buy_number: "شراء رقم 🛒",
-    my_balance: "رصيدي 💰",
-    deposit: "شحن الرصيد 💳",
-    my_stats: "إحصائياتي 📊",
-    notifications: "إعدادات التنبيهات ⚙️",
-    invite: "دعوه صديقك 🗽"
+    buy_number: "🛒 شراء رقم",
+    my_balance: "💰 رصيدي",
+    deposit: "💳 شحن الرصيد",
+    my_stats: "📊 إحصائياتي",
+    notifications: "⚙️ إعدادات التنبيهات",
+    invite: "🗽 دعوه صديقك"
   },
   fa: {
-    buy_number: "🛒 خرید شماره",
-    my_balance: "💰 موجودی من",
-    deposit: "💳 شارژ حساب",
-    my_stats: "📊 آمار من",
-    notifications: "⚙️ تنظیمات هشدارها",
-    invite: "🗽 ادعُ أصدقاءك"
+    buy_number: "خرید شماره 🛒",
+    my_balance: "موجودی من 💰",
+    deposit: "شارژ حساب 💳",
+    my_stats: "آمار من 📊",
+    notifications: "تنظیمات هشدارها ⚙️",
+    invite: "ادعُ أصدقاءك 🗽"
   },
   bn: {
     buy_number: "🛒 নম্বর কিনুন",
