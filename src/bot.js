@@ -407,10 +407,15 @@ async function showCountrySelection(ctx, isRefresh = false) {
       parse_mode: 'HTML',
       reply_markup: keyboards.buildCountryKeyboard(liveDist, ctx.state.lang).reply_markup
     });
+
+    // Provide a small success notification on refresh
+    if (isRefresh) {
+      await ctx.answerCbQuery("🔄 " + ctx.t('refresh_btn')).catch(() => {});
+    }
   } catch (error) {
-    // Ignore "message is not modified" error which happens on rapid refresh
+    // If message not modified, it means stock is still the same - still technically a success for the user
     if (error.description && error.description.includes('message is not modified')) {
-      return ctx.answerCbQuery(ctx.t('refresh_btn') + ': ' + ctx.t('stats_header').split('\n')[0].replace('📊 ', '')).catch(() => {});
+      return ctx.answerCbQuery("🔄 " + ctx.t('refresh_btn')).catch(() => {});
     }
 
     console.error("Error loading countries:", error);
@@ -431,7 +436,10 @@ bot.action('action_refresh_countries', async (ctx) => {
 
   if (elapsed < 3000) {
     const remaining = Math.ceil((3000 - elapsed) / 1000);
-    return ctx.answerCbQuery(`⏳ Please wait ${remaining} seconds before refreshing again`, { showAlert: true });
+    const msg = ctx.state.lang === 'ar' 
+      ? `⏳ يرجى الانتظار ${remaining} ثانية قبل التحديث مرة أخرى` 
+      : `⏳ Please wait ${remaining} seconds before refreshing again`;
+    return ctx.answerCbQuery(msg, { show_alert: true });
   }
 
   ctx.session.lastRefresh = now;
