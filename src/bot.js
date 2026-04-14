@@ -241,58 +241,67 @@ bot.action('action_deposit', async (ctx) => {
  * Handle Invite Friend
  */
 bot.action('action_invite', async (ctx) => {
-  const user = await getOrCreateUser(ctx);
-  const botInfo = await ctx.telegram.getMe();
-  const inviteLink = `https://t.me/${botInfo.username}?start=ref_${ctx.from.id}`;
-
-  const dateObj = new Date();
-  const year = dateObj.getFullYear();
-  const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-  const day = String(dateObj.getDate()).padStart(2, '0');
-  const dateStr = `${year}/${month}/${day}`;
-
-  const totalTeam = await prisma.user.count({ where: { referredById: user.id } });
-
-  const referrals = await prisma.user.findMany({ where: { referredById: user.id }, select: { id: true } });
-  const refIds = referrals.map(r => r.id);
-
-  const now = new Date();
-  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-  const startOfWeek = new Date(now);
-  startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
-  startOfWeek.setHours(0, 0, 0, 0);
-
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-
-  const allRefOrders = await prisma.order.findMany({
-    where: {
-      userId: { in: refIds },
-      status: 'COMPLETED'
-    },
-    select: { price: true, updatedAt: true }
-  });
-
-  let todayCount = 0, todayEarn = 0;
-  let weekCount = 0, weekEarn = 0;
-  let monthCount = 0, monthEarn = 0;
-
-  for (const o of allRefOrders) {
-    const earn = o.price * 0.05;
-    if (o.updatedAt >= startOfToday) {
-      todayCount++; todayEarn += earn;
-    }
-    if (o.updatedAt >= startOfWeek) {
-      weekCount++; weekEarn += earn;
-    }
-    if (o.updatedAt >= startOfMonth) {
-      monthCount++; monthEarn += earn;
-    }
-  }
-
   try {
+    console.log(`[ACTION] User ${ctx.from.id} clicked Invite button`);
+    await ctx.answerCbQuery().catch(() => {});
+
+    const user = await getOrCreateUser(ctx);
+    if (!user) {
+      console.error('[INVITE] Failed to get/create user');
+      return ctx.answerCbQuery('❌ Error: User record not found.', { show_alert: true });
+    }
+
+    const botInfo = await ctx.telegram.getMe();
+    const inviteLink = `https://t.me/${botInfo.username}?start=ref_${ctx.from.id}`;
+
+    const dateObj = new Date();
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    const dateStr = `${year}/${month}/${day}`;
+
+    // Get team count
+    const totalTeam = await prisma.user.count({ where: { referredById: user.id } });
+    const referrals = await prisma.user.findMany({ where: { referredById: user.id }, select: { id: true } });
+    const refIds = referrals.map(r => r.id);
+
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const allRefOrders = await prisma.order.findMany({
+      where: {
+        userId: { in: refIds },
+        status: 'COMPLETED'
+      },
+      select: { price: true, updatedAt: true }
+    });
+
+    let todayCount = 0, todayEarn = 0;
+    let weekCount = 0, weekEarn = 0;
+    let monthCount = 0, monthEarn = 0;
+
+    for (const o of allRefOrders) {
+      const earn = o.price * 0.05;
+      if (o.updatedAt >= startOfToday) {
+        todayCount++; todayEarn += earn;
+      }
+      if (o.updatedAt >= startOfWeek) {
+        weekCount++; weekEarn += earn;
+      }
+      if (o.updatedAt >= startOfMonth) {
+        monthCount++; monthEarn += earn;
+      }
+    }
+
     const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
-    if (!dbUser) return ctx.answerCbQuery('❌ Error: User not found.');
+    if (!dbUser) {
+      console.error('[INVITE] dbUser not found for ID:', user.id);
+      return ctx.answerCbQuery('❌ Error: User details not found.', { show_alert: true });
+    }
 
     const msg = ctx.t('invite_header', {
       link: inviteLink,
@@ -316,14 +325,14 @@ bot.action('action_invite', async (ctx) => {
       ]).reply_markup
     }).catch(err => {
       if (!err.message.includes('message is not modified')) {
-        console.error('Edit message error in action_invite:', err.message);
+        console.error('Edit error in action_invite:', err.message);
       }
     });
 
-    await ctx.answerCbQuery().catch(() => {});
+    console.log(`[ACTION] User ${ctx.from.id} invite stats shown`);
   } catch (err) {
-    console.error('Handler error in action_invite:', err);
-    await ctx.answerCbQuery('❌ An error occurred while loading your invite stats.', { show_alert: true });
+    console.error('CRITICAL ERROR in action_invite handler:', err);
+    await ctx.answerCbQuery('❌ A system error occurred. Please try again later.', { show_alert: true });
   }
 });
 
