@@ -621,7 +621,7 @@ body.loading {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    margin-bottom: 25px;
+    margin-bottom: 22px; /* Set consistent gap above balance control */
 }
 
 .modal-info-item-v2 {
@@ -718,6 +718,17 @@ input[type=number] {
 
 .adjust-btn:active {
     transform: scale(0.95);
+}
+
+.modal-group {
+    margin-bottom: 22px; /* Symmetry: Exact match with gap above (user-info-stack) */
+}
+
+.modal-status-group {
+    padding: 0;
+    background: transparent;
+    border: none;
+    margin-bottom: 12px;
 }
 
 .modal .btn-ban {

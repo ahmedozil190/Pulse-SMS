@@ -342,10 +342,10 @@ window.openUserModal = (id, name, username, balance, isBanned) => {
     // Setup Ban/Unban Button
     const banBtn = document.getElementById('modal-ban-btn');
     if (isBanned) {
-        banBtn.innerHTML = '<i class="fas fa-user-check"></i> UNBAN USER';
+        banBtn.textContent = 'Unban';
         banBtn.className = 'gradient-btn btn-unban';
     } else {
-        banBtn.innerHTML = '<i class="fas fa-user-slash"></i> BAN USER';
+        banBtn.textContent = 'Ban';
         banBtn.className = 'gradient-btn btn-ban';
     }
 
