@@ -172,6 +172,8 @@ bot.command('lang', (ctx) => {
         data: { language: lang }
       });
       ctx.state.lang = lang; 
+      ctx.t = (key, params) => i18n.t(lang, key, params); // Refresh translation helper for current request
+      
       const langNames = { ar: 'العربية', en: 'English', fa: 'فارسی', bn: 'বাংলা' };
       await ctx.answerCbQuery(ctx.t('lang_set_success', { lang: langNames[lang] || lang }));
       
