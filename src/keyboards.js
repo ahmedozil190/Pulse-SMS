@@ -54,11 +54,9 @@ const keyboards = {
     codes.forEach(code => {
       const info = durianApi.getCountryInfo(code);
       const stock = distribution[code];
-      const isFresh = hunter.isFresh(code);
       
       // 3. Match Competitor Label: Flag Name (Stock) 0.25$
-      const fire = isFresh ? '🔥 ' : '';
-      const label = `${fire}${info.flag} ${info.name} (${stock}) 0.25$`;
+      const label = `${info.flag} ${info.name} (${stock}) 0.25$`;
       
       buttons.push(Markup.button.callback(label, `select_country_${code}`));
     });
