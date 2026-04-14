@@ -305,11 +305,12 @@ function renderUsersList(users) {
             if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
             renderUsersList(users);
         },
-        document.getElementById('user-pagination')
+        document.getElementById('user-pagination'),
+        'userPaginationCallback'
     );
 }
 
-function renderPagination(totalPages, currentPage, onPageChange, container) {
+function renderPagination(totalPages, currentPage, onPageChange, container, callbackName) {
     if (!container) return;
     
     if (totalPages <= 1) {
@@ -318,16 +319,16 @@ function renderPagination(totalPages, currentPage, onPageChange, container) {
     }
 
     container.innerHTML = `
-        <button class="pagination-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="window.paginationCallback(${currentPage - 1})">
+        <button class="pagination-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="window.${callbackName}(${currentPage - 1})">
             <i class="fas fa-chevron-left"></i>
         </button>
         <div class="pagination-text">Page ${currentPage} of ${totalPages}</div>
-        <button class="pagination-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="window.paginationCallback(${currentPage + 1})">
+        <button class="pagination-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="window.${callbackName}(${currentPage + 1})">
             <i class="fas fa-chevron-right"></i>
         </button>
     `;
     
-    window.paginationCallback = (page) => {
+    window[callbackName] = (page) => {
         onPageChange(page);
     };
 }
@@ -516,7 +517,8 @@ window.renderCountries = () => {
             if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
             renderCountries();
         },
-        paginationContainer
+        paginationContainer,
+        'countryPaginationCallback'
     );
 };
 
