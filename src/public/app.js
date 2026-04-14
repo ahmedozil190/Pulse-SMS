@@ -285,8 +285,10 @@ function renderUserPagination(totalCount) {
 
 window.changeUserPage = (delta) => {
     currentUserPage += delta;
-    const userPage = document.getElementById('page-users');
-    if (userPage) userPage.scrollTop = 0; // Reset scroll to top of section
+    const target = document.getElementById('user-management-section');
+    if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
     applyUserFiltersPaginated();
 };
 
