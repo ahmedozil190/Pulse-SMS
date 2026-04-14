@@ -290,29 +290,41 @@ bot.action('action_invite', async (ctx) => {
     }
   }
 
-  const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
+  try {
+    const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
+    if (!dbUser) return ctx.answerCbQuery('❌ Error: User not found.');
 
-  const msg = ctx.t('invite_header', {
-    link: inviteLink,
-    teamCount: totalTeam,
-    todayCount: todayCount,
-    todayProfit: todayEarn.toFixed(2),
-    weekCount: weekCount,
-    weekProfit: weekEarn.toFixed(2),
-    monthCount: monthCount,
-    monthProfit: monthEarn.toFixed(2),
-    refBalance: dbUser.referralBalance.toFixed(2),
-    date: dateStr
-  });
+    const msg = ctx.t('invite_header', {
+      link: inviteLink,
+      teamCount: totalTeam,
+      todayCount: todayCount,
+      todayProfit: todayEarn.toFixed(2),
+      weekCount: weekCount,
+      weekProfit: weekEarn.toFixed(2),
+      monthCount: monthCount,
+      monthProfit: monthEarn.toFixed(2),
+      refBalance: dbUser.referralBalance.toFixed(2),
+      date: dateStr
+    });
 
-  await ctx.editMessageText(msg, {
-    parse_mode: 'Markdown',
-    disable_web_page_preview: true,
-    reply_markup: Markup.inlineKeyboard([
-      [Markup.button.callback(ctx.t('withdraw_btn'), 'action_withdraw_referral')],
-      [Markup.button.callback(ctx.t('back_btn'), 'action_main_menu')]
-    ]).reply_markup
-  });
+    await ctx.editMessageText(msg, {
+      parse_mode: 'Markdown',
+      disable_web_page_preview: true,
+      reply_markup: Markup.inlineKeyboard([
+        [Markup.button.callback(ctx.t('withdraw_btn'), 'action_withdraw_referral')],
+        [Markup.button.callback(ctx.t('back_btn'), 'action_main_menu')]
+      ]).reply_markup
+    }).catch(err => {
+      if (!err.message.includes('message is not modified')) {
+        console.error('Edit message error in action_invite:', err.message);
+      }
+    });
+
+    await ctx.answerCbQuery().catch(() => {});
+  } catch (err) {
+    console.error('Handler error in action_invite:', err);
+    await ctx.answerCbQuery('❌ An error occurred while loading your invite stats.', { show_alert: true });
+  }
 });
 
 /**
@@ -619,11 +631,20 @@ async function startPolling(ctx, phoneNumber, countryCode) {
  * Return to Main Menu
  */
 bot.action(/action_main_menu|action_cancel/, async (ctx) => {
-  const msg = ctx.t('welcome_bot');
-  await ctx.editMessageText(msg, {
-    parse_mode: 'Markdown',
-    reply_markup: keyboards.mainMenu(ctx.state.lang).reply_markup
-  });
+  try {
+    const msg = ctx.t('welcome_bot');
+    await ctx.editMessageText(msg, {
+      parse_mode: 'Markdown',
+      reply_markup: keyboards.mainMenu(ctx.state.lang).reply_markup
+    }).catch(err => {
+      if (!err.message.includes('message is not modified')) {
+        console.error('Edit error in main menu:', err.message);
+      }
+    });
+    await ctx.answerCbQuery().catch(() => {});
+  } catch (err) {
+    console.error('Main menu handler error:', err);
+  }
 });
 
 
