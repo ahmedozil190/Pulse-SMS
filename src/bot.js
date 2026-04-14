@@ -8,8 +8,12 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const crypto = require('crypto');
+const hunter = require('./services/hunter');
 
 dotenv.config();
+
+// Start the Live Hunting Monitor (5s interval)
+hunter.start(5000);
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 
@@ -382,25 +386,27 @@ bot.action('action_buy_number', async (ctx) => {
 });
 
 async function showCountrySelection(ctx, isRefresh = false) {
-  const loadingMsg = isRefresh ? "🔄 Refreshing list..." : "🌍 Loading countries...";
-
   if (!isRefresh) {
     await ctx.answerCbQuery().catch(() => { });
   }
 
   try {
-    // 0257 is Telegram
-    const response = await durianApi.getCountryDistribution('0257');
-
-    if (response.code === 200 && response.data) {
-      const distribution = response.data;
-      await ctx.editMessageText(ctx.t('buy_number_header'), {
-        parse_mode: 'HTML',
-        reply_markup: keyboards.buildCountryKeyboard(distribution, ctx.state.lang).reply_markup
-      });
-    } else {
-      await ctx.reply("⚠️ Failed to fetch country list. Please try again.");
+    // If refresh requested, force a fresh poll from API
+    if (isRefresh) {
+      await hunter.poll();
     }
+
+    // Force a poll if hunter hasn't finished first poll yet
+    if (Object.keys(hunter.getLiveDistribution()).length === 0) {
+      await hunter.poll();
+    }
+
+    const liveDist = hunter.getLiveDistribution();
+
+    await ctx.editMessageText(ctx.t('buy_number_header'), {
+      parse_mode: 'HTML',
+      reply_markup: keyboards.buildCountryKeyboard(liveDist, ctx.state.lang).reply_markup
+    });
   } catch (error) {
     console.error("Error loading countries:", error);
     await ctx.editMessageText(`❌ System error while loading countries.`, {
