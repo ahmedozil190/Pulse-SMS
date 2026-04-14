@@ -149,9 +149,9 @@
                 <!-- User Management -->
                 <div class="glass-container" style="margin-top: 25px;">
                     <div class="section-title" style="margin-top:0">User Management</div>
-                    <div class="tabs-row" style="display: flex; gap: 5px; background: rgba(0, 0, 0, 0.3); padding: 5px; border-radius: 14px; margin-bottom: 20px;">
-                        <button class="tab-btn active" id="tab-active" onclick="setUserFilter('active')" style="flex: 1; padding: 12px; border-radius: 10px; background: #3b82f6; color: #fff; font-weight: 700; font-size: 0.95rem; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;">Active</button>
-                        <button class="tab-btn" id="tab-banned" onclick="setUserFilter('banned')" style="flex: 1; padding: 12px; border-radius: 10px; background: transparent; color: #94a3b8; font-weight: 700; font-size: 0.95rem; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;">Banned</button>
+                    <div class="tabs-row">
+                        <button class="tab-btn active" id="tab-active" onclick="setUserFilter('active')">Active</button>
+                        <button class="tab-btn" id="tab-banned" onclick="setUserFilter('banned')">Banned</button>
                     </div>
                     <div id="users-list" class="data-list"></div>
                     <div id="user-pagination" class="pagination-container"></div>
