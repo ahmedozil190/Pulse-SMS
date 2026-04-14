@@ -859,9 +859,9 @@ input[type=number] {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 8px; /* Move name/text closer to buttons */
-    margin-top: 15px; /* Reduce extra space below list */
-    padding-bottom: 15px;
+    gap: 15px;
+    margin-top: 30px;
+    padding-bottom: 30px;
 }
 
 .pagination-btn {
