@@ -3,7 +3,7 @@ const texts = {
     welcome: "<b>🔰 Welcome to International Numbers Store 🔰</b>\n\n{name} 👋\n\n<b>Choose the appropriate option from the menu:</b>",
     choose_lang: "❍ Please choose your language\n❍ দয়া করে আপনার ভাষা নির্বাচন করুন\n❍ لطفاً زبان خود را انتخاب کنید\n❍ الرجاء اختيار لغتك",
     balance_header: "💰 <b>Your Current Balance</b>\n\n• <b>Available Balance:</b> {balance}$\n• <b>Total Purchases:</b> {purchases}$\n\n💎 <b>Choose Deposit Method:</b>",
-    stats_header: "📊 <b>Your Personal Statistics</b>\n\n• <b>Active Numbers:</b> {active}\n• <b>Total Purchases:</b> {count}\n• <b>Total Spent:</b> {total}$\n\n🎯 <b>Continue Shopping!</b>",
+    stats_header: "📊 <b>Your Personal Statistics</b>\n\n• <b>Active Numbers:</b> {active}\n• <b>Total Purchases:</b> {count}\n• <b>Total Purchases:</b> {total} $\n\n🎯 <b>Continue Shopping!</b>",
     invite_header: "<b>🔗 Invite a Friend</b>\n\nInvite your friends and earn 5% of their purchases!\n\n📎 Your invite link:\n<code>{link}</code>\n\nCopy the link and send it to your friends. When they join through your link and buy a number, you'll earn 5% of the purchase price.\n\n<b>📊 Your Statistics</b>\n• 👥 Your total team: {teamCount}\n• Today: {todayCount} (Earnings: {todayProfit}$)\n• This week: {weekCount} (Earnings: {weekProfit}$)\n• This month: {monthCount} (Earnings: {monthProfit}$)\n• 💰 Current referral balance: {refBalance}$\n\nThis balance is separate from your main balance and can be used to buy numbers or withdraw\n\n📅 Date: {date}",
     withdraw_btn: "💰 Withdraw Earnings",
     back_btn: "🔙 Back",
@@ -32,7 +32,7 @@ const texts = {
     lang_set_success: "✅ تم ضبط اللغة على {lang}",
     choose_lang: "❍ Please choose your language\n❍ দয়া করে আপনার ভাষা নির্বাচন করুন\n❍ لطفاً زبان خود را انتخاب کنید\n❍ الرجاء اختيار لغتك",
     balance_header: "💰 <b>رصيدك الحالي</b>\n\n• <b>الرصيد المتاح:</b> {balance}$\n• <b>إجمالي المشتريات:</b> {purchases}$\n\n💎 <b>اختر طريقة الشحن:</b>",
-    stats_header: "📊 <b>إحصائياتك الشخصية</b>\n\n• <b>الأرقام النشطة:</b> {active}\n• <b>إجمالي المشتريات:</b> {count}\n• <b>إجمالي المشتريات:</b> {total}$\n\n🎯 <b>استمر في الشراء!</b>",
+    stats_header: "📊 <b>إحصائياتك الشخصية</b>\n\n• <b>الأرقام النشطة:</b> {active}\n• <b>إجمالي المشتريات:</b> {count}\n• <b>إجمالي المشتريات:</b> {total} $\n\n🎯 <b>استمر في الشراء!</b>",
     invite_header: "<b>🔗 دعوة صديق</b>\n\nادعُ أصدقاءك واربح 5% من مشترياتهم!\n\n📎 رابط دعوتك:\n<code>{link}</code>\n\nانسخ الرابط وأرسله لأصدقائك، عندما يشترك أحدهم عبر رابطك ويشتري رقماً ستربح 5% من سعر الشراء.\n\n<b>📊 إحصائياتك</b>\n• 👥 إجمالي فريقك: {teamCount}\n• اليوم: {todayCount} (أرباح: {todayProfit}$)\n• هذا الأسبوع: {weekCount} (أرباح: {weekProfit}$)\n• هذا الشهر: {monthCount} (أرباح: {monthProfit}$)\n• 💰 رصيد الإحالات الحالي: {refBalance}$\n\nهذا الرصيد منفصل عن رصيدك الرئيسي ويمكن استخدامه لشراء الأرقام أو سحبه\n\n📅 التاريخ: {date}",
     withdraw_btn: "💰 سحب الأرباح",
     back_btn: "🔙 رجوع",
@@ -61,6 +61,7 @@ const texts = {
     withdraw_btn: "💰 برداشت سود",
     back_btn: "🔙 بازگشت",
     balance_header: "💰 موجودی فعلی شما\n\n• موجودی در دسترس: {balance}$\n• کل خریدها: {purchases}$\n\n💎 روش واریز را انتخاب کنید:",
+    stats_header: "📊 <b>آمار شخصی شما</b>\n\n• <b>شماره های فعال:</b> {active}\n• <b>کل خریدها:</b> {count}\n• <b>کل خریدها:</b> {total} $\n\n🎯 <b>ادامه خرید!</b>",
   },
   bn: {
     welcome_user: "<b>🔰 আন্তর্জাতিক নম্বর স্টোরে স্বাগতম 🔰</b>\n\n{name} 👋\n\n<b>মেনু থেকে উপযুক্ত বিকল্প নির্বাচন করুন:</b>",
@@ -70,6 +71,7 @@ const texts = {
     withdraw_btn: "💰 অর্থ উত্তোলন",
     back_btn: "🔙 ফিরে যান",
     balance_header: "💰 আপনার বর্তমান ব্যালেন্স\n\n• উপলব্ধ ব্যালেন্স: {balance}$\n• মোট কেনাকাটা: {purchases}$\n\n💎 ডিপোজিট পদ্ধতি বেছে নিন:",
+    stats_header: "📊 <b>আপনার ব্যক্তিগত পরিসংখ্যান</b>\n\n• <b>সক্রিয় নম্বর:</b> {active}\n• <b>মোট ক্রয়:</b> {count}\n• <b>মোট ক্রয়:</b> {total} $\n\n🎯 <b>কেনাকাটা চালিয়ে যান!</b>",
   }
 };
 
