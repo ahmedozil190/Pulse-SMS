@@ -97,22 +97,31 @@
             <!-- Users List -->
             <main id="page-users" class="page">
                 <!-- User Stats -->
-                <div class="user-stats-row">
-                    <div class="info-card">
-                        <span class="info-label">TOTAL USERS</span>
-                        <span class="info-value color-blue" id="user-stat-total">0</span>
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px;">
+                    <!-- Total Users Card -->
+                    <div class="card"
+                        style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; min-height: 60px; padding: 12px 20px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 20px;">
+                        <div class="card-label"
+                            style="font-size: 0.85rem; color: #94a3b8; font-weight: 700; margin-bottom: 0;">TOTAL USERS
+                        </div>
+                        <div class="card-value" id="user-stat-total"
+                            style="font-size: 1.3rem; color: #3b82f6; font-weight: 800;">0</div>
                     </div>
-                </div>
-                <div class="user-stats-row">
-                    <div class="info-card">
-                        <span class="info-label">ACTIVE</span>
-                        <span class="info-value color-green" id="user-stat-active">0</span>
+                    <!-- Active Users Card -->
+                    <div class="card"
+                        style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; min-height: 60px; padding: 12px 20px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 20px;">
+                        <div class="card-label"
+                            style="font-size: 0.85rem; color: #94a3b8; font-weight: 700; margin-bottom: 0;">ACTIVE</div>
+                        <div class="card-value" id="user-stat-active"
+                            style="font-size: 1.3rem; color: #10b981; font-weight: 800;">0</div>
                     </div>
-                </div>
-                <div class="user-stats-row">
-                    <div class="info-card">
-                        <span class="info-label">BANNED</span>
-                        <span class="info-value color-red" id="user-stat-banned">0</span>
+                    <!-- Banned Users Card -->
+                    <div class="card"
+                        style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; min-height: 60px; padding: 12px 20px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 20px;">
+                        <div class="card-label"
+                            style="font-size: 0.85rem; color: #94a3b8; font-weight: 700; margin-bottom: 0;">BANNED</div>
+                        <div class="card-value" id="user-stat-banned"
+                            style="font-size: 1.3rem; color: #ef4444; font-weight: 800;">0</div>
                     </div>
                 </div>
 
@@ -146,22 +155,13 @@
                     </div>
                 </div>
 
-                <!-- User Management List Card -->
-                <div class="card"
-                    style="margin-top: 35px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); padding: 22px; border-radius: 20px;">
-                    <div
-                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h3 style="color: #94a3b8; font-size: 1rem; font-weight: 700; margin: 0;">User Management</h3>
+                <!-- User Management -->
+                <div class="glass-container" style="margin-top: 25px;">
+                    <div class="section-title" style="margin-top:0">User Management</div>
+                    <div class="tabs-row">
+                        <button class="tab-btn active" id="tab-active" onclick="setUserFilter('active')">Active</button>
+                        <button class="tab-btn" id="tab-banned" onclick="setUserFilter('banned')">Banned</button>
                     </div>
-
-                    <div class="tabs-row"
-                        style="margin-bottom: 25px; background: rgba(0,0,0,0.2); padding: 5px; border-radius: 14px; display: flex; gap: 5px;">
-                        <button class="tab-btn active" id="tab-active" onclick="setUserFilter('active')"
-                            style="flex: 1; padding: 12px; border-radius: 10px; font-weight: 700; font-size: 0.85rem; transition: none !important; display: flex; align-items: center; justify-content: center; gap: 8px;">Active</button>
-                        <button class="tab-btn" id="tab-banned" onclick="setUserFilter('banned')"
-                            style="flex: 1; padding: 12px; border-radius: 10px; font-weight: 700; font-size: 0.85rem; transition: none !important; display: flex; align-items: center; justify-content: center; gap: 8px;">Banned</button>
-                    </div>
-
                     <div id="users-list" class="data-list"></div>
                     <div id="user-pagination" class="pagination-container"></div>
                 </div>
