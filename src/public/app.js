@@ -9,6 +9,9 @@ let allDeposits = [];
 let currentEditingUserId = null;
 let currentOrderFilter = 'ALL';
 let currentDepositFilter = 'ALL';
+let currentUserFilter = 'active'; // 'active' or 'banned'
+let userSearchQuery = '';
+let orderSearchQuery = '';
 let depositSearchQuery = '';
 
 // Pagination State
@@ -71,11 +74,17 @@ async function refreshData() {
         allDeposits = await depositsRes.json();
 
         // Update Overview stats
-        document.getElementById('stat-total-users').textContent = stats.totalUsers || 0;
-        document.getElementById('stat-total-orders').textContent = stats.totalOrdersCount || 0;
-        document.getElementById('stat-total-sales').textContent = stats.successfulOrders || 0;
-        document.getElementById('stat-pending-deposits').textContent = stats.pendingDeposits || 0;
-        document.getElementById('stat-total-revenue').textContent = `$${(stats.totalRevenue || 0).toFixed(2)}`;
+        const sTotalUsers = document.getElementById('stat-total-users');
+        const sTotalOrders = document.getElementById('stat-total-orders');
+        const sTotalSales = document.getElementById('stat-total-sales');
+        const sPendingDep = document.getElementById('stat-pending-deposits');
+        const sRevenue = document.getElementById('stat-total-revenue');
+
+        if (sTotalUsers) sTotalUsers.textContent = stats.totalUsers || 0;
+        if (sTotalOrders) sTotalOrders.textContent = stats.totalOrdersCount || 0;
+        if (sTotalSales) sTotalSales.textContent = stats.successfulOrders || 0;
+        if (sPendingDep) sPendingDep.textContent = stats.pendingDeposits || 0;
+        if (sRevenue) sRevenue.textContent = `$${(stats.totalRevenue || 0).toFixed(2)}`;
 
         // Update User page stats
         const uStatTotal = document.getElementById('user-stat-total');
@@ -98,9 +107,9 @@ async function refreshData() {
         if (dStatAmount) dStatAmount.textContent = `$${(stats.totalDepositsAmount || 0).toFixed(2)}`;
 
         // Render lists
-        applyUserFilters();
-        applyOrderFilters();
-        applyDepositFilters();
+        try { applyUserFilters(); } catch(e) { console.error('Users render error:', e); }
+        try { applyOrderFilters(); } catch(e) { console.error('Orders render error:', e); }
+        try { applyDepositFilters(); } catch(e) { console.error('Deposits render error:', e); }
     } catch (err) {
         console.error('Data refresh error:', err);
         throw err;
@@ -220,10 +229,10 @@ function renderUsersList(users) {
             </div>
             <div class="user-row">
                 <span class="user-row-label">Balance</span>
-                <span class="user-row-value color-blue-tint">$${u.balance.toFixed(2)}</span>
+                <span class="user-row-value color-blue-tint">$${parseFloat(u.balance || 0).toFixed(2)}</span>
             </div>
-            <div class="user-row"><span class="user-row-label">Spent</span><span class="user-row-value color-red">$${(u.spent || 0).toFixed(2)}</span></div>
-            <div class="user-row"><span class="user-row-label">Earned</span><span class="user-row-value color-green">$${(u.referralBalance || 0).toFixed(2)}</span></div>
+            <div class="user-row"><span class="user-row-label">Spent</span><span class="user-row-value color-red">$${parseFloat(u.spent || 0).toFixed(2)}</span></div>
+            <div class="user-row"><span class="user-row-label">Earned</span><span class="user-row-value color-green">$${parseFloat(u.referralBalance || 0).toFixed(2)}</span></div>
             <div class="user-row"><span class="user-row-label">Orders Made</span><span class="user-row-value color-purple">${u.ordersMade || 0}</span></div>
         </div>
     `}).join('');
@@ -233,6 +242,8 @@ function renderUsersList(users) {
 
 function renderUserPagination(totalCount) {
     const container = document.getElementById('user-pagination');
+    if (!container) return; // Safety check
+    
     const totalPages = Math.ceil(totalCount / usersPerPage);
     
     if (totalPages <= 1) {
@@ -453,4 +464,6 @@ function escapeHtml(str) {
 }
 
 // START
-init();
+document.addEventListener('DOMContentLoaded', () => {
+    init();
+});
