@@ -115,6 +115,14 @@ async function refreshData() {
         if (dStatCount) dStatCount.textContent = stats.totalDepositsCount || 0;
         if (dStatAmount) dStatAmount.textContent = `$${(stats.totalDepositsAmount || 0).toFixed(2)}`;
 
+        // Update Countries stats
+        const cStatTotal = document.getElementById('country-stat-total');
+        const cStatActive = document.getElementById('country-stat-active');
+        const cStatInactive = document.getElementById('country-stat-inactive');
+        if (cStatTotal) cStatTotal.textContent = allCountries.length;
+        if (cStatActive) cStatActive.textContent = allCountries.filter(c => c.isEnabled).length;
+        if (cStatInactive) cStatInactive.textContent = allCountries.filter(c => !c.isEnabled).length;
+
         // Render lists
         try { applyUserFilters(); } catch(e) { console.error('Users render error:', e); }
         try { applyOrderFilters(); } catch(e) { console.error('Orders render error:', e); }
@@ -404,11 +412,9 @@ window.renderCountries = () => {
     const list = document.getElementById('countries-list');
     if (!list) return;
     
-    // Convert generic data-list container into a responsive grid
-    list.style.display = 'grid';
-    list.style.gridTemplateColumns = 'repeat(auto-fill, minmax(160px, 1fr))';
-    list.style.gap = '16px';
-    list.style.padding = '10px 0';
+    // Convert back to standard list display
+    list.style.display = 'block';
+    list.style.padding = '0';
     list.innerHTML = '';
 
     const query = (countrySearchQuery || '').toLowerCase();
@@ -418,80 +424,54 @@ window.renderCountries = () => {
     );
 
     if (filtered.length === 0) {
-        list.style.display = 'block'; // reset grid for empty state
         list.innerHTML = `<div class="empty-state">No countries found</div>`;
         return;
     }
 
-    filtered.forEach(c => {
-        const item = document.createElement('div');
-        item.style.cssText = `
-            background: rgba(44, 44, 46, 0.4);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 14px;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            transition: transform 0.2s ease, background 0.2s ease;
-            position: relative;
-        `;
-        item.onmouseover = () => {
-            item.style.background = 'rgba(58, 58, 60, 0.6)';
-            item.style.transform = 'translateY(-2px)';
-        };
-        item.onmouseout = () => {
-            item.style.background = 'rgba(44, 44, 46, 0.4)';
-            item.style.transform = 'translateY(0)';
-        };
-        
+    filtered.forEach((c, index) => {
         const isLive = c.stock > 0;
         
-        item.innerHTML = `
-            <!-- Top Row: Flag & Stock Badge -->
-            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                <span style="font-size: 34px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">${c.flag}</span>
-                <span style="background: ${isLive ? 'rgba(48, 209, 88, 0.15)' : 'rgba(255, 69, 58, 0.15)'}; 
-                             color: ${isLive ? '#30d158' : '#ff453a'}; 
-                             padding: 4px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; letter-spacing: 0.5px;">
-                    <i class="fas ${isLive ? 'fa-signal' : 'fa-box-open'}"></i> ${isLive ? c.stock + ' Avail' : 'Empty'}
-                </span>
+        list.innerHTML += `
+        <div class="user-container">
+            <div class="user-card-index">${index + 1}</div>
+            
+            <div class="user-row">
+                <span class="user-row-label">Status</span>
+                <span class="user-row-value ${c.isEnabled ? 'color-green' : 'color-red'}">${c.isEnabled ? 'ACTIVE' : 'INACTIVE'}</span>
+            </div>
+            
+            <div class="user-row">
+                <span class="user-row-label">Name</span>
+                <span class="user-row-value color-yellow">${c.flag} ${escapeHtml(c.name)}</span>
+            </div>
+            
+            <div class="user-row">
+                <span class="user-row-label">Code</span>
+                <span class="user-row-value color-blue-tint">${c.code.toUpperCase()}</span>
+            </div>
+            
+            <div class="user-row">
+                <span class="user-row-label">Avail</span>
+                <span class="user-row-value" style="font-weight: 700; color: ${isLive ? '#30d158' : '#A0A0A5'}">${c.stock || 0}</span>
             </div>
 
-            <!-- Country Identity -->
-            <div style="display: flex; flex-direction: column;">
-                <span style="font-size: 15px; font-weight: 700; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: 'Inter', sans-serif;" title="${escapeHtml(c.name)}">${escapeHtml(c.name)}</span>
-                <span style="font-size: 11px; color: #8e8e93; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px;">CODE: ${c.code.toUpperCase()}</span>
-            </div>
-
-            <!-- Divider -->
-            <div style="height: 1px; background: rgba(255,255,255,0.05); margin: 2px 0;"></div>
-
-            <!-- Actions (Price & Toggle) -->
-            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
-                <!-- Price Input Container -->
+            <div class="data-card-actions" style="margin-top:15px; border-top:1px solid rgba(255,255,255,0.05); padding-top:15px; display:flex; gap:10px; align-items:center;">
+                <!-- Price Input -->
                 <div style="position: relative; flex: 1;">
-                    <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #8e8e93; font-size: 12px; font-weight: 700;">$</span>
+                    <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #8e8e93; font-size: 13px; font-weight: 600;">$</span>
                     <input type="number" step="0.01" min="0" value="${c.price}" 
                            onchange="updateCountryConfig('${c.code}', 'price', this.value)"
-                           style="width: 100%; box-sizing: border-box; background: #1c1c1e; border: 1px solid #3a3a3c; color: white; border-radius: 8px; padding: 6px 6px 6px 22px; font-size: 13px; font-weight: 700; font-family: 'Inter', sans-serif; transition: all 0.2s; outline: none;"
-                           onfocus="this.style.borderColor='#0a84ff'; this.style.boxShadow='0 0 0 3px rgba(10, 132, 255, 0.2)';"
-                           onblur="this.style.borderColor='#3a3a3c'; this.style.boxShadow='none';">
+                           style="width: 100%; box-sizing: border-box; background: #1c1c1e; border: 1px solid #3a3a3c; color: white; border-radius: 8px; padding: 10px 10px 10px 24px; font-size: 14px; font-weight: 600; outline: none;">
                 </div>
                 
                 <!-- Toggle Button -->
-                <button onclick="updateCountryConfig('${c.code}', 'isEnabled', ${!c.isEnabled})"
-                        style="flex: 1; padding: 7px 0; border: none; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s; 
-                               background: ${c.isEnabled ? 'rgba(50, 215, 75, 0.1)' : 'rgba(255, 69, 58, 0.1)'}; 
-                               color: ${c.isEnabled ? '#32d74b' : '#ff453a'}; 
-                               box-shadow: inset 0 0 0 1px ${c.isEnabled ? 'rgba(50, 215, 75, 0.3)' : 'rgba(255, 69, 58, 0.3)'};"
-                        onmouseover="this.style.background='${c.isEnabled ? 'rgba(50, 215, 75, 0.2)' : 'rgba(255, 69, 58, 0.2)'}';"
-                        onmouseout="this.style.background='${c.isEnabled ? 'rgba(50, 215, 75, 0.1)' : 'rgba(255, 69, 58, 0.1)'}';">
-                    <i class="fas ${c.isEnabled ? 'fa-eye' : 'fa-eye-slash'}"></i> ${c.isEnabled ? 'Active' : 'Hidden'}
+                <button class="gradient-btn" onclick="updateCountryConfig('${c.code}', 'isEnabled', ${!c.isEnabled})"
+                        style="flex: 1; padding: 10px; background: ${c.isEnabled ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)'}; border: 1px solid ${c.isEnabled ? '#ef4444' : '#10b981'}; color: ${c.isEnabled ? '#ef4444' : '#10b981'}; box-shadow: none;">
+                    ${c.isEnabled ? 'Hide' : 'Show'}
                 </button>
             </div>
+        </div>
         `;
-        list.appendChild(item);
     });
 };
 
