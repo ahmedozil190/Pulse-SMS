@@ -205,8 +205,7 @@ bot.action('action_balance', async (ctx) => {
 
   const msg = ctx.t('balance_header', { balance: availableBalance, purchases: totalPurchases });
   await ctx.editMessageText(msg, {
-    parse_mode: 'HTML',
-    reply_markup: keyboards.depositMethods(ctx.state.lang).reply_markup
+    parse_mode: 'HTML'
   });
 });
 
