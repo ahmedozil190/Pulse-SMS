@@ -3,7 +3,7 @@ const texts = {
     welcome: "🔰 *Welcome to International Numbers Store* 🔰\n\n{name} 👋\n\n*Choose the appropriate option from the menu:*",
     choose_lang: "❍ Please choose your language\n❍ দয়া করে আপনার भाषा নির্বাচন করুন\n❍ لطفاً زبان خود را انتخاب کنید\n❍ الرجاء اختيار لغتك",
     balance_header: "💰 *Your Current Balance*\n\n• *Available Balance:* {balance}$\n• *Total Purchases:* {purchases}$\n\n💎 *Choose Deposit Method:*",
-    stats_header: "📊 *Personal Statistics*\n\n• *Active Numbers:* {active}\n• *Total Purchases:* {count}\n• *Total Spent:* {total}$\n\n🎯 *Continue Shopping!*",
+    stats_header: "📊 *Personal Statistics*\n\n• *Active Numbers:* {active}\n• *Total Purchases:* {count}\n• *Total Purchases:* {total}$\n\n🎯 *Continue Shopping!*",
     invite_header: "🔗 *Invite Friend*\n\nInvite your friends and earn 5% of their purchases!\n\n📎 *Your Invite Link:*\n{link}\n\n📊 *Statistics*\n• 👥 Team Total: {teamCount}\n• Today: {todayCount} (Profit: {todayProfit}$)\n• This Week: {weekCount} (Profit: {weekProfit}$)\n• This Month: {monthCount} (Profit: {monthProfit}$)\n• 💰 Referral Balance: {refBalance}$\n\nThis balance is separate and can be used to buy numbers or withdrawn.",
     withdraw_btn: "Withdraw Profits 💰",
     back_btn: "🔙 Back",
