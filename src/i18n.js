@@ -25,7 +25,8 @@ const texts = {
     lang_set_success: "✅ Language set to {lang}",
     welcome_user: "<b>🔰 Welcome to International Numbers Store 🔰</b>\n\n{name} 👋\n\n<b>Choose the appropriate option from the menu:</b>",
     welcome_bot: "<b>🔰 Welcome to International Numbers Store 🔰</b>\n\nPulse SMS 🩸 👋\n\n<b>Choose the appropriate option from the menu:</b>",
-    insufficient_balance: "❌ Insufficient balance! You need 0.25$\nYour balance {balance}$"
+    insufficient_balance: "❌ Insufficient balance! You need 0.25$\nYour balance {balance}$",
+    refresh_cooldown_msg: "⏳ Please wait {seconds} seconds before refreshing again"
   },
   ar: {
     welcome_user: "<b>🔰 مرحباً بك في متجر الأرقام الدولي 🔰</b>\n\n{name} 👋\n\n<b>اختر الخيار المناسب من القائمة:</b>",
@@ -53,7 +54,8 @@ const texts = {
     withdrawn_to_balance: "تم إضافة {amount}$ إلى رصيدك الرئيسي.",
     insufficient_ref_balance: "❌ رصيد الإحالات الخاص بك غير كافٍ.\n• الرصيد الحالي: {balance}$\n• الحد الأدنى المطلوب: 1$",
     activation_channel_btn: "📢 قناة التفعيلات",
-    insufficient_balance: "❌ رصيدك غير كافي! تحتاج 0.25$ ورصيدك {balance}$"
+    insufficient_balance: "❌ رصيدك غير كافي! تحتاج 0.25$ ورصيدك {balance}$",
+    refresh_cooldown_msg: "يرجى الانتظار {seconds} ثوانٍ قبل التحديث مرة أخرى ⏳"
   },
   fa: {
     welcome_user: "<b>🔰 به فروشگاه اعداد بین المللی خوش آمدید 🔰</b>\n\n{name} 👋\n\n<b>گزینه مناسب را از منو انتخاب کنید:</b>",
@@ -69,7 +71,8 @@ const texts = {
     back_btn: "🔙 بازگشت",
     buy_number_header: "<b>🌍 کشور مورد نظر را انتخاب کنید</b>\n\n• همه به‌روزرسانی‌ها را اولین نفر دریافت کنید\n• کشور مورد نظر برای خرید شماره را انتخاب کنید:",
     refresh_btn: "🔄 به‌روزرسانی لیست",
-    insufficient_balance: "❌ موجودی کافی نیست! نیاز دارید 0.25$ و موجودی شما {balance}$"
+    insufficient_balance: "❌ موجودی کافی نیست! نیاز دارید 0.25$ و موجودی شما {balance}$",
+    refresh_cooldown_msg: "⌛ لطفاً {seconds} ثانیه صبر کنید قبل از به‌روزرسانی مجدد"
   },
   bn: {
     welcome_user: "<b>🔰 আন্তর্জাতিক নম্বর স্টোরে স্বাগতম 🔰</b>\n\n{name} 👋\n\n<b>মেনু থেকে উপযুক্ত বিকল্প নির্বাচন করুন:</b>",
@@ -85,7 +88,8 @@ const texts = {
     back_btn: "🔙 ফিরে যান",
     buy_number_header: "<b>🌍 প্রয়োজনীয় দেশ নির্বাচন করুন</b>\n\n• সব আপডেট সবার আগে পান\n• যে দেশ থেকে নম্বর কিনতে চান তা নির্বাচন করুন:",
     refresh_btn: "🔄 তালিকা রিফ্রেশ",
-    insufficient_balance: "❌ পর্যাপ্ত ব্যালেন্স নেই! আপনার দরকার 0.25$ আপনার ব্যালেন্স {balance}$"
+    insufficient_balance: "❌ পর্যাপ্ত ব্যালেন্স নেই! আপনার দরকার 0.25$ আপনার ব্যালেন্স {balance}$",
+    refresh_cooldown_msg: "⏳ আবার রিফ্রেশ করার আগে {seconds} সেকেন্ড অপেক্ষা করুন"
   },
 };
 

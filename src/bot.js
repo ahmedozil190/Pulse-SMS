@@ -436,9 +436,7 @@ bot.action('action_refresh_countries', async (ctx) => {
 
   if (elapsed < 3000) {
     const remaining = Math.ceil((3000 - elapsed) / 1000);
-    const msg = ctx.state.lang === 'ar' 
-      ? `⏳ يرجى الانتظار ${remaining} ثانية قبل التحديث مرة أخرى` 
-      : `⏳ Please wait ${remaining} seconds before refreshing again`;
+    const msg = ctx.t('refresh_cooldown_msg', { seconds: remaining });
     return ctx.answerCbQuery(msg, { show_alert: true });
   }
 
