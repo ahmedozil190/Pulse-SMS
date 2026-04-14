@@ -109,7 +109,7 @@ bot.command('start', async (ctx) => {
     const startMessage = `
 🔰 *Welcome to International Numbers Store* 🔰
 
-*Pulse SMS 🩸 👋*
+${ctx.from.first_name || 'User'} 👋 
 
 *Choose the appropriate option from the menu:*
     `;
@@ -122,6 +122,11 @@ bot.command('start', async (ctx) => {
     console.error('[START COMMAND ERROR]', err);
   }
 });
+
+/**
+ * /lang command
+ */
+bot.command('lang', (ctx) => ctx.reply('Please use the menu /start'));
 
 /**
  * Handle My Balance
