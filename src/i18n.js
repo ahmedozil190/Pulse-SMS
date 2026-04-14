@@ -23,12 +23,12 @@ const texts = {
     withdrawn_to_balance: "{amount}$ has been added to your main balance.",
     insufficient_ref_balance: "❌ Your referral balance is insufficient.\n• Current balance: {balance}$\n• Minimum required: 1$",
     lang_set_success: "✅ Language set to {lang}",
-    welcome_user: "🔰 *Welcome to International Numbers Store* 🔰\n\n{name} 👋\n\n*Choose the appropriate option from the menu:*",
-    welcome_bot: "🔰 *Welcome to International Numbers Store* 🔰\n\nPulse SMS 🩸 👋\n\n*Choose the appropriate option from the menu:*"
+    welcome_user: "🔰 *Welcome to International Numbers Store* 🔰\n\n*{name} 👋*\n\n*Choose the appropriate option from the menu:*",
+    welcome_bot: "🔰 *Welcome to International Numbers Store* 🔰\n\n*Pulse SMS 🩸 👋*\n\n*Choose the appropriate option from the menu:*"
   },
   ar: {
-    welcome_user: "🔰 مرحباً بك في متجر الأرقام الدولي 🔰\n\n{name} 👋\n\nاختر الخيار المناسب من القائمة:",
-    welcome_bot: "🔰 مرحباً بك في متجر الأرقام الدولي 🔰\n\nPulse SMS 🩸 👋\n\nاختر الخيار المناسب من القائمة:",
+    welcome_user: "🔰 *مرحباً بك في متجر الأرقام الدولي* 🔰\n\n*{name} 👋*\n\n*اختر الخيار المناسب من القائمة:*",
+    welcome_bot: "🔰 *مرحباً بك في متجر الأرقام الدولي* 🔰\n\n*Pulse SMS 🩸 👋*\n\n*اختر الخيار المناسب من القائمة:*",
     lang_set_success: "✅ تم ضبط اللغة على {lang}",
     choose_lang: "❍ Please choose your language\n❍ দয়া করে আপনার भाषा নির্বাচন করুন\n❍ لطفاً زبان خود را انتخاب کنید\n❍ الرجاء اختيار لغتك",
     balance_header: "💰 *رصيدك الحالي*\n\n• *الرصيد المتاح:* {balance}$\n• *إجمالي المشتريات:* {purchases}$\n\n💎 *اختر طريقة الشحن:*",
@@ -78,7 +78,7 @@ const buttons = {
   },
   ar: {
     buy_number: "شراء رقم 🛒",
-    my_balance: "💰 رصيدي",
+    my_balance: "رصيدي 💰",
     deposit: "شحن الرصيد 💳",
     my_stats: "إحصائياتي 📊",
     notifications: "إعدادات التنبيهات ⚙️",

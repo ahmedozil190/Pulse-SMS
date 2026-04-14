@@ -72,6 +72,12 @@ async function getOrCreateUser(ctx, referrerTelegramId = null) {
         }
       }
 
+      // Auto-detect language from Telegram if possible
+      let detectedLang = 'en';
+      if (ctx.from.language_code && ctx.from.language_code.startsWith('ar')) {
+        detectedLang = 'ar';
+      }
+
       user = await prisma.user.create({
         data: {
           telegramId,
@@ -79,6 +85,7 @@ async function getOrCreateUser(ctx, referrerTelegramId = null) {
           firstName: ctx.from.first_name || null,
           lastName: ctx.from.last_name || null,
           balance: 0.0,
+          language: detectedLang,
           referredById
         }
       });
