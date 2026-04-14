@@ -402,10 +402,12 @@ async function showCountrySelection(ctx, isRefresh = false) {
     }
 
     const liveDist = hunter.getLiveDistribution();
+    const configs = await prisma.countryConfig.findMany();
+    const configMap = configs.reduce((acc, c) => ({ ...acc, [c.countryCode]: c }), {});
 
     await ctx.editMessageText(ctx.t('buy_number_header'), {
       parse_mode: 'HTML',
-      reply_markup: keyboards.buildCountryKeyboard(liveDist, ctx.state.lang).reply_markup
+      reply_markup: keyboards.buildCountryKeyboard(liveDist, ctx.state.lang, configMap).reply_markup
     });
 
     // Provide a small success notification on refresh
@@ -452,8 +454,13 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
   const countryInfo = durianApi.getCountryInfo(countryCode);
   const user = await getOrCreateUser(ctx);
 
+  const countryConfig = await prisma.countryConfig.findUnique({
+    where: { countryCode }
+  });
+  const currentPrice = countryConfig ? countryConfig.price : 0.25;
+
   // 1. Check for sufficient balance before starting purchase
-  if (user.balance < 0.25) {
+  if (user.balance < currentPrice) {
     const msg = ctx.t('insufficient_balance', { balance: user.balance.toFixed(1) });
     return ctx.answerCbQuery(msg, { show_alert: true });
   }
@@ -484,7 +491,7 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
           serviceId: '0257',
           countryId: countryCode,
           phoneNumber: phoneNumber,
-          price: 0.25,
+          price: currentPrice,
           status: 'PENDING'
         }
       });
@@ -1007,6 +1014,68 @@ app.post('/api/admin/deposit-action', isAdminMiddleware, async (req, res) => {
   } catch (err) {
     console.error('[DEPOSIT ACTION ERROR]', err);
     res.status(500).json({ msg: 'Failed to process deposit' });
+  }
+});
+
+// --- COUNTRY MANAGEMENT APIs ---
+
+app.get('/api/admin/countries', isAdminMiddleware, async (req, res) => {
+  try {
+    const liveDist = hunter.getLiveDistribution();
+    const configs = await prisma.countryConfig.findMany();
+    const configMap = configs.reduce((acc, c) => ({ ...acc, [c.countryCode]: c }), {});
+
+    const countries = [];
+    // Only return countries that Durian currently recognizes or has stock for
+    Object.keys(liveDist).forEach(code => {
+      const info = durianApi.getCountryInfo(code);
+      if (!info) return; // Skip if unknown
+      
+      const config = configMap[code] || { isEnabled: true, price: 0.25 };
+      countries.push({
+        code,
+        name: info.name,
+        flag: info.flag,
+        stock: liveDist[code] || 0,
+        isEnabled: config.isEnabled,
+        price: config.price
+      });
+    });
+
+    // Sort alphabetically by name
+    countries.sort((a, b) => a.name.localeCompare(b.name));
+    res.json(countries);
+  } catch (err) {
+    console.error('Fetch countries error:', err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+app.post('/api/admin/countries/update', isAdminMiddleware, async (req, res) => {
+  const { code, isEnabled, price } = req.body;
+  try {
+    const parsedPrice = parseFloat(price);
+    if (isNaN(parsedPrice) || parsedPrice < 0) {
+      return res.status(400).json({ msg: 'Invalid price' });
+    }
+
+    await prisma.countryConfig.upsert({
+      where: { countryCode: code },
+      update: {
+        isEnabled: isEnabled === undefined ? undefined : isEnabled,
+        price: parsedPrice
+      },
+      create: {
+        countryCode: code,
+        isEnabled: isEnabled === undefined ? true : isEnabled,
+        price: parsedPrice
+      }
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Update country error:', err);
+    res.status(500).json({ msg: 'Failed to update country' });
   }
 });
 

@@ -35,13 +35,20 @@ const keyboards = {
   /**
    * Generates a dynamic keyboard for countries (Elite Hunting Style)
    * @param {Object} distribution - Data returned from API { code: stock }
+   * @param {string} lang - Language code
+   * @param {Object} configMap - Map of country configs from the database { code: { isEnabled, price } }
    */
-  buildCountryKeyboard: (distribution, lang) => {
+  buildCountryKeyboard: (distribution, lang, configMap = {}) => {
     const buttons = [];
     
-    // 1. Filter for 'Real-time' Low Stock (1-25) to match professional hunting bots
+    // 1. Filter for 'Real-time' Low Stock (1-25) and ensure country is globally enabled
     const codes = Object.keys(distribution)
       .filter(c => c !== "" && distribution[c] > 0 && distribution[c] <= 25)
+      .filter(c => {
+        // If config exists, must be enabled. If no config, default to true.
+        const cfg = configMap[c];
+        return cfg ? cfg.isEnabled : true;
+      })
       .sort((a, b) => {
         // 2. Sort Logic: Fresh Arrivals (🔥) first, then by highest stock
         const aFresh = hunter.isFresh(a) ? 1 : 0;
@@ -54,9 +61,11 @@ const keyboards = {
     codes.forEach(code => {
       const info = durianApi.getCountryInfo(code);
       const stock = distribution[code];
+      const cfg = configMap[code];
+      const price = cfg ? cfg.price : 0.25;
       
-      // 3. Match Competitor Label: Flag Name (Stock) 0.25$
-      const label = `${info.flag} ${info.name} (${stock}) 0.25$`;
+      // 3. Match Competitor Label: Flag Name (Stock) Price$
+      const label = `${info.flag} ${info.name} (${stock}) ${price}$`;
       
       buttons.push(Markup.button.callback(label, `select_country_${code}`));
     });

@@ -43,6 +43,10 @@
                     <i class="fas fa-wallet"></i>
                     <span>Deposits</span>
                 </div>
+                <div class="nav-item" data-page="countries" onclick="switchPage('countries')">
+                    <i class="fas fa-globe"></i>
+                    <span>Countries</span>
+                </div>
                 <div class="nav-item" data-page="settings" onclick="switchPage('settings')">
                     <i class="fas fa-cog"></i>
                     <span>Settings</span>
@@ -221,6 +225,20 @@
                 <div class="glass-container" style="margin-top: 25px;">
                     <div class="section-title" style="margin-top:0">Deposit History</div>
                     <div id="deposits-list" class="data-list"></div>
+                </div>
+            </main>
+
+            <!-- Countries List -->
+            <main id="page-countries" class="page">
+                <div class="glass-container" style="margin-top: 15px;">
+                    <div class="search-box-v2">
+                        <input type="text" id="country-search-v2" placeholder="Search countries...">
+                    </div>
+                </div>
+
+                <div class="glass-container" style="margin-top: 25px;">
+                    <div class="section-title" style="margin-top:0">Country Configuration</div>
+                    <div id="countries-list" class="data-list"></div>
                 </div>
             </main>
 

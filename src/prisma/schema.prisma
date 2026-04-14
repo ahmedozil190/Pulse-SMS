@@ -50,3 +50,11 @@ model Deposit {
   status      String   @default("PENDING") // PENDING, APPROVED, REJECTED
   createdAt   DateTime @default(now())
 }
+
+model CountryConfig {
+  id          Int      @id @default(autoincrement())
+  countryCode String   @unique
+  isEnabled   Boolean  @default(true)
+  price       Float    @default(0.25)
+  updatedAt   DateTime @updatedAt
+}

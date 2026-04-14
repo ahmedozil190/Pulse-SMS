@@ -13,6 +13,8 @@ let currentUserFilter = 'active'; // 'active' or 'banned'
 let userSearchQuery = '';
 let orderSearchQuery = '';
 let depositSearchQuery = '';
+let allCountries = [];
+let countrySearchQuery = '';
 
 // Pagination State
 let currentUserPage = 1;
@@ -32,6 +34,9 @@ async function init() {
 
         const depositSearch = document.getElementById('deposit-search-v2');
         if (depositSearch) depositSearch.addEventListener('input', (e) => { depositSearchQuery = e.target.value; applyDepositFilters(); });
+
+        const countrySearch = document.getElementById('country-search-v2');
+        if (countrySearch) countrySearch.addEventListener('input', (e) => { countrySearchQuery = e.target.value; renderCountries(); });
 
         // Restore previous page if exists
         const lastPage = sessionStorage.getItem('admin_last_page');
@@ -57,14 +62,15 @@ function getHeaders() {
 
 async function refreshData() {
     try {
-        const [statsRes, usersRes, ordersRes, depositsRes] = await Promise.all([
+        const [statsRes, usersRes, ordersRes, depositsRes, countriesRes] = await Promise.all([
             fetch('/api/admin/stats', { headers: getHeaders() }),
             fetch('/api/admin/users', { headers: getHeaders() }),
             fetch('/api/admin/orders', { headers: getHeaders() }),
-            fetch('/api/admin/deposits', { headers: getHeaders() })
+            fetch('/api/admin/deposits', { headers: getHeaders() }),
+            fetch('/api/admin/countries', { headers: getHeaders() })
         ]);
 
-        if (!statsRes.ok || !usersRes.ok || !ordersRes.ok || !depositsRes.ok) {
+        if (!statsRes.ok || !usersRes.ok || !ordersRes.ok || !depositsRes.ok || !countriesRes.ok) {
             throw new Error('One or more API requests failed');
         }
 
@@ -72,6 +78,7 @@ async function refreshData() {
         allUsers = await usersRes.json();
         allOrders = await ordersRes.json();
         allDeposits = await depositsRes.json();
+        allCountries = await countriesRes.json();
 
         // Update Overview stats
         const sTotalUsers = document.getElementById('stat-total-users');
@@ -112,6 +119,7 @@ async function refreshData() {
         try { applyUserFilters(); } catch(e) { console.error('Users render error:', e); }
         try { applyOrderFilters(); } catch(e) { console.error('Orders render error:', e); }
         try { applyDepositFilters(); } catch(e) { console.error('Deposits render error:', e); }
+        try { renderCountries(); } catch(e) { console.error('Countries render error:', e); }
     } catch (err) {
         console.error('Data refresh error:', err);
         throw err;
@@ -135,7 +143,7 @@ window.switchPage = (pageName) => {
         if (isActive) page.scrollTop = 0; // Reset scroll to top on switch
     });
 
-    const titles = { dashboard: 'Overview', users: 'User Management', orders: 'Orders', deposits: 'Deposits', settings: 'Settings' };
+    const titles = { dashboard: 'Overview', users: 'User Management', orders: 'Orders', deposits: 'Deposits', countries: 'Countries', settings: 'Settings' };
     document.getElementById('page-title').textContent = titles[pageName] || 'Overview';
     document.getElementById('sidebar').classList.remove('open');
 };
