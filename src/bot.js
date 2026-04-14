@@ -13,6 +13,19 @@ dotenv.config();
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 
+/**
+ * Escapes characters for HTML parse mode
+ */
+const escapeHTML = (str) => {
+  if (!str) return '';
+  return str.toString()
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+};
+
 // Simple session middleware
 bot.use(session());
 
@@ -44,8 +57,8 @@ bot.command('admin', async (ctx) => {
 
   const webAppUrl = process.env.WEBAPP_URL || 'https://your-app.up.railway.app';
 
-  await ctx.reply('🔒 *Welcome Creator*\nOpen the dashboard to manage your empire.', {
-    parse_mode: 'Markdown',
+  await ctx.reply('🔒 <b>Welcome Creator</b>\nOpen the dashboard to manage your empire.', {
+    parse_mode: 'HTML',
     reply_markup: {
       inline_keyboard: [
         [{ text: '📊 Open Admin Dashboard', web_app: { url: webAppUrl } }]
@@ -133,9 +146,9 @@ bot.command('start', async (ctx) => {
       return ctx.reply("⚠️ Sorry, there is a technical issue with the database setup. Please try again in 1 minute.");
     }
 
-    const msg = ctx.t('welcome_user', { name: ctx.from.first_name || 'User' });
+    const msg = ctx.t('welcome_user', { name: escapeHTML(ctx.from.first_name || 'User') });
     await ctx.reply(msg, {
-      parse_mode: 'Markdown',
+      parse_mode: 'HTML',
       reply_markup: keyboards.mainMenu(ctx.state.lang).reply_markup
     });
   } catch (err) {
@@ -163,9 +176,9 @@ bot.command('lang', (ctx) => {
       await ctx.answerCbQuery(ctx.t('lang_set_success', { lang: langNames[lang] || lang }));
       
       // Send fresh start message in new language
-      const msg = ctx.t('welcome_user', { name: ctx.from.first_name || 'User' });
+      const msg = ctx.t('welcome_user', { name: escapeHTML(ctx.from.first_name || 'User') });
       await ctx.reply(msg, {
-        parse_mode: 'Markdown',
+        parse_mode: 'HTML',
         reply_markup: keyboards.mainMenu(lang).reply_markup
       });
       
@@ -190,7 +203,7 @@ bot.action('action_balance', async (ctx) => {
 
   const msg = ctx.t('balance_header', { balance: availableBalance, purchases: totalPurchases });
   await ctx.editMessageText(msg, {
-    parse_mode: 'Markdown',
+    parse_mode: 'HTML',
     reply_markup: keyboards.depositMethods(ctx.state.lang).reply_markup
   });
 });
@@ -222,7 +235,7 @@ bot.action('action_stats', async (ctx) => {
   });
   
   await ctx.editMessageText(msg, {
-    parse_mode: 'Markdown',
+    parse_mode: 'HTML',
     reply_markup: keyboards.backToMain(ctx.state.lang).reply_markup
   });
 });
@@ -232,7 +245,7 @@ bot.action('action_stats', async (ctx) => {
  */
 bot.action('action_deposit', async (ctx) => {
   await ctx.editMessageText(ctx.t('deposit_header'), {
-    parse_mode: 'Markdown',
+    parse_mode: 'HTML',
     reply_markup: keyboards.depositMethods(ctx.state.lang).reply_markup
   });
 });
@@ -304,7 +317,7 @@ bot.action('action_invite', async (ctx) => {
     }
 
     const msg = ctx.t('invite_header', {
-      link: inviteLink,
+      link: escapeHTML(inviteLink),
       teamCount: totalTeam,
       todayCount: todayCount,
       todayProfit: todayEarn.toFixed(2),
@@ -317,7 +330,7 @@ bot.action('action_invite', async (ctx) => {
     });
 
     await ctx.editMessageText(msg, {
-      parse_mode: 'Markdown',
+      parse_mode: 'HTML',
       disable_web_page_preview: true,
       reply_markup: Markup.inlineKeyboard([
         [Markup.button.callback(ctx.t('withdraw_btn'), 'action_withdraw_referral')],
@@ -381,7 +394,7 @@ async function showCountrySelection(ctx, isRefresh = false) {
     if (response.code === 200 && response.data) {
       const distribution = response.data;
       await ctx.editMessageText(ctx.t('buy_number_header'), {
-        parse_mode: 'Markdown',
+        parse_mode: 'HTML',
         reply_markup: keyboards.buildCountryKeyboard(distribution, ctx.state.lang).reply_markup
       });
     } else {
@@ -451,10 +464,10 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
         }
       });
 
-      const msg = `${ctx.t('purchase_success')}\n\n• *${ctx.t('number_label')}*: \`+${cleanPhone}\`\n• *${ctx.t('country_label')}*: ${countryInfo.flag} ${countryInfo.name}\n• *${ctx.t('code_label')}*: \`XXXXX\`\n\n*🔄 ${ctx.t('request_code_btn')}*`;
+      const msg = `${ctx.t('purchase_success')}\n\n• <b>${ctx.t('number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${ctx.t('country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryInfo.name)}\n• <b>${ctx.t('code_label')}</b>: <code>XXXXX</code>\n\n<b>🔄 ${ctx.t('request_code_btn')}</b>`;
 
       await ctx.editMessageText(msg, {
-        parse_mode: 'Markdown',
+        parse_mode: 'HTML',
         reply_markup: {
           inline_keyboard: [
             [{ text: ctx.t('request_code_btn'), callback_data: `check_code_${countryCode}_${phoneNumber}` }]
@@ -488,13 +501,13 @@ bot.action(/^check_code_(.+)_(.+)$/, async (ctx) => {
 
   await ctx.answerCbQuery().catch(() => { });
 
- // Random animation effect
+  // Random animation effect
   for (let i = 0; i < 3; i++) {
     const randomCode = Math.floor(10000 + Math.random() * 90000);
-    const animMsg = `${ctx.t('purchase_success')}\n\n• *${ctx.t('number_label')}*: \`+${cleanPhone}\`\n• *${ctx.t('country_label')}*: ${countryInfo.flag} ${countryInfo.name}\n• *${ctx.t('code_label')}*: \`${randomCode}\`\n\n*🔄 ${ctx.t('request_code_btn')}*`;
+    const animMsg = `${ctx.t('purchase_success')}\n\n• <b>${ctx.t('number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${ctx.t('country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryInfo.name)}\n• <b>${ctx.t('code_label')}</b>: <code>${randomCode}</code>\n\n<b>🔄 ${ctx.t('request_code_btn')}</b>`;
     try {
       await ctx.editMessageText(animMsg, {
-        parse_mode: 'Markdown',
+        parse_mode: 'HTML',
         reply_markup: {
           inline_keyboard: [[{ text: ctx.t('request_code_btn'), callback_data: `check_code_${countryCode}_${phoneNumber}` }]]
         }
@@ -507,9 +520,9 @@ bot.action(/^check_code_(.+)_(.+)$/, async (ctx) => {
     const smsRes = await durianApi.getMsg('0257', phoneNumber);
     if (smsRes.code === 200 && smsRes.data && smsRes.data.length > 0) {
       await completeOrderAndCommission(phoneNumber, smsRes.data);
-      const msg = `${ctx.t('purchase_success')}\n\n• *${ctx.t('number_label')}*: \`+${cleanPhone}\`\n• *${ctx.t('country_label')}*: ${countryInfo.flag} ${countryInfo.name}\n• *${ctx.t('code_label')}*:  \`${smsRes.data}\`\n\n✅ ${ctx.t('use_code_now_hint') || 'You can use the code now'}`;
+      const msg = `${ctx.t('purchase_success')}\n\n• <b>${ctx.t('number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${ctx.t('country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryInfo.name)}\n• <b>${ctx.t('code_label')}</b>:  <code>${escapeHTML(smsRes.data)}</code>\n\n✅ ${ctx.t('use_code_now_hint') || 'You can use the code now'}`;
       await ctx.editMessageText(msg, {
-        parse_mode: 'Markdown',
+        parse_mode: 'HTML',
         reply_markup: {
           inline_keyboard: [
             [{ text: ctx.t('buy_another_btn'), callback_data: 'action_buy_number' }],
@@ -518,9 +531,9 @@ bot.action(/^check_code_(.+)_(.+)$/, async (ctx) => {
         }
       });
     } else {
-      const msg = `${ctx.t('purchase_success')}\n\n• *${ctx.t('number_label')}*: \`+${cleanPhone}\`\n• *${ctx.t('country_label')}*: ${countryInfo.flag} ${countryInfo.name}\n• *${ctx.t('code_label')}*:  \`XXXXX\`\n\n${ctx.t('code_not_retrieved')}`;
+      const msg = `${ctx.t('purchase_success')}\n\n• <b>${ctx.t('number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${ctx.t('country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryInfo.name)}\n• <b>${ctx.t('code_label')}</b>:  <code>XXXXX</code>\n\n${ctx.t('code_not_retrieved')}`;
       await ctx.editMessageText(msg, {
-        parse_mode: 'Markdown',
+        parse_mode: 'HTML',
         reply_markup: {
           inline_keyboard: [
             [{ text: ctx.t('retry_btn'), callback_data: `check_code_${countryCode}_${phoneNumber}` }],
@@ -530,9 +543,9 @@ bot.action(/^check_code_(.+)_(.+)$/, async (ctx) => {
       });
     }
   } catch (err) {
-    const errorMsg = `🎉 Purchase Successful\n\n• *Number*: \`+${cleanPhone}\`\n• *Country*: ${countryInfo.flag} ${countryInfo.name}\n• *Code*:  \`XXXXX\`\n\n❌ *The code was not retrieved. Please try again.*`;
+    const errorMsg = `🎉 <b>Purchase Successful</b>\n\n• <b>Number</b>: <code>+${cleanPhone}</code>\n• <b>Country</b>: ${countryInfo.flag} ${escapeHTML(countryInfo.name)}\n• <b>Code</b>:  <code>XXXXX</code>\n\n❌ <b>The code was not retrieved. Please try again.</b>`;
     await ctx.editMessageText(errorMsg, {
-      parse_mode: 'Markdown',
+      parse_mode: 'HTML',
       reply_markup: {
         inline_keyboard: [
           [{ text: '🔄 Retry', callback_data: `check_code_${countryCode}_${phoneNumber}` }],
@@ -597,9 +610,9 @@ async function startPolling(ctx, phoneNumber, countryCode) {
           ctx.chat.id,
           ctx.callbackQuery.message.message_id,
           null,
-          `${ctx.t('purchase_success')}\n\n• *${ctx.t('number_label')}*: \`+${cleanPhone}\`\n• *${ctx.t('country_label')}*: ${countryInfo.flag} ${countryInfo.name}\n• *${ctx.t('code_label')}*:  \`${smsRes.data}\`\n\n✅ ${ctx.t('use_code_now_hint') || 'You can use the code now'}`,
+          `${ctx.t('purchase_success')}\n\n• <b>${ctx.t('number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${ctx.t('country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryInfo.name)}\n• <b>${ctx.t('code_label')}</b>:  <code>${escapeHTML(smsRes.data)}</code>\n\n✅ ${ctx.t('use_code_now_hint') || 'You can use the code now'}`,
           {
-            parse_mode: 'Markdown',
+            parse_mode: 'HTML',
             reply_markup: {
               inline_keyboard: [
                 [{ text: ctx.t('buy_another_btn'), callback_data: 'action_buy_number' }],
@@ -618,9 +631,9 @@ async function startPolling(ctx, phoneNumber, countryCode) {
           ctx.chat.id,
           ctx.callbackQuery.message.message_id,
           null,
-          `${ctx.t('purchase_success')}\n\n• *${ctx.t('number_label')}*: \`+${cleanPhone}\`\n• *${ctx.t('country_label')}*: ${countryInfo.flag} ${countryInfo.name}\n• *${ctx.t('code_label')}*:  \`XXXXX\`\n\n${ctx.t('code_not_retrieved')}`,
+          `${ctx.t('purchase_success')}\n\n• <b>${ctx.t('number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${ctx.t('country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryInfo.name)}\n• <b>${ctx.t('code_label')}</b>:  <code>XXXXX</code>\n\n${ctx.t('code_not_retrieved')}`,
           {
-            parse_mode: 'Markdown',
+            parse_mode: 'HTML',
             reply_markup: {
               inline_keyboard: [
                 [{ text: ctx.t('retry_btn'), callback_data: `check_code_${countryCode}_${phoneNumber}` }],
@@ -643,7 +656,7 @@ bot.action(/action_main_menu|action_cancel/, async (ctx) => {
   try {
     const msg = ctx.t('welcome_bot');
     await ctx.editMessageText(msg, {
-      parse_mode: 'Markdown',
+      parse_mode: 'HTML',
       reply_markup: keyboards.mainMenu(ctx.state.lang).reply_markup
     }).catch(err => {
       if (!err.message.includes('message is not modified')) {
@@ -662,7 +675,7 @@ bot.action(/action_main_menu|action_cancel/, async (ctx) => {
  * Catch all text for simple testing
  */
 bot.on('text', async (ctx) => {
-  await ctx.reply(ctx.t('welcome', { name: ctx.from.first_name || 'User' }));
+  await ctx.reply(ctx.t('welcome', { name: escapeHTML(ctx.from.first_name || 'User') }), { parse_mode: 'HTML' });
 });
 
 /**
