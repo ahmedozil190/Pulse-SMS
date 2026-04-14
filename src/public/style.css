@@ -590,7 +590,7 @@ body.loading {
 .tab-btn.active {
     background: #3b82f6;
     color: #fff;
-    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    /* Removed glow as requested */
 }
 
 /* User Card Styles */
@@ -638,21 +638,29 @@ body.loading {
     display: flex;
     gap: 12px;
     align-items: center;
-    background: rgba(255, 255, 255, 0.02);
-    padding: 6px;
-    border-radius: 18px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    border: none;
 }
 
 .balance-adjust-row input {
     flex: 1;
-    min-width: 0; /* Prevents overflow */
-    background: transparent;
-    border: none;
-    padding: 12px 15px;
-    font-weight: 800;
+    min-width: 0;
+    background: #0d0f14;
+    border: 1px solid #1f2937;
+    border-radius: 14px;
+    padding: 14px 20px;
+    font-weight: 600;
     color: white;
     font-size: 1rem;
+    transition: 0.2s;
+}
+
+.balance-adjust-row input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+    outline: none;
 }
 
 .adjust-actions {
@@ -662,12 +670,12 @@ body.loading {
 }
 
 .adjust-btn {
-    width: 40px;
-    height: 40px;
+    width: 54px;
+    height: 52px;
     border-radius: 14px;
     border: none;
     cursor: pointer;
-    font-size: 1rem;
+    font-size: 1.2rem;
     color: white;
     transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
@@ -677,13 +685,18 @@ body.loading {
 }
 
 .btn-plus {
-    background: linear-gradient(135deg, #10b981, #059669);
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
 }
 
 .btn-minus {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+    background: #111827;
+    border: 1px solid #7f1d1d;
+    color: #ef4444;
+}
+
+.btn-minus i {
+    color: #ef4444;
 }
 
 .adjust-btn:hover {
@@ -723,7 +736,7 @@ body.loading {
     font-weight: 900;
     color: #fff;
     border: 2px solid #0a0b10;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    /* Removed glow as requested */
 }
 
 .user-row {
