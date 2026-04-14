@@ -218,39 +218,29 @@
                 <div class="close-circle" onclick="closeModal()"><i class="fas fa-times"></i></div>
             </div>
             
-            <!-- Info Header (3 Fields) -->
-            <div class="modal-info-grid">
-                <div class="modal-info-item">
-                    <span class="modal-info-label">Full Name</span>
-                    <span class="modal-info-value color-yellow" id="modal-user-name">-</span>
-                </div>
-                <div class="modal-info-item">
-                    <span class="modal-info-label">Username</span>
-                    <span class="modal-info-value color-blue-tint" id="modal-user-handle">-</span>
-                </div>
-                <div class="modal-info-item">
-                    <span class="modal-info-label">Coins</span>
-                    <span class="modal-info-value color-green" id="modal-user-balance">$0.00</span>
-                </div>
+            <!-- Info Header (Vertical, No Labels) -->
+            <div class="user-info-stack">
+                <div class="modal-info-item-v2 color-yellow" id="modal-user-name">-</div>
+                <div class="modal-info-item-v2 color-blue-tint" id="modal-user-handle">-</div>
+                <div class="modal-info-item-v2 color-green" id="modal-user-balance">$0.00</div>
             </div>
             
             <!-- Balance Adjustment Section -->
             <div class="modal-group">
                 <label class="modal-label">Adjust Balance</label>
                 <div class="balance-adjust-row">
-                    <input type="number" id="balance-amount" step="0.01" placeholder="Enter amount..." style="flex: 2; margin-top:0">
-                    <button class="adjust-btn btn-plus" onclick="performBalanceUpdate('add')">
+                    <input type="number" id="balance-amount" step="0.01" placeholder="Enter amount..." style="margin-top:0">
+                    <button class="adjust-btn btn-plus" onclick="performBalanceUpdate('add')" title="Add to balance">
                         <i class="fas fa-plus"></i>
                     </button>
-                    <button class="adjust-btn btn-minus" onclick="performBalanceUpdate('subtract')">
+                    <button class="adjust-btn btn-minus" onclick="performBalanceUpdate('subtract')" title="Remove from balance">
                         <i class="fas fa-minus"></i>
                     </button>
                 </div>
             </div>
 
             <!-- Status Section -->
-            <div class="modal-group" style="margin-bottom: 5px;">
-                <label class="modal-label">Security & Status</label>
+            <div class="modal-group" style="padding: 0; background: transparent; border: none; margin-bottom: 5px;">
                 <button id="modal-ban-btn" class="gradient-btn" onclick="performToggleBanFromModal()" style="width: 100%;">
                     <!-- Text/Icon set via JS -->
                 </button>
