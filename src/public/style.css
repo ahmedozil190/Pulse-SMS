@@ -581,6 +581,21 @@ body.loading {
     border-color: var(--accent-blue);
 }
 
+.search-section {
+    padding: 25px !important; /* Enlarge the card padding */
+}
+
+.search-section .search-box-v2 input {
+    padding: 18px !important; /* Enlarge the input */
+    font-size: 1.1rem !important;
+    margin-bottom: 20px !important;
+}
+
+.search-section .gradient-btn {
+    padding: 16px !important; /* Enlarge the Find button */
+    font-size: 1.1rem !important;
+}
+
 .gradient-btn {
     width: 100%;
     padding: 12px;
