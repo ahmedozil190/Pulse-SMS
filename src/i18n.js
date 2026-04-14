@@ -27,8 +27,8 @@ const texts = {
     welcome_bot: "🔰 *Welcome to International Numbers Store* 🔰\n\n*Pulse SMS 🩸 👋*\n\n*Choose the appropriate option from the menu:*"
   },
   ar: {
-    welcome_user: "🔰 *مرحباً بك في متجر الأرقام الدولي* 🔰\n\n*{name} 👋*\n\n*اختر الخيار المناسب من القائمة:*",
-    welcome_bot: "🔰 *مرحباً بك في متجر الأرقام الدولي* 🔰\n\n*Pulse SMS 🩸 👋*\n\n*اختر الخيار المناسب من القائمة:*",
+    welcome_user: "🔰 *مرحباً بك في متجر الأرقام الدولي* 🔰\n\n{name} 👋\n\n*اختر الخيار المناسب من القائمة:*",
+    welcome_bot: "🔰 *مرحباً بك في متجر الأرقام الدولي* 🔰\n\nPulse SMS 🩸 👋\n\n*اختر الخيار المناسب من القائمة:*",
     lang_set_success: "✅ تم ضبط اللغة على {lang}",
     choose_lang: "❍ Please choose your language\n❍ দয়া করে আপনার भाषा নির্বাচন করুন\n❍ لطفاً زبان خود را انتخاب کنید\n❍ الرجاء اختيار لغتك",
     balance_header: "💰 *رصيدك الحالي*\n\n• *الرصيد المتاح:* {balance}$\n• *إجمالي المشتريات:* {purchases}$\n\n💎 *اختر طريقة الشحن:*",
@@ -77,12 +77,12 @@ const buttons = {
     invite: "🗽 Invite Friend"
   },
   ar: {
-    buy_number: "شراء رقم 🛒",
-    my_balance: "رصيدي 💰",
-    deposit: "شحن الرصيد 💳",
-    my_stats: "إحصائياتي 📊",
-    notifications: "إعدادات التنبيهات ⚙️",
-    invite: "دعوه صديقك 🗽"
+    buy_number: "🛒 شراء رقم",
+    my_balance: "💰 رصيدي",
+    deposit: "💳 شحن الرصيد",
+    my_stats: "📊 إحصائياتي",
+    notifications: "⚙️ إعدادات التنبيهات",
+    invite: "🗽 دعوه صديقك"
   },
   fa: {
     buy_number: "🛒 خرید شماره",
