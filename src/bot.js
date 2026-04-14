@@ -452,6 +452,13 @@ bot.action('action_refresh_countries', async (ctx) => {
 bot.action(/^select_country_(.+)$/, async (ctx) => {
   const countryCode = ctx.match[1];
   const countryInfo = durianApi.getCountryInfo(countryCode);
+  const user = await getOrCreateUser(ctx);
+
+  // 1. Check for sufficient balance before starting purchase
+  if (user.balance < 0.25) {
+    const msg = ctx.t('insufficient_balance', { balance: user.balance.toFixed(2) });
+    return ctx.answerCbQuery(msg, { show_alert: true });
+  }
 
   await ctx.answerCbQuery().catch(() => { });
 
@@ -590,6 +597,13 @@ async function completeOrderAndCommission(phoneNumber, smsCode) {
       where: { id: order.id },
       data: { status: 'COMPLETED', smsCode }
     });
+
+    // 3. Deduct balance only on successful code arrival
+    await prisma.user.update({
+      where: { id: order.userId },
+      data: { balance: { decrement: order.price } }
+    });
+
     const user = await prisma.user.findUnique({ where: { id: order.userId } });
     if (user && user.referredById) {
       const commission = order.price * 0.05;
