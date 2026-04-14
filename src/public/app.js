@@ -399,6 +399,93 @@ function renderDepositsList(deposits) {
     `).join('');
 }
 
+// --- COUNTRIES LOGIC ---
+window.renderCountries = () => {
+    const list = document.getElementById('countries-list');
+    if (!list) return;
+    list.innerHTML = '';
+
+    const query = (countrySearchQuery || '').toLowerCase();
+    const filtered = allCountries.filter(c => 
+        c.name.toLowerCase().includes(query) || 
+        c.code.toLowerCase().includes(query)
+    );
+
+    if (filtered.length === 0) {
+        list.innerHTML = `<div class="empty-state">No countries found</div>`;
+        return;
+    }
+
+    filtered.forEach(c => {
+        const item = document.createElement('div');
+        item.className = 'data-item-v2';
+        
+        item.innerHTML = `
+            <div class="data-item-content">
+                <div class="data-main">
+                    <span class="avatar-sm" style="background:#2C2C2E">${c.flag}</span>
+                    <div style="display:flex; flex-direction:column;">
+                        <span style="font-weight:600; font-size:14px; margin-bottom: 2px;">${escapeHtml(c.name)} (${c.code.toUpperCase()})</span>
+                        <span style="font-size:11px; color:#A0A0A5;">Live Stock: ${c.stock || 0}</span>
+                    </div>
+                </div>
+                <!-- Price Input Container -->
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="position: relative;">
+                        <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); color: #A0A0A5; font-size: 13px;">$</span>
+                        <input type="number" 
+                               step="0.01" 
+                               min="0" 
+                               value="${c.price}" 
+                               onchange="updateCountryConfig('${c.code}', 'price', this.value)"
+                               style="background: #1C1C1E; border: 1px solid #3A3A3C; color: white; border-radius: 8px; padding: 6px 8px 6px 20px; width: 70px; font-size: 13px; font-family: inherit; transition: border-color 0.2s;"
+                               onfocus="this.style.borderColor='#30d158';"
+                               onblur="this.style.borderColor='#3A3A3C';"
+                        >
+                    </div>
+                </div>
+            </div>
+            
+            <div class="data-item-actions">
+                <button class="action-btn-sm ${c.isEnabled ? "btn-danger" : "btn-success"}" style="width: 100%" onclick="updateCountryConfig('${c.code}', 'isEnabled', ${!c.isEnabled})">
+                    <i class="fas ${c.isEnabled ? "fa-eye-slash" : "fa-eye"}"></i> ${c.isEnabled ? "Hide Country" : "Show Country"}
+                </button>
+            </div>
+        `;
+        list.appendChild(item);
+    });
+};
+
+window.updateCountryConfig = async (code, field, value) => {
+    try {
+        const payload = { code };
+        if (field === 'price') {
+            const parsed = parseFloat(value);
+            if (isNaN(parsed) || parsed < 0) return alert('Invalid price');
+            payload.price = parsed;
+        } else if (field === 'isEnabled') {
+            payload.isEnabled = value;
+        }
+
+        const res = await fetch('/api/admin/countries/update', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getHeaders()
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) throw new Error('Failed to update config');
+        
+        webapp.HapticFeedback.notificationOccurred('success');
+        await refreshData();
+    } catch (err) {
+        webapp.HapticFeedback.notificationOccurred('error');
+        alert('Update failed. Please try again.');
+    }
+};
+
 // HANDLERS
 window.performToggleBanFromModal = async () => {
     if (!currentEditingUserId) return;
