@@ -410,12 +410,12 @@ async function showCountrySelection(ctx, isRefresh = false) {
 
     // Provide a small success notification on refresh
     if (isRefresh) {
-      await ctx.answerCbQuery("🔄 " + ctx.t('refresh_btn')).catch(() => {});
+      await ctx.answerCbQuery("🔄").catch(() => {});
     }
   } catch (error) {
     // If message not modified, it means stock is still the same - still technically a success for the user
     if (error.description && error.description.includes('message is not modified')) {
-      return ctx.answerCbQuery("🔄 " + ctx.t('refresh_btn')).catch(() => {});
+      return ctx.answerCbQuery("🔄").catch(() => {});
     }
 
     console.error("Error loading countries:", error);
