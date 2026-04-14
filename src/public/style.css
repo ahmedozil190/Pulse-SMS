@@ -621,7 +621,7 @@ body.loading {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    margin-bottom: 22px; /* Set consistent gap above balance control */
+    margin-bottom: 15px; /* Reduced gap as requested */
 }
 
 .modal-info-item-v2 {
@@ -721,7 +721,7 @@ input[type=number] {
 }
 
 .modal-group {
-    margin-bottom: 22px; /* Symmetry: Exact match with gap above (user-info-stack) */
+    margin-bottom: 15px; /* Symmetric reduction to match the top gap */
 }
 
 .modal-status-group {
