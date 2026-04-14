@@ -37,7 +37,7 @@ const keyboards = {
    */
   buildCountryKeyboard: (distribution, lang) => {
     const buttons = [];
-    const codes = Object.keys(distribution).filter(c => c !== ""); 
+    const codes = Object.keys(distribution).filter(c => c !== "" && distribution[c] > 0); 
 
     codes.forEach(code => {
       const info = durianApi.getCountryInfo(code);
