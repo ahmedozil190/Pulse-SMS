@@ -115,11 +115,13 @@
                     <div class="search-box-v2">
                         <input type="text" id="user-search-v2" placeholder="Search users...">
                     </div>
-                    <button class="gradient-btn" onclick="triggerSearch('user')" id="btn-find-users" style="margin-bottom: 8px;">
-                        Find
+                    <button class="gradient-btn" onclick="triggerSearch('user')" id="btn-find-users"
+                        style="margin-bottom: 8px;">
+                        <i class="fas fa-search"></i> Find
                     </button>
                     <div id="reset-search-container" style="display: none;">
-                        <button class="tab-btn" onclick="resetSearch('user')" style="width: 100%; height: 45px; background: rgba(255,255,255,0.05) !important;">
+                        <button class="tab-btn" onclick="resetSearch('user')"
+                            style="width: 100%; height: 45px; background: rgba(255,255,255,0.05) !important;">
                             Reset
                         </button>
                     </div>
@@ -225,16 +227,18 @@
                 <div class="modal-info-item-v2 color-blue-tint" id="modal-user-handle">-</div>
                 <div class="modal-info-item-v2 color-green" id="modal-user-balance">$0.00</div>
             </div>
-            
+
             <!-- Balance Adjustment Section -->
             <div class="modal-group">
                 <div class="balance-adjust-row">
                     <input type="number" id="balance-amount" step="0.01" placeholder="Amount...">
                     <div class="adjust-actions">
-                        <button class="adjust-btn btn-plus" onclick="performBalanceUpdate('add')" title="Add to balance">
+                        <button class="adjust-btn btn-plus" onclick="performBalanceUpdate('add')"
+                            title="Add to balance">
                             <i class="fas fa-plus"></i>
                         </button>
-                        <button class="adjust-btn btn-minus" onclick="performBalanceUpdate('subtract')" title="Remove from balance">
+                        <button class="adjust-btn btn-minus" onclick="performBalanceUpdate('subtract')"
+                            title="Remove from balance">
                             <i class="fas fa-minus"></i>
                         </button>
                     </div>
@@ -243,7 +247,8 @@
 
             <!-- Status Section -->
             <div class="modal-group modal-status-group">
-                <button id="modal-ban-btn" class="gradient-btn" onclick="performToggleBanFromModal()" style="width: 100%;">
+                <button id="modal-ban-btn" class="gradient-btn" onclick="performToggleBanFromModal()"
+                    style="width: 100%;">
                     <!-- Text set via JS -->
                 </button>
             </div>
