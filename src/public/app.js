@@ -130,7 +130,9 @@ window.switchPage = (pageName) => {
     });
 
     document.querySelectorAll('.page').forEach(page => {
-        page.classList.toggle('active', page.id === `page-${pageName}`);
+        const isActive = page.id === `page-${pageName}`;
+        page.classList.toggle('active', isActive);
+        if (isActive) page.scrollTop = 0; // Reset scroll to top on switch
     });
 
     const titles = { dashboard: 'Overview', users: 'User Management', orders: 'Orders', deposits: 'Deposits', settings: 'Settings' };
@@ -283,7 +285,8 @@ function renderUserPagination(totalCount) {
 
 window.changeUserPage = (delta) => {
     currentUserPage += delta;
-    // Re-apply filters to get the current list and re-render
+    const userPage = document.getElementById('page-users');
+    if (userPage) userPage.scrollTop = 0; // Reset scroll to top of section
     applyUserFiltersPaginated();
 };
 
