@@ -311,7 +311,7 @@ bot.action('action_invite', async (ctx) => {
     reply_markup: Markup.inlineKeyboard([
       [Markup.button.callback(ctx.t('withdraw_btn'), 'action_withdraw_referral')],
       [Markup.button.callback(ctx.t('back_btn'), 'action_main_menu')]
-    ])
+    ]).reply_markup
   });
 });
 
