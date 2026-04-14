@@ -63,8 +63,8 @@ const texts = {
     balance_header: "<b>💰 موجودی فعلی شما</b>\n\n• <b>موجودی قابل استفاده:</b> {balance}<b>$</b>\n• <b>کل خریدها:</b> {purchases}<b>$</b>\n\n<b>💎 روش شارژ را انتخاب کنید:</b>",
     stats_header: "📊 <b>آمار شخصی شما</b>\n\n• <b>شماره های فعال:</b> {active}\n• <b>کل خریدها:</b> {count}\n• <b>کل خریدها:</b> {total} $\n\n🎯 <b>ادامه خرید!</b>",
     deposit_header: "<b>💎 روش شارژ را انتخاب کنید:</b>",
-    binance_btn: "بایننس 💳",
-    back_btn: "بازگشت 🔙",
+    binance_btn: "💳 بایننس",
+    back_btn: "🔙 بازگشت",
   },
   bn: {
     welcome_user: "<b>🔰 আন্তর্জাতিক নম্বর স্টোরে স্বাগতম 🔰</b>\n\n{name} 👋\n\n<b>মেনু থেকে উপযুক্ত বিকল্প নির্বাচন করুন:</b>",
