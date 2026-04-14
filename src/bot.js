@@ -3,6 +3,7 @@ const dotenv = require('dotenv');
 const prisma = require('./db/prisma');
 const durianApi = require('./api/durian');
 const keyboards = require('./keyboards');
+const i18n = require('./i18n');
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -14,6 +15,21 @@ const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 
 // Simple session middleware
 bot.use(session());
+
+/**
+ * i18n Middleware - Detect user language and provide translation helper
+ */
+bot.use(async (ctx, next) => {
+  if (!ctx.from) return next();
+  
+  const user = await getOrCreateUser(ctx);
+  const lang = user?.language || 'en';
+  
+  ctx.state.lang = lang;
+  ctx.t = (key, params) => i18n.t(lang, key, params);
+  
+  return next();
+});
 
 /**
  * /admin command - Opens the Mini App Dashboard
@@ -83,6 +99,11 @@ async function getOrCreateUser(ctx, referrerTelegramId = null) {
         });
       }
     }
+    }
+    
+    // Attach language to session for faster access if needed
+    ctx.session.lang = user.language;
+    
     return user;
   } catch (error) {
     console.error('[DATABASE ERROR] Failed to get/create user:', error.message);
@@ -106,17 +127,10 @@ bot.command('start', async (ctx) => {
       return ctx.reply("⚠️ Sorry, there is a technical issue with the database setup. Please try again in 1 minute.");
     }
 
-    const startMessage = `
-🔰 *Welcome to International Numbers Store* 🔰
-
-${ctx.from.first_name || 'User'} 👋 
-
-*Choose the appropriate option from the menu:*
-    `;
-
-    await ctx.reply(startMessage, {
+    const msg = ctx.t('welcome', { name: ctx.from.first_name || 'User' });
+    await ctx.reply(msg, {
       parse_mode: 'Markdown',
-      reply_markup: keyboards.mainMenu.reply_markup
+      reply_markup: keyboards.mainMenu(ctx.state.lang).reply_markup
     });
   } catch (err) {
     console.error('[START COMMAND ERROR]', err);
@@ -127,11 +141,31 @@ ${ctx.from.first_name || 'User'} 👋
  * /lang command
  */
 bot.command('lang', (ctx) => {
-  const msg = `❍ Please choose your language
-❍ দয়া করে আপনার ভাষা নির্বাচন করুন
-❍ لطفاً زبان خود را انتخاب کنید
-❍ الرجاء اختيار لغتك`;
-  return ctx.reply(msg, keyboards.languageSelect);
+  return ctx.reply(ctx.t('choose_lang'), keyboards.languageSelect);
+});
+
+// Handle Language Switch
+['ar', 'en', 'fa', 'bn'].forEach(lang => {
+  bot.action(`set_lang_${lang}`, async (ctx) => {
+    try {
+      await prisma.user.update({
+        where: { telegramId: ctx.from.id.toString() },
+        data: { language: lang }
+      });
+      ctx.state.lang = lang; 
+      await ctx.answerCbQuery('Language Updated! ✅');
+      
+      // Send fresh start message in new language
+      const msg = ctx.t('welcome', { name: ctx.from.first_name || 'User' });
+      await ctx.reply(msg, {
+        parse_mode: 'Markdown',
+        reply_markup: keyboards.mainMenu(lang).reply_markup
+      });
+      
+      // Cleanup
+      await ctx.deleteMessage();
+    } catch (err) { console.error(err); }
+  });
 });
 
 /**
@@ -147,10 +181,10 @@ bot.action('action_balance', async (ctx) => {
   const totalPurchases = (totalPurchasesResult._sum.price || 0).toFixed(2);
   const availableBalance = user.balance.toFixed(2);
 
-  const msg = `*💰 Your Current Balance*\n\n*• Available Balance:* ${availableBalance}$\n*• Total Purchases:* ${totalPurchases}$\n\n*💎 Choose Deposit Method:*`;
+  const msg = ctx.t('balance_header', { balance: availableBalance, purchases: totalPurchases });
   await ctx.editMessageText(msg, {
     parse_mode: 'Markdown',
-    reply_markup: keyboards.depositMethods.reply_markup
+    reply_markup: keyboards.depositMethods(ctx.state.lang).reply_markup
   });
 });
 
@@ -163,26 +197,26 @@ bot.action('action_stats', async (ctx) => {
   const allOrdersCount = await prisma.order.count({
     where: { userId: user.id }
   });
-
-  const completedCount = await prisma.order.count({
-    where: { userId: user.id, status: 'COMPLETED' }
-  });
-
   const totalPurchasesResult = await prisma.order.aggregate({
     _sum: { price: true },
+    _count: { id: true },
     where: { userId: user.id, status: 'COMPLETED' }
   });
+  
   const totalSpent = (totalPurchasesResult._sum.price || 0).toFixed(2);
+  const totalCount = totalPurchasesResult._count.id;
+  
+  const activeCount = 0;
 
-  const msg = `*📊 Your Personal Statistics*\n\n•* Active Numbers:* ${completedCount}\n• *Total Purchases:* ${allOrdersCount}\n• *Total Purchases:* ${totalSpent} $\n\n*🎯 Continue Shopping!*`;
-
+  const msg = ctx.t('stats_header', { 
+    active: activeCount, 
+    count: totalCount, 
+    total: totalSpent 
+  });
+  
   await ctx.editMessageText(msg, {
     parse_mode: 'Markdown',
-    reply_markup: {
-      inline_keyboard: [
-        [{ text: '🔙 Back', callback_data: 'action_main_menu' }]
-      ]
-    }
+    reply_markup: keyboards.backToMain(ctx.state.lang).reply_markup
   });
 });
 
@@ -190,11 +224,12 @@ bot.action('action_stats', async (ctx) => {
  * Handle Deposit
  */
 bot.action('action_deposit', async (ctx) => {
-  await ctx.editMessageText(`*💎 Choose Deposit Method:*`, {
+  await ctx.editMessageText(ctx.t('deposit_header'), {
     parse_mode: 'Markdown',
-    reply_markup: keyboards.depositMethods.reply_markup
+    reply_markup: keyboards.depositMethods(ctx.state.lang).reply_markup
   });
 });
+
 /**
  * Handle Invite Friend
  */
@@ -250,17 +285,26 @@ bot.action('action_invite', async (ctx) => {
 
   const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
 
-  const msg = `*🔗 Invite a Friend*\n\nInvite your friends and earn 5% of their purchases!\n\n📎 Your invite link:\n\`${inviteLink}\`\n\nCopy the link and send it to your friends. When they join through your link and buy a number, you'll earn 5% of the purchase price.\n\n*📊 Your Statistics*\n• 👥 Your total team: ${totalTeam}\n• Today: ${todayCount} (Earnings: ${todayEarn.toFixed(2)}$)\n• This week: ${weekCount} (Earnings: ${weekEarn.toFixed(2)}$)\n• This month: ${monthCount} (Earnings: ${monthEarn.toFixed(2)}$)\n• 💰 Current referral balance: ${dbUser.referralBalance.toFixed(2)}$\n\nThis balance is separate from your main balance and can be used to buy numbers or withdraw\n\n📅 Date: ${dateStr}`;
+  const msg = ctx.t('invite_header', {
+    link: inviteLink,
+    teamCount: totalTeam,
+    todayCount: todayCount,
+    todayProfit: todayEarn.toFixed(2),
+    weekCount: weekCount,
+    weekProfit: weekEarn.toFixed(2),
+    monthCount: monthCount,
+    monthProfit: monthEarn.toFixed(2),
+    refBalance: dbUser.referralBalance.toFixed(2),
+    date: dateStr
+  });
 
   await ctx.editMessageText(msg, {
     parse_mode: 'Markdown',
     disable_web_page_preview: true,
-    reply_markup: {
-      inline_keyboard: [
-        [{ text: '💰 Withdraw Earnings', callback_data: 'action_withdraw_referral' }],
-        [{ text: '🔙 Back', callback_data: 'action_main_menu' }]
-      ]
-    }
+    reply_markup: Markup.inlineKeyboard([
+      [Markup.button.callback(ctx.t('withdraw_btn'), 'action_withdraw_referral')],
+      [Markup.button.callback(ctx.t('back_btn'), 'action_main_menu')]
+    ])
   });
 });
 
@@ -272,7 +316,7 @@ bot.action('action_withdraw_referral', async (ctx) => {
   const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
 
   if (dbUser.referralBalance < 1) {
-    const alertMsg = `❌ Your referral balance is insufficient.\n• Current balance: ${dbUser.referralBalance.toFixed(2)}$\n• Minimum required: 1$`;
+    const alertMsg = ctx.t('insufficient_ref_balance', { balance: dbUser.referralBalance.toFixed(2) });
     return ctx.answerCbQuery(alertMsg, { show_alert: true });
   }
 
@@ -284,7 +328,8 @@ bot.action('action_withdraw_referral', async (ctx) => {
     }
   });
 
-  return ctx.answerCbQuery(`✅ Withdrawal Successful!\n${dbUser.referralBalance.toFixed(2)}$ has been added to your main balance.`, { show_alert: true });
+  const successMsg = ctx.t('withdrawal_success') + '\n' + ctx.t('withdrawn_to_balance', { amount: dbUser.referralBalance.toFixed(2) });
+  return ctx.answerCbQuery(successMsg, { show_alert: true });
 });
 
 /**
@@ -306,36 +351,18 @@ async function showCountrySelection(ctx, isRefresh = false) {
     const response = await durianApi.getCountryDistribution('0257');
 
     if (response.code === 200 && response.data) {
-      // Sort and take top 20 countries with stock > 0
       const distribution = response.data;
-      const sortedCodes = Object.keys(distribution)
-        .filter(c => c !== "" && distribution[c] > 0)
-        .sort((a, b) => distribution[b] - distribution[a])
-        .slice(0, 20); // Top 20 for better UI
-
-      const filteredDistribution = {};
-      sortedCodes.forEach(code => filteredDistribution[code] = distribution[code]);
-
-      const msg = `🌍 *Choose Required Country*\n\n• Get all updates first-hand\n• Choose the country to buy number from:`;
-      const keyboard = keyboards.buildCountryKeyboard(filteredDistribution);
-
-      if (isRefresh) {
-        await ctx.answerCbQuery("✅ List refreshed");
-      }
-
-      await ctx.editMessageText(msg, {
+      await ctx.editMessageText(ctx.t('buy_number_header'), {
         parse_mode: 'Markdown',
-        reply_markup: keyboard.reply_markup
+        reply_markup: keyboards.buildCountryKeyboard(distribution, ctx.state.lang).reply_markup
       });
     } else {
-      await ctx.editMessageText(`❌ Failed to load countries: ${response.msg}`, {
-        reply_markup: keyboards.backToMain.reply_markup
-      });
+      await ctx.reply("⚠️ Failed to fetch country list. Please try again.");
     }
   } catch (error) {
     console.error("Error loading countries:", error);
     await ctx.editMessageText(`❌ System error while loading countries.`, {
-      reply_markup: keyboards.backToMain.reply_markup
+      reply_markup: keyboards.backToMain(ctx.state.lang).reply_markup
     });
   }
 }
@@ -396,13 +423,13 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
         }
       });
 
-      const msg = `🎉 *Purchase Successful!*\n\n• *Number*: \`+${cleanPhone}\`\n• *Country*: ${countryInfo.flag} ${countryInfo.name}\n• *Code*: \`XXXXX\`\n\n*🔄 Request Code*`;
+      const msg = `${ctx.t('purchase_success')}\n\n• *${ctx.t('number_label')}*: \`+${cleanPhone}\`\n• *${ctx.t('country_label')}*: ${countryInfo.flag} ${countryInfo.name}\n• *${ctx.t('code_label')}*: \`XXXXX\`\n\n*🔄 ${ctx.t('request_code_btn')}*`;
 
       await ctx.editMessageText(msg, {
         parse_mode: 'Markdown',
         reply_markup: {
           inline_keyboard: [
-            [{ text: '🔄 Request Code', callback_data: `check_code_${countryCode}_${phoneNumber}` }]
+            [{ text: ctx.t('request_code_btn'), callback_data: `check_code_${countryCode}_${phoneNumber}` }]
           ]
         }
       });
@@ -412,12 +439,12 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
 
     } else {
       await ctx.editMessageText(`❌ Failed to get number: ${response.msg}`, {
-        reply_markup: keyboards.backToMain.reply_markup
+        reply_markup: keyboards.backToMain(ctx.state.lang).reply_markup
       });
     }
   } catch (error) {
     await ctx.editMessageText(`❌ System error. Try again later.`, {
-      reply_markup: keyboards.backToMain.reply_markup
+      reply_markup: keyboards.backToMain(ctx.state.lang).reply_markup
     });
   }
 });
@@ -433,15 +460,15 @@ bot.action(/^check_code_(.+)_(.+)$/, async (ctx) => {
 
   await ctx.answerCbQuery().catch(() => { });
 
-  // Random animation effect "ارقام ورا بعض"
+ // Random animation effect
   for (let i = 0; i < 3; i++) {
     const randomCode = Math.floor(10000 + Math.random() * 90000);
-    const animMsg = `🎉 *Purchase Successful!*\n\n• *Number*: \`+${cleanPhone}\`\n• *Country*: ${countryInfo.flag} ${countryInfo.name}\n• *Code*: \`${randomCode}\`\n\n*🔄 Request Code*`;
+    const animMsg = `${ctx.t('purchase_success')}\n\n• *${ctx.t('number_label')}*: \`+${cleanPhone}\`\n• *${ctx.t('country_label')}*: ${countryInfo.flag} ${countryInfo.name}\n• *${ctx.t('code_label')}*: \`${randomCode}\`\n\n*🔄 ${ctx.t('request_code_btn')}*`;
     try {
       await ctx.editMessageText(animMsg, {
         parse_mode: 'Markdown',
         reply_markup: {
-          inline_keyboard: [[{ text: '🔄 Request Code', callback_data: `check_code_${countryCode}_${phoneNumber}` }]]
+          inline_keyboard: [[{ text: ctx.t('request_code_btn'), callback_data: `check_code_${countryCode}_${phoneNumber}` }]]
         }
       });
       await new Promise(resolve => setTimeout(resolve, 600));
@@ -452,24 +479,24 @@ bot.action(/^check_code_(.+)_(.+)$/, async (ctx) => {
     const smsRes = await durianApi.getMsg('0257', phoneNumber);
     if (smsRes.code === 200 && smsRes.data && smsRes.data.length > 0) {
       await completeOrderAndCommission(phoneNumber, smsRes.data);
-      const msg = `🎉 Purchase Successful\n\n• *Number*: \`+${cleanPhone}\`\n• *Country*: ${countryInfo.flag} ${countryInfo.name}\n• *Code*:  \`${smsRes.data}\`\n\n✅ You can use the code now`;
+      const msg = `${ctx.t('purchase_success')}\n\n• *${ctx.t('number_label')}*: \`+${cleanPhone}\`\n• *${ctx.t('country_label')}*: ${countryInfo.flag} ${countryInfo.name}\n• *${ctx.t('code_label')}*:  \`${smsRes.data}\`\n\n✅ ${ctx.t('use_code_now_hint') || 'You can use the code now'}`;
       await ctx.editMessageText(msg, {
         parse_mode: 'Markdown',
         reply_markup: {
           inline_keyboard: [
-            [{ text: '🛒 Buy Another Number', callback_data: 'action_buy_number' }],
-            [{ text: '📢 Activation Channel', url: 'https://t.me/your_activation_channel' }]
+            [{ text: ctx.t('buy_another_btn'), callback_data: 'action_buy_number' }],
+            [{ text: ctx.t('activation_channel_btn'), url: 'https://t.me/your_activation_channel' }]
           ]
         }
       });
     } else {
-      const msg = `🎉 Purchase Successful\n\n• *Number*: \`+${cleanPhone}\`\n• *Country*: ${countryInfo.flag} ${countryInfo.name}\n• *Code*:  \`XXXXX\`\n\n❌ *The code was not retrieved. Please try again.*`;
+      const msg = `${ctx.t('purchase_success')}\n\n• *${ctx.t('number_label')}*: \`+${cleanPhone}\`\n• *${ctx.t('country_label')}*: ${countryInfo.flag} ${countryInfo.name}\n• *${ctx.t('code_label')}*:  \`XXXXX\`\n\n${ctx.t('code_not_retrieved')}`;
       await ctx.editMessageText(msg, {
         parse_mode: 'Markdown',
         reply_markup: {
           inline_keyboard: [
-            [{ text: '🔄 Retry', callback_data: `check_code_${countryCode}_${phoneNumber}` }],
-            [{ text: '🔙 Main Menu', callback_data: 'action_main_menu' }]
+            [{ text: ctx.t('retry_btn'), callback_data: `check_code_${countryCode}_${phoneNumber}` }],
+            [{ text: ctx.t('back_btn'), callback_data: 'action_main_menu' }]
           ]
         }
       });
@@ -542,13 +569,13 @@ async function startPolling(ctx, phoneNumber, countryCode) {
           ctx.chat.id,
           ctx.callbackQuery.message.message_id,
           null,
-          `🎉 Purchase Successful\n\n• *Number*: \`+${cleanPhone}\`\n• *Country*: ${countryInfo.flag} ${countryInfo.name}\n• *Code*:  \`${smsRes.data}\`\n\n✅ You can use the code now`,
+          `${ctx.t('purchase_success')}\n\n• *${ctx.t('number_label')}*: \`+${cleanPhone}\`\n• *${ctx.t('country_label')}*: ${countryInfo.flag} ${countryInfo.name}\n• *${ctx.t('code_label')}*:  \`${smsRes.data}\`\n\n✅ ${ctx.t('use_code_now_hint') || 'You can use the code now'}`,
           {
             parse_mode: 'Markdown',
             reply_markup: {
               inline_keyboard: [
-                [{ text: '🛒 Buy Another Number', callback_data: 'action_buy_number' }],
-                [{ text: '📢 Activation Channel', url: 'https://t.me/your_activation_channel' }]
+                [{ text: ctx.t('buy_another_btn'), callback_data: 'action_buy_number' }],
+                [{ text: ctx.t('activation_channel_btn'), url: 'https://t.me/your_activation_channel' }]
               ]
             }
           }
@@ -563,13 +590,13 @@ async function startPolling(ctx, phoneNumber, countryCode) {
           ctx.chat.id,
           ctx.callbackQuery.message.message_id,
           null,
-          `🎉 Purchase Successful\n\n• *Number*: \`+${cleanPhone}\`\n• *Country*: ${countryInfo.flag} ${countryInfo.name}\n• *Code*:  \`XXXXX\`\n\n❌ *The code was not retrieved. Please try again.*`,
+          `${ctx.t('purchase_success')}\n\n• *${ctx.t('number_label')}*: \`+${cleanPhone}\`\n• *${ctx.t('country_label')}*: ${countryInfo.flag} ${countryInfo.name}\n• *${ctx.t('code_label')}*:  \`XXXXX\`\n\n${ctx.t('code_not_retrieved')}`,
           {
             parse_mode: 'Markdown',
             reply_markup: {
               inline_keyboard: [
-                [{ text: '🔄 Retry', callback_data: `check_code_${countryCode}_${phoneNumber}` }],
-                [{ text: '🔙 Main Menu', callback_data: 'action_main_menu' }]
+                [{ text: ctx.t('retry_btn'), callback_data: `check_code_${countryCode}_${phoneNumber}` }],
+                [{ text: ctx.t('back_btn'), callback_data: 'action_main_menu' }]
               ]
             }
           }
@@ -584,18 +611,11 @@ async function startPolling(ctx, phoneNumber, countryCode) {
 /**
  * Return to Main Menu
  */
-bot.action('action_main_menu', async (ctx) => {
-  const startMessage = `
-🔰 *Welcome to International Numbers Store* 🔰
-
-*Pulse SMS 🩸 👋*
-
-*Choose the appropriate option from the menu:*
-  `;
-
-  await ctx.editMessageText(startMessage, {
+bot.action(/action_main_menu|action_cancel/, async (ctx) => {
+  const msg = ctx.t('welcome', { name: ctx.from.first_name || 'User' });
+  await ctx.editMessageText(msg, {
     parse_mode: 'Markdown',
-    reply_markup: keyboards.mainMenu.reply_markup
+    reply_markup: keyboards.mainMenu(ctx.state.lang).reply_markup
   });
 });
 
@@ -605,12 +625,14 @@ bot.action('action_main_menu', async (ctx) => {
  * Catch all text for simple testing
  */
 bot.on('text', async (ctx) => {
-  await ctx.reply("Please use the menu /start");
+  await ctx.reply(ctx.t('welcome', { name: ctx.from.first_name || 'User' }));
 });
 
-
-bot.command('lang', async (ctx) => {
-  await ctx.reply("Language selection coming soon...");
+/**
+ * Handle Settings Placeholder
+ */
+bot.action('action_settings', async (ctx) => {
+  await ctx.answerCbQuery('Coming soon... ⚙️', { show_alert: true });
 });
 
 bot.launch().then(async () => {
