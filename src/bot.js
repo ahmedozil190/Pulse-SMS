@@ -456,7 +456,7 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
 
   // 1. Check for sufficient balance before starting purchase
   if (user.balance < 0.25) {
-    const msg = ctx.t('insufficient_balance', { balance: user.balance.toFixed(2) });
+    const msg = ctx.t('insufficient_balance', { balance: user.balance.toFixed(1) });
     return ctx.answerCbQuery(msg, { show_alert: true });
   }
 
