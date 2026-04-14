@@ -1024,14 +1024,13 @@ app.get('/api/admin/countries', isAdminMiddleware, async (req, res) => {
     const liveDist = hunter.getLiveDistribution();
     const configs = await prisma.countryConfig.findMany();
     const configMap = configs.reduce((acc, c) => ({ ...acc, [c.countryCode]: c }), {});
+    const allCountryMap = durianApi.getAllCountries();
 
     const countries = [];
-    // Only return countries that Durian currently recognizes or has stock for
-    Object.keys(liveDist).forEach(code => {
-      const info = durianApi.getCountryInfo(code);
-      if (!info) return; // Skip if unknown
-      
+    Object.keys(allCountryMap).forEach(code => {
+      const info = allCountryMap[code];
       const config = configMap[code] || { isEnabled: true, price: 0.25 };
+      
       countries.push({
         code,
         name: info.name,

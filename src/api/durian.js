@@ -325,6 +325,13 @@ class DurianAPI {
   getCountryInfo(code) {
     return COUNTRY_MAP[code.toLowerCase()] || { name: code.toUpperCase(), flag: '🏳️' };
   }
+
+  /**
+   * Get all supported countries
+   */
+  getAllCountries() {
+    return COUNTRY_MAP;
+  }
 }
 
 module.exports = new DurianAPI();
