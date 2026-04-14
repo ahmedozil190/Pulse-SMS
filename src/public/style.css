@@ -594,7 +594,7 @@ body.loading {
     align-items: center;
     justify-content: center;
     gap: 10px;
-    box-shadow: 0 4px 15px rgba(96, 165, 250, 0.2);
+    box-shadow: none;
     cursor: pointer;
     transition: 0.2s;
 }
@@ -859,9 +859,9 @@ input[type=number] {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 15px;
-    margin-top: 30px;
-    padding-bottom: 30px;
+    gap: 8px; /* Move name/text closer to buttons */
+    margin-top: 15px; /* Reduce extra space below list */
+    padding-bottom: 15px;
 }
 
 .pagination-btn {
