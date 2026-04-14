@@ -126,7 +126,13 @@ ${ctx.from.first_name || 'User'} 👋
 /**
  * /lang command
  */
-bot.command('lang', (ctx) => ctx.reply('Please use the menu /start'));
+bot.command('lang', (ctx) => {
+  const msg = `❍ Please choose your language
+❍ দয়া করে আপনার ভাষা নির্বাচন করুন
+❍ لطفاً زبان خود را انتخاب کنید
+❍ الرجاء اختيار لغتك`;
+  return ctx.reply(msg, keyboards.languageSelect);
+});
 
 /**
  * Handle My Balance

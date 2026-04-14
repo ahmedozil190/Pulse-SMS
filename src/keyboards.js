@@ -58,7 +58,18 @@ const keyboards = {
     rows.push([Markup.button.callback('🔙 Back', 'action_main_menu')]);
 
     return Markup.inlineKeyboard(rows);
-  }
+  },
+
+  languageSelect: Markup.inlineKeyboard([
+    [
+      Markup.button.callback('🇪🇬 العربية', 'set_lang_ar'),
+      Markup.button.callback('🇺🇸 English', 'set_lang_en')
+    ],
+    [
+      Markup.button.callback('🇮🇷 فارسی', 'set_lang_fa'),
+      Markup.button.callback('🇧🇩 বাংলা', 'set_lang_bn')
+    ]
+  ])
 };
 
 module.exports = keyboards;
