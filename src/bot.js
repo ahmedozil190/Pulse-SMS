@@ -99,7 +99,6 @@ async function getOrCreateUser(ctx, referrerTelegramId = null) {
         });
       }
     }
-    }
     
     // Attach language to session for faster access if needed
     ctx.session.lang = user.language;
@@ -127,7 +126,7 @@ bot.command('start', async (ctx) => {
       return ctx.reply("⚠️ Sorry, there is a technical issue with the database setup. Please try again in 1 minute.");
     }
 
-    const msg = ctx.t('welcome', { name: ctx.from.first_name || 'User' });
+    const msg = ctx.t('welcome_user', { name: ctx.from.first_name || 'User' });
     await ctx.reply(msg, {
       parse_mode: 'Markdown',
       reply_markup: keyboards.mainMenu(ctx.state.lang).reply_markup
@@ -153,10 +152,11 @@ bot.command('lang', (ctx) => {
         data: { language: lang }
       });
       ctx.state.lang = lang; 
-      await ctx.answerCbQuery('Language Updated! ✅');
+      const langNames = { ar: 'العربية', en: 'English', fa: 'فارسی', bn: 'বাংলা' };
+      await ctx.answerCbQuery(ctx.t('lang_set_success', { lang: langNames[lang] || lang }));
       
       // Send fresh start message in new language
-      const msg = ctx.t('welcome', { name: ctx.from.first_name || 'User' });
+      const msg = ctx.t('welcome_user', { name: ctx.from.first_name || 'User' });
       await ctx.reply(msg, {
         parse_mode: 'Markdown',
         reply_markup: keyboards.mainMenu(lang).reply_markup
@@ -612,7 +612,7 @@ async function startPolling(ctx, phoneNumber, countryCode) {
  * Return to Main Menu
  */
 bot.action(/action_main_menu|action_cancel/, async (ctx) => {
-  const msg = ctx.t('welcome', { name: ctx.from.first_name || 'User' });
+  const msg = ctx.t('welcome_bot');
   await ctx.editMessageText(msg, {
     parse_mode: 'Markdown',
     reply_markup: keyboards.mainMenu(ctx.state.lang).reply_markup
