@@ -480,8 +480,12 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
       startPolling(ctx, phoneNumber, countryCode);
 
     } else {
-      await ctx.editMessageText(`❌ Failed to get number: ${response.msg}`, {
-        reply_markup: keyboards.backToMain(ctx.state.lang).reply_markup
+      await ctx.editMessageText(`❌ Failed to get number: ${response.msg}\n\nPlease try another country or refresh the list.`, {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: `🔙 ${ctx.t('back_btn')}`, callback_data: 'action_buy_number' }]
+          ]
+        }
       });
     }
   } catch (error) {

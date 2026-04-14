@@ -7,7 +7,7 @@ const texts = {
     invite_header: "<b>🔗 Invite a Friend</b>\n\nInvite your friends and earn 5% of their purchases!\n\n📎 Your invite link:\n<code>{link}</code>\n\nCopy the link and send it to your friends. When they join through your link and buy a number, you'll earn 5% of the purchase price.\n\n<b>📊 Your Statistics</b>\n• 👥 Your total team: {teamCount}\n• Today: {todayCount} (Earnings: {todayProfit}$)\n• This week: {weekCount} (Earnings: {weekProfit}$)\n• This month: {monthCount} (Earnings: {monthProfit}$)\n• 💰 Current referral balance: {refBalance}$\n\nThis balance is separate from your main balance and can be used to buy numbers or withdraw\n\n📅 Date: {date}",
     withdraw_btn: "💰 Withdraw Earnings",
     back_btn: "🔙 Back",
-    buy_number_header: "🌍 <b>Choose Country</b> 🌍\n\n• Get everything new first!\n• Choose the country to buy a number from:",
+    buy_number_header: "<b>🌍 Choose Required Country</b>\n\n• Get all updates first-hand\n• Choose the country to buy number from:",
     refresh_btn: "🔄 Refresh List",
     binance_btn: "💳 Binance",
     deposit_header: "💎 <b>Choose Deposit Method:</b>",
@@ -36,7 +36,7 @@ const texts = {
     invite_header: "<b>🔗 دعوة صديق</b>\n\nادعُ أصدقاءك واربح 5% من مشترياتهم!\n\n📎 رابط دعوتك:\n<code>{link}</code>\n\nانسخ الرابط وأرسله لأصدقائك، عندما يشترك أحدهم عبر رابطك ويشتري رقماً ستربح 5% من سعر الشراء.\n\n<b>📊 إحصائياتك</b>\n• 👥 إجمالي فريقك: {teamCount}\n• اليوم: {todayCount} (أرباح: {todayProfit}$)\n• هذا الأسبوع: {weekCount} (أرباح: {weekProfit}$)\n• هذا الشهر: {monthCount} (أرباح: {monthProfit}$)\n• 💰 رصيد الإحالات الحالي: {refBalance}$\n\nهذا الرصيد منفصل عن رصيدك الرئيسي ويمكن استخدامه لشراء الأرقام أو سحبه\n\n📅 التاريخ: {date}",
     withdraw_btn: "💰 سحب الأرباح",
     back_btn: "🔙 رجوع",
-    buy_number_header: "🌍 <b>اختر الدولة المطلوبة</b> 🌍\n\n• يصلك كل جديد أولًا بأول\n• اختر الدولة المراد شراء رقم منها:",
+    buy_number_header: "<b>🌍 اختر الدولة المطلوبة</b>\n\n• يصلك كل جديد أولًا بأول\n• اختر الدولة المراد شراء رقم منها:",
     refresh_btn: "🔄 تحديث القائمة",
     binance_btn: "💳 باينانس",
     deposit_header: "💎 <b>اختر طريقة الشحن:</b>",
@@ -65,7 +65,7 @@ const texts = {
     deposit_header: "<b>💎 روش شارژ را انتخاب کنید:</b>",
     binance_btn: "💳 بایننس",
     back_btn: "🔙 بازگشت",
-    buy_number_header: "🌍 <b>کشور مورد نظر را انتخاب کنید</b> 🌍\n\n• همه به‌روزرسانی‌ها را اولین نفر دریافت کنید\n• کشور مورد نظر برای خرید شماره را انتخاب کنید:",
+    buy_number_header: "<b>🌍 کشور مورد نظر را انتخاب کنید</b>\n\n• همه به‌روزرسانی‌ها را اولین نفر دریافت کنید\n• کشور مورد نظر برای خرید شماره را انتخاب کنید:",
     refresh_btn: "🔄 به‌روزرسانی لیست",
   },
   bn: {
@@ -80,7 +80,7 @@ const texts = {
     deposit_header: "<b>💎 ডিপোজিট পদ্ধতি নির্বাচন করুন:</b>",
     binance_btn: "💳 বাইন্যান্স",
     back_btn: "🔙 ফিরে যান",
-    buy_number_header: "🌍 <b>প্রয়োজনীয় দেশ নির্বাচন করুন</b> 🌍\n\n• সব আপডেট সবার আগে পান\n• যে দেশ থেকে নম্বর কিনতে চান তা নির্বাচন করুন:",
+    buy_number_header: "<b>🌍 প্রয়োজনীয় দেশ নির্বাচন করুন</b>\n\n• সব আপডেট সবার আগে পান\n• যে দেশ থেকে নম্বর কিনতে চান তা নির্বাচন করুন:",
     refresh_btn: "🔄 তালিকা রিফ্রেশ",
   }
 };

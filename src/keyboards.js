@@ -37,12 +37,15 @@ const keyboards = {
    */
   buildCountryKeyboard: (distribution, lang) => {
     const buttons = [];
-    const codes = Object.keys(distribution).filter(c => c !== "" && distribution[c] > 0); 
+    const codes = Object.keys(distribution)
+      .filter(c => c !== "" && distribution[c] > 0)
+      .sort((a, b) => distribution[b] - distribution[a])
+      .slice(0, 90); 
 
     codes.forEach(code => {
       const info = durianApi.getCountryInfo(code);
       const stock = distribution[code];
-      const label = `${info.flag} ${info.name} (${stock}) 0.25$`;
+      const label = `${info.flag} ${info.name} (${stock})`;
       buttons.push(Markup.button.callback(label, `select_country_${code}`));
     });
 
