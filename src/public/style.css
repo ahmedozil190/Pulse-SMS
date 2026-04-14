@@ -31,12 +31,20 @@
 body {
     background-color: var(--bg-main);
     color: var(--text-primary);
-    min-height: 100vh;
-    overflow-x: hidden;
-    background-image:
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
         radial-gradient(circle at 10% 10%, rgba(96, 165, 250, 0.08) 0%, transparent 40%),
         radial-gradient(circle at 90% 80%, rgba(168, 85, 247, 0.1) 0%, transparent 40%);
-    background-attachment: fixed;
+    z-index: -1;
+    pointer-events: none;
 }
 
 body.loading {
@@ -189,9 +197,10 @@ body.loading {
 
 /* ═══ TOPBAR ═══ */
 #main-wrapper {
-    min-height: 100vh;
+    height: 100vh;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 #topbar {
@@ -239,12 +248,35 @@ body.loading {
 /* ═══ PAGES ═══ */
 .page {
     display: none;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
     padding: 20px;
     animation: fadeIn 0.4s ease-out;
 }
 
 .page.active {
     display: block;
+}
+
+/* Purple Scrollbar (Billion Bot Style) */
+.page::-webkit-scrollbar {
+    width: 6px;
+}
+
+.page::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.page::-webkit-scrollbar-thumb {
+    background: #8b5cf6; /* Vibrant Purple */
+    border-radius: 10px;
+    border: 1px solid transparent;
+    background-clip: padding-box;
+}
+
+.page::-webkit-scrollbar-thumb:hover {
+    background: #a78bfa;
 }
 
 @keyframes fadeIn {
@@ -833,23 +865,22 @@ input[type=number] {
 }
 
 .pagination-btn {
-    width: 48px;
-    height: 48px;
-    background: #14151a; /* Dark background as in image */
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.05); /* Semi-transparent as in Billion Bot */
     border: none;
-    border-radius: 14px;
+    border-radius: 12px;
     color: #fff;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
     transition: 0.2s;
-    font-size: 1.2rem;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    font-size: 1rem;
 }
 
 .pagination-btn:hover:not(:disabled) {
-    background: #1c1e26;
+    background: rgba(255, 255, 255, 0.1);
     transform: scale(1.05);
 }
 
@@ -860,12 +891,12 @@ input[type=number] {
 }
 
 .pagination-text {
-    font-size: 1.1rem;
-    font-weight: 800; /* Extra bold text as in image */
+    font-size: 0.9rem;
+    font-weight: 600; /* Medium-bold text as in Billion Bot */
     color: #fff;
-    min-width: 140px;
+    min-width: 120px;
     text-align: center;
-    letter-spacing: -0.5px;
+    letter-spacing: -0.3px;
 }
 
 /* ════ RESPONSIVE ════ */

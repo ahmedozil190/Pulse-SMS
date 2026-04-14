@@ -25,7 +25,7 @@ async function init() {
 
         // Search Handlers
         const userSearch = document.getElementById('user-search-v2');
-        if (userSearch) userSearch.addEventListener('input', (e) => { userSearchQuery = e.target.value; applyUserFilters(); });
+        if (userSearch) userSearch.addEventListener('input', (e) => { userSearchQuery = e.target.value; });
 
         const orderSearch = document.getElementById('order-search-v2');
         if (orderSearch) orderSearch.addEventListener('input', (e) => { orderSearchQuery = e.target.value; applyOrderFilters(); });
@@ -139,6 +139,10 @@ window.switchPage = (pageName) => {
 window.triggerSearch = (type) => {
     if (type === 'user') {
         userSearchQuery = document.getElementById('user-search-v2').value;
+        const resetBtn = document.getElementById('reset-search-container');
+        if (resetBtn) resetBtn.style.display = userSearchQuery.trim() ? 'block' : 'none';
+        
+        currentUserPage = 1; // Reset to page 1 on new search
         applyUserFilters();
     } else if (type === 'order') {
         orderSearchQuery = document.getElementById('order-search-v2').value;
@@ -146,6 +150,19 @@ window.triggerSearch = (type) => {
     } else if (type === 'deposit') {
         depositSearchQuery = document.getElementById('deposit-search-v2').value;
         applyDepositFilters();
+    }
+};
+
+window.resetSearch = (type) => {
+    if (type === 'user') {
+        const input = document.getElementById('user-search-v2');
+        if (input) input.value = '';
+        userSearchQuery = '';
+        const resetBtn = document.getElementById('reset-search-container');
+        if (resetBtn) resetBtn.style.display = 'none';
+        
+        currentUserPage = 1;
+        applyUserFilters();
     }
 };
 
