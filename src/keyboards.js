@@ -40,7 +40,7 @@ const keyboards = {
     const codes = Object.keys(distribution)
       .filter(c => c !== "" && distribution[c] > 0)
       .sort((a, b) => distribution[b] - distribution[a])
-      .slice(0, 90); 
+      .slice(0, 50); 
 
     codes.forEach(code => {
       const info = durianApi.getCountryInfo(code);
