@@ -859,9 +859,13 @@ input[type=number] {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 15px;
-    margin-top: 30px;
+    gap: 8px; /* Reduced gap as requested */
+    margin-top: 15px; /* Reduced margin top */
     padding-bottom: 30px;
+}
+
+.pagination-container:empty {
+    display: none; /* Hide and remove space if no buttons are shown (search mode) */
 }
 
 .pagination-btn {

@@ -89,8 +89,10 @@ async function refreshData() {
         // Update User page stats
         const uStatTotal = document.getElementById('user-stat-total');
         const uStatBanned = document.getElementById('user-stat-banned');
+        const uStatActive = document.getElementById('user-stat-active');
         if (uStatTotal) uStatTotal.textContent = stats.totalUsers || 0;
         if (uStatBanned) uStatBanned.textContent = stats.bannedUsers || 0;
+        if (uStatActive) uStatActive.textContent = (stats.totalUsers || 0) - (stats.bannedUsers || 0);
 
         // Update Order page stats
         const oStatTotal = document.getElementById('order-stat-total');
