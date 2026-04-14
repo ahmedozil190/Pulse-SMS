@@ -116,18 +116,25 @@
                     </div>
                 </div>
 
-                <!-- Search Section -->
-                <div class="glass-container search-section" style="margin-top: 25px;">
-                    <div class="search-box-v2">
-                        <input type="text" id="user-search-v2" placeholder="Search users...">
+                <!-- Search Container -->
+                <div class="card"
+                    style="padding: 18px; margin-top: -2px; margin-bottom: 25px; background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 20px;">
+                    <!-- Search Input -->
+                    <div class="search-box-v2" style="margin-bottom: 14px; margin-top: 0;">
+                        <input type="text" id="user-search-v2" placeholder="Search users..."
+                            style="width: 100%; padding: 14px; background: #0f1116; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 12px; color: #fff; font-size: 0.95rem; outline: none; transition: 0.3s; margin-bottom: 2px;">
                     </div>
-                    <button class="gradient-btn" onclick="triggerSearch('user')" id="btn-find-users"
-                        style="margin-bottom: 8px;">
+
+                    <!-- Find Button -->
+                    <button onclick="triggerSearch('user')" class="gradient-btn" id="btn-find-users"
+                        style="width: 100%; padding: 15px; background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); border: none; border-radius: 14px; color: #fff; font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 15px rgba(96, 165, 250, 0.2); margin-bottom: 12px;">
                         <i class="fas fa-search"></i> Find
                     </button>
+
+                    <!-- Reset Search Button -->
                     <div id="reset-search-container" style="display: none;">
-                        <button class="tab-btn" onclick="resetSearch('user')"
-                            style="width: 100%; height: 45px; background: rgba(255,255,255,0.05) !important;">
+                        <button onclick="resetSearch('user')" class="tab-btn"
+                            style="width: 100%; padding: 15px; background: #1a1d24 !important; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; color: #94a3b8; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: 0.3s; margin-bottom: 20px;">
                             Reset
                         </button>
                     </div>

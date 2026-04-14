@@ -269,7 +269,8 @@ body.loading {
 }
 
 .page::-webkit-scrollbar-thumb {
-    background: #8b5cf6; /* Vibrant Purple */
+    background: #8b5cf6;
+    /* Vibrant Purple */
     border-radius: 10px;
     border: 1px solid transparent;
     background-clip: padding-box;
@@ -581,21 +582,6 @@ body.loading {
     border-color: var(--accent-blue);
 }
 
-.search-section {
-    padding: 25px !important; /* Enlarge the card padding */
-}
-
-.search-section .search-box-v2 input {
-    padding: 18px !important; /* Enlarge the input */
-    font-size: 1.1rem !important;
-    margin-bottom: 20px !important;
-}
-
-.search-section .gradient-btn {
-    padding: 16px !important; /* Enlarge the Find button */
-    font-size: 1.1rem !important;
-}
-
 .gradient-btn {
     width: 100%;
     padding: 12px;
@@ -656,9 +642,12 @@ body.loading {
 
 .user-container:hover {
     background: rgba(255, 255, 255, 0.03);
-    border-color: rgba(255, 255, 255, 0.08); /* Minimal border */
-    transform: scale(1.02); /* Grow slightly */
-    box-shadow: none; /* Removed shadow as requested */
+    border-color: rgba(255, 255, 255, 0.08);
+    /* Minimal border */
+    transform: scale(1.02);
+    /* Grow slightly */
+    box-shadow: none;
+    /* Removed shadow as requested */
 }
 
 .user-container:active {
@@ -669,7 +658,8 @@ body.loading {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    margin-bottom: 15px; /* Reduced gap as requested */
+    margin-bottom: 15px;
+    /* Reduced gap as requested */
 }
 
 .modal-info-item-v2 {
@@ -745,17 +735,20 @@ input[type=number] {
 
 .btn-plus {
     background: linear-gradient(135deg, #6366f1, #a855f7);
-    box-shadow: none; /* Removed glow */
+    box-shadow: none;
+    /* Removed glow */
 }
 
 .btn-minus {
     background: rgba(239, 68, 68, 0.1);
     border: 1px solid rgba(239, 68, 68, 0.2);
-    box-shadow: none; /* Removed glow */
+    box-shadow: none;
+    /* Removed glow */
 }
 
 .btn-minus i {
-    color: #ef4444; /* Brighter red for visibility on light bg */
+    color: #ef4444;
+    /* Brighter red for visibility on light bg */
     font-weight: 900;
 }
 
@@ -769,7 +762,8 @@ input[type=number] {
 }
 
 .modal-group {
-    margin-bottom: 15px; /* Symmetric reduction to match the top gap */
+    margin-bottom: 15px;
+    /* Symmetric reduction to match the top gap */
 }
 
 .modal-status-group {
@@ -875,18 +869,22 @@ input[type=number] {
     justify-content: center;
     align-items: center;
     gap: 8px;
-    margin-top: 45px; /* Increased to push buttons down */
-    padding-bottom: 45px; /* Balanced space below */
+    margin-top: 45px;
+    /* Increased to push buttons down */
+    padding-bottom: 45px;
+    /* Balanced space below */
 }
 
 .pagination-container:empty {
-    display: none; /* Hide and remove space if no buttons are shown (search mode) */
+    display: none;
+    /* Hide and remove space if no buttons are shown (search mode) */
 }
 
 .pagination-btn {
     width: 40px;
     height: 40px;
-    background: rgba(255, 255, 255, 0.05); /* Semi-transparent as in Billion Bot */
+    background: rgba(255, 255, 255, 0.05);
+    /* Semi-transparent as in Billion Bot */
     border: none;
     border-radius: 12px;
     color: #fff;
@@ -911,7 +909,8 @@ input[type=number] {
 
 .pagination-text {
     font-size: 0.9rem;
-    font-weight: 600; /* Medium-bold text as in Billion Bot */
+    font-weight: 600;
+    /* Medium-bold text as in Billion Bot */
     color: #fff;
     min-width: 120px;
     text-align: center;
