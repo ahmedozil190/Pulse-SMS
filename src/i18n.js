@@ -55,7 +55,7 @@ const texts = {
     insufficient_ref_balance: "❌ رصيد الإحالات الخاص بك غير كافٍ.\n• الرصيد الحالي: {balance}$\n• الحد الأدنى المطلوب: 1$",
     activation_channel_btn: "📢 قناة التفعيلات",
     insufficient_balance: "❌ رصيدك غير كافي! تحتاج 0.25$ ورصيدك {balance}$",
-    refresh_cooldown_msg: "يرجى الانتظار {seconds} ثوانٍ قبل التحديث مرة أخرى ⏳"
+    refresh_cooldown_msg: "⏳ يرجى الانتظار {seconds} ثوانٍ قبل التحديث مرة أخرى"
   },
   fa: {
     welcome_user: "<b>🔰 به فروشگاه اعداد بین المللی خوش آمدید 🔰</b>\n\n{name} 👋\n\n<b>گزینه مناسب را از منو انتخاب کنید:</b>",
@@ -71,8 +71,8 @@ const texts = {
     back_btn: "🔙 بازگشت",
     buy_number_header: "<b>🌍 کشور مورد نظر را انتخاب کنید</b>\n\n• همه به‌روزرسانی‌ها را اولین نفر دریافت کنید\n• کشور مورد نظر برای خرید شماره را انتخاب کنید:",
     refresh_btn: "🔄 به‌روزرسانی لیست",
-    insufficient_balance: "❌ موجودی کافی نیست! نیاز دارید 0.25$ و موجودی شما {balance}$",
-    refresh_cooldown_msg: "⌛ لطفاً {seconds} ثانیه صبر کنید قبل از به‌روزرسانی مجدد"
+    insufficient_balance: "❌ موجودی کافی نیست! نیاز دارید 0.25$ موجودی شما {balance}$",
+    refresh_cooldown_msg: "⏳ لطفاً {seconds} ثانیه صبر کنید قبل از به‌روزرسانی مجدد"
   },
   bn: {
     welcome_user: "<b>🔰 আন্তর্জাতিক নম্বর স্টোরে স্বাগতম 🔰</b>\n\n{name} 👋\n\n<b>মেনু থেকে উপযুক্ত বিকল্প নির্বাচন করুন:</b>",
