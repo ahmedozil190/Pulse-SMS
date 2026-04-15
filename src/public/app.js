@@ -379,7 +379,11 @@ function renderOrdersList(orders) {
         list.innerHTML = `<div class="empty-state"><i class="fas fa-receipt"></i><span>No orders found</span></div>`;
         return;
     }
-    list.innerHTML = orders.map((o, index) => `
+    list.innerHTML = orders.map((o, index) => {
+        const countryInfo = allCountries.find(c => c.code === o.countryId);
+        const countryDisplay = countryInfo ? `${countryInfo.flag} ${countryInfo.name}` : (o.countryId || '-');
+
+        return `
         <div class="user-container">
             <div class="user-card-index">${index + 1}</div>
             <div class="user-row">
@@ -387,8 +391,8 @@ function renderOrdersList(orders) {
                 <span class="user-row-value ${o.status === 'COMPLETED' ? 'color-green' : o.status === 'CANCELLED' ? 'color-red' : 'color-orange'}">${o.status}</span>
             </div>
             <div class="user-row">
-                <span class="user-row-label">User</span>
-                <span class="user-row-value color-yellow">${escapeHtml(o.user?.firstName || 'User #' + o.userId)}</span>
+                <span class="user-row-label">User ID</span>
+                <span class="user-row-value color-yellow">${o.user?.telegramId || o.userId}</span>
             </div>
             <div class="user-row">
                 <span class="user-row-label">Phone</span>
@@ -396,7 +400,7 @@ function renderOrdersList(orders) {
             </div>
             <div class="user-row">
                 <span class="user-row-label">Country</span>
-                <span class="user-row-value">${o.countryId || '-'}</span>
+                <span class="user-row-value color-purple">${countryDisplay}</span>
             </div>
             <div class="user-row">
                 <span class="user-row-label">Price</span>
@@ -404,10 +408,11 @@ function renderOrdersList(orders) {
             </div>
             <div class="user-row">
                 <span class="user-row-label">Date</span>
-                <span class="user-row-value" style="font-size:0.8rem">${formatDate(o.createdAt)}</span>
+                <span class="user-row-value color-blue-tint" style="font-size:0.8rem">${formatDate(o.createdAt)}</span>
             </div>
         </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 function renderDepositsList(deposits) {
