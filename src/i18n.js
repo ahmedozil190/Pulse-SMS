@@ -132,7 +132,8 @@ module.exports = {
   t: (lang, key, params = {}) => {
     let str = (texts[lang] && texts[lang][key]) || (texts['en'][key]) || key;
     for (const [k, v] of Object.entries(params)) {
-      str = str.replace(`{${k}}`, v);
+      const regex = new RegExp(`\\{${k}\\}`, 'g');
+      str = str.replace(regex, v);
     }
     return str;
   },
