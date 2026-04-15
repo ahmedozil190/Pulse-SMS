@@ -160,6 +160,28 @@ bot.command('admin', async (ctx) => {
 });
 
 /**
+ * /resetme command (ADMIN ONLY) - Deletes your own account from the DB to test "New User" flow
+ */
+bot.command('resetme', async (ctx) => {
+  const adminIds = (process.env.ADMIN_IDS || process.env.ADMIN_TELEGRAM_ID || "").split(',').map(id => id.trim());
+  const userId = ctx.from.id.toString();
+
+  if (!adminIds.includes(userId)) return;
+
+  try {
+    const user = await prisma.user.findUnique({ where: { telegramId: userId } });
+    if (user) {
+      await prisma.user.delete({ where: { id: user.id } });
+      return ctx.reply('✅ Your account has been deleted from the database. Send /start to simulate a completely NEW user.');
+    } else {
+      return ctx.reply('⚠️ You are not in the database.');
+    }
+  } catch (err) {
+    return ctx.reply('Error: ' + err.message);
+  }
+});
+
+/**
  * Helper to ensure user exists in Database
  */
 async function getOrCreateUser(ctx, referrerTelegramId = null) {
