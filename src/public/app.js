@@ -492,12 +492,10 @@ window.renderCountries = () => {
                     ${c.isEnabled ? '<i class="fas fa-check"></i> ACTIVE' : 'INACTIVE'}
                 </span>
             </div>
-            
             <div class="user-row">
                 <span class="user-row-label">Name</span>
                 <span class="user-row-value color-yellow">${c.flag} ${escapeHtml(c.name)}</span>
             </div>
-            
             <div class="user-row">
                 <span class="user-row-label">Code</span>
                 <span class="user-row-value color-blue-tint">${c.code.toUpperCase()}</span>
@@ -613,6 +611,25 @@ window.performToggleBanFromModal = async () => {
         if (res.ok) {
             closeModal();
             await refreshData();
+        }
+    } catch (err) { console.error(err); }
+};
+
+window.bulkToggleCountries = async (isEnabled) => {
+    const action = isEnabled ? 'ENABLE' : 'DISABLE';
+    if (!confirm(`Are you sure you want to ${action} ALL countries?`)) return;
+
+    try {
+        const res = await fetch('/api/admin/countries/bulk-toggle', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...getHeaders() },
+            body: JSON.stringify({ isEnabled })
+        });
+        if (res.ok) {
+            webapp.HapticFeedback.notificationOccurred('success');
+            await refreshData();
+        } else {
+            alert('Bulk update failed');
         }
     } catch (err) { console.error(err); }
 };

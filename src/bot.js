@@ -1084,6 +1084,35 @@ app.post('/api/admin/countries/update', isAdminMiddleware, async (req, res) => {
   }
 });
 
+app.post('/api/admin/countries/bulk-toggle', isAdminMiddleware, async (req, res) => {
+  const { isEnabled } = req.body;
+  try {
+    if (isEnabled) {
+      // Enable All: Just set all existing to true.
+      await prisma.countryConfig.updateMany({
+        data: { isEnabled: true }
+      });
+    } else {
+      // Disable All: Must ensure all valid countries have a 'false' record
+      const allCountryMap = durianApi.getAllCountries();
+      const codes = Object.keys(allCountryMap);
+      
+      // Using a batch of upserts for safety and consistency
+      await Promise.all(codes.map(code => 
+        prisma.countryConfig.upsert({
+          where: { countryCode: code },
+          update: { isEnabled: false },
+          create: { countryCode: code, isEnabled: false, price: 0.15 }
+        })
+      ));
+    }
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Bulk update error:', err);
+    res.status(500).json({ msg: 'Bulk update failed' });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`[SERVER] Admin Dashboard running on port ${PORT}`);
