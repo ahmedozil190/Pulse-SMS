@@ -102,15 +102,32 @@ bot.use(async (ctx, next) => {
     }
 
     if (notJoined.length > 0) {
-      // User must join channels
-      const buttons = notJoined.map(ch => [Markup.button.url('- Click Here .', ch.link)]);
+      // 1- Sequential subscription: Show only the first unjoined channel
+      const nextChannel = notJoined[0];
+      const buttons = [
+        [Markup.button.url('- Click Here .', nextChannel.link)]
+      ];
       
-      return ctx.reply('<b>🔒 Subscription Required</b>\n\nSorry, you must join our channel first to use the bot:\n\n<b>✅ After joining, send</b> /start', {
+      const msgText = '<b>🔒 Subscription Required</b>\n\nSorry, you must join our channel first to use the bot:\n\n<b>✅ After joining, send</b> /start';
+      const msgOpts = {
         parse_mode: 'HTML',
-        reply_markup: {
-          inline_keyboard: buttons
+        reply_markup: { inline_keyboard: buttons }
+      };
+
+      // 2- Mutate current message if interaction came from a button click
+      if (ctx.callbackQuery) {
+        try {
+          await ctx.answerCbQuery('🔒 Subscription Required');
+          await ctx.editMessageText(msgText, msgOpts);
+          return;
+        } catch (e) {
+          // Fallback if message content is exactly the same or edit fails
+          if (e.description && e.description.includes('exactly the same')) return;
+          return ctx.reply(msgText, msgOpts);
         }
-      });
+      } else {
+        return ctx.reply(msgText, msgOpts);
+      }
     }
   } catch (err) {
     console.error('[SUB MIDDLEWARE ERROR]', err);
