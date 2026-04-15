@@ -747,12 +747,7 @@ window.renderMandatoryChannels = () => {
     if (!list) return;
 
     if (allChannels.length === 0) {
-        list.innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-rss"></i>
-                <span>No mandatory channels added yet.</span>
-            </div>
-        `;
+        list.innerHTML = `<div class="empty-state"><i class="fas fa-rss"></i><span>No channels added yet</span></div>`;
         return;
     }
 
