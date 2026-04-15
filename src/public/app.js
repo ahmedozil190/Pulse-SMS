@@ -825,9 +825,6 @@ window.addMandatoryChannel = async () => {
             usernameInput.value = '';
             linkInput.value = '';
             
-            // Premium success notification
-            showOzToast('success', 'Channel Added', 'The channel has been successfully registered.');
-
             await refreshData();
         } else {
             showOzToast('error', 'Operation Failed', 'Could not add the channel.');
@@ -855,7 +852,6 @@ window.deleteMandatoryChannel = async (id) => {
         });
 
         if (res.ok) {
-            showOzToast('success', 'Deleted', 'The channel has been removed.');
             await refreshData();
         } else {
             showOzToast('error', 'Error', 'Failed to delete channel.');
