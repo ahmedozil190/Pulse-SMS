@@ -1074,3 +1074,75 @@ input[type=number] {
 .sub-header i {
     font-size: 0.9rem;
 }
+
+/* ═══ GLASSMORPHISM OVERHAUL ═══ */
+.glass-card {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 28px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+/* High-end inner glow effect */
+.glass-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.settings-text-input {
+    width: 100%;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.4); /* Darker box for clarity */
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    color: #fff;
+    font-size: 1.15rem;
+    font-weight: 500;
+    outline: none;
+    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.settings-text-input:focus {
+    border-color: rgba(96, 165, 250, 0.5);
+    background: rgba(0, 0, 0, 0.6);
+    box-shadow: 0 0 20px rgba(96, 165, 250, 0.1);
+}
+
+.btn-update-settings {
+    width: 100%;
+    background: #5dade2 !important;
+    color: white !important;
+    border-radius: 20px !important;
+    padding: 18px !important;
+    font-size: 1.15rem !important;
+    font-weight: 700 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    box-shadow: 0 8px 30px rgba(93, 173, 226, 0.3) !important;
+    border: none !important;
+    cursor: pointer;
+    transition: 0.3s !important;
+}
+
+.btn-update-settings:hover {
+    background: #3498db !important;
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(93, 173, 226, 0.4) !important;
+}
+
+.btn-update-settings i {
+    font-size: 1.25rem;
+}
