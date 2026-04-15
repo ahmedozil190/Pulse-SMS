@@ -187,6 +187,7 @@ async function refreshData() {
         // Render lists
         try { applyUserFilters(); } catch (e) { console.error('Users render error:', e); }
         try { renderCountries(); } catch (e) { console.error('Countries render error:', e); }
+        try { renderMandatoryChannels(); } catch (e) { console.error('Channels render error:', e); }
     } catch (err) {
         console.error('Data refresh error:', err);
         throw err;
@@ -823,19 +824,57 @@ window.addMandatoryChannel = async () => {
         if (res.ok) {
             usernameInput.value = '';
             linkInput.value = '';
-            webapp.showConfirm('Channel added successfully ✅');
+            
+            // Premium success notification
+            Swal.fire({
+                icon: 'success',
+                title: 'Channel Added',
+                text: 'The channel has been successfully registered.',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false,
+                background: '#1e293b',
+                color: '#fff',
+                iconColor: '#22c55e'
+            });
+
             await refreshData();
         } else {
-            alert('Failed to add channel');
+            Swal.fire({
+                icon: 'error',
+                title: 'Operation Failed',
+                text: 'Could not add the channel. Please check the details.',
+                background: '#1e293b',
+                color: '#fff'
+            });
         }
     } catch (err) {
         console.error(err);
-        webapp.showAlert('Server error ❌');
+        Swal.fire({
+            icon: 'error',
+            title: 'System Error',
+            text: 'A connection error occurred.',
+            background: '#1e293b',
+            color: '#fff'
+        });
     }
 };
 
 window.deleteMandatoryChannel = async (id) => {
-    if (!confirm('Are you sure you want to delete this channel?')) return;
+    const result = await Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#9f1239',
+        cancelButtonColor: '#475569',
+        confirmButtonText: 'Yes, delete it!',
+        background: '#1e293b',
+        color: '#fff',
+        iconColor: '#f43f5e'
+    });
+
+    if (!result.isConfirmed) return;
 
     try {
         const res = await fetch('/api/admin/channels/delete', {
@@ -845,10 +884,25 @@ window.deleteMandatoryChannel = async (id) => {
         });
 
         if (res.ok) {
-            webapp.showConfirm('Channel deleted 🗑️');
+            Swal.fire({
+                icon: 'success',
+                title: 'Deleted!',
+                text: 'The channel has been removed.',
+                timer: 1500,
+                showConfirmButton: false,
+                background: '#1e293b',
+                color: '#fff',
+                iconColor: '#22c55e'
+            });
             await refreshData();
         } else {
-            alert('Delete failed');
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to delete channel.',
+                background: '#1e293b',
+                color: '#fff'
+            });
         }
     } catch (err) {
         console.error(err);
