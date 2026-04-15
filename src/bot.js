@@ -838,7 +838,7 @@ bot.launch().then(async () => {
   } catch (e) {
     console.log('Failed to set commands', e);
   }
-  console.log('[BOT] Pulse SMS Bot started successfully.');
+  console.log('[BOT] OzZoO SMS Bot started successfully.');
 });
 
 // --- EXPRESS SERVER FOR ADMIN WEB APP ---
@@ -1193,7 +1193,7 @@ app.get('/api/admin/settings', isAdminMiddleware, async (req, res) => {
     const settingsMap = settings.reduce((acc, s) => ({ ...acc, [s.key]: s.value }), {});
 
     // Set defaults if missing
-    if (!settingsMap.bot_name) settingsMap.bot_name = 'Pulse SMS';
+    if (!settingsMap.bot_name) settingsMap.bot_name = 'OzZoO SMS';
     if (!settingsMap.maintenance_mode) settingsMap.maintenance_mode = 'false';
 
     res.json(settingsMap);
