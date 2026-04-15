@@ -49,6 +49,26 @@ bot.use(async (ctx, next) => {
 });
 
 /**
+ * Maintenance Mode Middleware
+ */
+bot.use(async (ctx, next) => {
+  if (!ctx.from) return next();
+  
+  // Skip maintenance check for admins
+  const adminIds = (process.env.ADMIN_IDS || process.env.ADMIN_TELEGRAM_ID || "").split(',').map(id => id.trim());
+  if (adminIds.includes(ctx.from.id.toString())) {
+    return next();
+  }
+
+  const maintenance = await prisma.globalSetting.findUnique({ where: { key: 'maintenance_mode' } });
+  if (maintenance && maintenance.value === 'true') {
+    return ctx.reply('🛠️ <b>System Under Maintenance</b>\n\nWe are currently performing scheduled maintenance to improve our service. Please try again later.\n\nThank you for your patience!', { parse_mode: 'HTML' });
+  }
+
+  return next();
+});
+
+/**
  * /admin command - Opens the Mini App Dashboard
  */
 bot.command('admin', async (ctx) => {
@@ -1083,6 +1103,40 @@ app.post('/api/admin/countries/update', isAdminMiddleware, async (req, res) => {
   } catch (err) {
     console.error('Update country error:', err);
     res.status(500).json({ msg: 'Failed to update country' });
+  }
+});
+
+// --- SETTINGS APIs ---
+
+app.get('/api/admin/settings', isAdminMiddleware, async (req, res) => {
+  try {
+    const settings = await prisma.globalSetting.findMany();
+    // Convert to easy-to-use object
+    const settingsMap = settings.reduce((acc, s) => ({ ...acc, [s.key]: s.value }), {});
+    
+    // Set defaults if missing
+    if (!settingsMap.bot_name) settingsMap.bot_name = 'Pulse SMS';
+    if (!settingsMap.maintenance_mode) settingsMap.maintenance_mode = 'false';
+    
+    res.json(settingsMap);
+  } catch (err) {
+    console.error('Fetch settings error:', err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+app.post('/api/admin/settings/update', isAdminMiddleware, async (req, res) => {
+  const { key, value } = req.body;
+  try {
+    await prisma.globalSetting.upsert({
+      where: { key },
+      update: { value: String(value) },
+      create: { key, value: String(value) }
+    });
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Update setting error:', err);
+    res.status(500).json({ msg: 'Failed to update setting' });
   }
 });
 

@@ -923,3 +923,119 @@ input[type=number] {
         font-size: 1.5rem;
     }
 }
+
+/* ═══ SETTINGS OVERHAUL ═══ */
+.settings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 10px 0;
+}
+
+.settings-row {
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius);
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    cursor: pointer;
+    transition: 0.3s;
+    backdrop-filter: blur(10px);
+}
+
+.settings-row:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.settings-icon-box {
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.settings-info {
+    flex: 1;
+}
+
+.settings-label {
+    display: block;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.settings-chevron {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* Settings Icon Colors (Backgrounds) */
+.color-red-bg { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+.color-orange-bg { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+.color-blue-bg { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+.color-purple-bg { background: rgba(168, 85, 247, 0.1); color: #a855f7; }
+.color-green-bg { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+
+.toggle-switch {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px 0;
+}
+
+.toggle-input {
+    width: 50px;
+    height: 26px;
+    background: #1a1d24;
+    border-radius: 20px;
+    position: relative;
+    cursor: pointer;
+    transition: 0.3s;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.toggle-input::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 4px;
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+.toggle-input.active {
+    background: var(--success);
+}
+
+.toggle-input.active::after {
+    left: 26px;
+}
+
+.settings-text-input {
+    width: 100%;
+    padding: 15px;
+    background: #0f1116;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 14px;
+    color: #fff;
+    font-size: 1rem;
+    outline: none;
+    transition: 0.3s;
+}
+
+.settings-text-input:focus {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 10px rgba(96, 165, 250, 0.1);
+}

@@ -16,6 +16,9 @@ let depositSearchQuery = '';
 let allCountries = [];
 let countrySearchQuery = '';
 let currentCountryFilter = 'active'; // 'active' or 'inactive'
+let allSettings = {};
+let currentEditingSettingKey = null;
+let currentEditingSettingType = 'text';
 
 // Pagination State
 let currentUserPage = 1;
@@ -80,7 +83,8 @@ async function refreshData() {
             fetch('/api/admin/users', { headers: getHeaders() }),
             fetch('/api/admin/orders', { headers: getHeaders() }),
             fetch('/api/admin/deposits', { headers: getHeaders() }),
-            fetch('/api/admin/countries', { headers: getHeaders() })
+            fetch('/api/admin/countries', { headers: getHeaders() }),
+            fetch('/api/admin/settings', { headers: getHeaders() })
         ]);
 
         const apiChecks = {
@@ -88,7 +92,8 @@ async function refreshData() {
             'Users': usersRes,
             'Orders': ordersRes,
             'Deposits': depositsRes,
-            'Countries': countriesRes
+            'Countries': countriesRes,
+            'Settings': settingsRes
         };
 
         for (const [name, res] of Object.entries(apiChecks)) {
@@ -102,6 +107,11 @@ async function refreshData() {
         allOrders = await ordersRes.json();
         allDeposits = await depositsRes.json();
         allCountries = await countriesRes.json();
+        allSettings = await settingsRes.json();
+
+        // Update Bot Name in Sidebar
+        const sidebarTitle = document.querySelector('.sidebar-title');
+        if (sidebarTitle) sidebarTitle.textContent = allSettings.bot_name || 'Pulse Bot';
 
         // Update Overview stats
         const sTotalUsers = document.getElementById('stat-total-users');
@@ -157,6 +167,92 @@ async function refreshData() {
         throw err;
     }
 }
+
+// --- SETTINGS OVERHAUL ---
+
+window.openSettingsEditor = (key, label, type) => {
+    currentEditingSettingKey = key;
+    currentEditingSettingType = type;
+    
+    document.getElementById('settings-modal-title').textContent = label;
+    const container = document.getElementById('settings-input-container');
+    container.innerHTML = '';
+
+    const currentValue = allSettings[key] || '';
+
+    if (type === 'text') {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'settings-text-input';
+        input.value = currentValue;
+        input.id = 'setting-input-field';
+        input.placeholder = 'Enter value...';
+        container.appendChild(input);
+    } else if (type === 'toggle') {
+        const isActive = currentValue === 'true';
+        const wrapper = document.createElement('div');
+        wrapper.className = 'toggle-switch';
+        wrapper.innerHTML = `
+            <span style="color: var(--text-secondary); font-size: 0.95rem;">Enable Module</span>
+            <div id="setting-toggle-btn" class="toggle-input ${isActive ? 'active' : ''}" onclick="toggleSettingUI()"></div>
+        `;
+        container.appendChild(wrapper);
+    } else if (type === 'group') {
+        const info = document.createElement('div');
+        info.style.color = 'var(--text-secondary)';
+        info.style.textAlign = 'center';
+        info.style.padding = '20px';
+        info.textContent = 'This module will be available in the next update. Stay tuned! 🚀';
+        container.appendChild(info);
+        
+        // Hide save button for placeholders
+        document.getElementById('btn-save-setting').style.display = 'none';
+    }
+
+    if (type !== 'group') {
+        document.getElementById('btn-save-setting').style.display = 'block';
+    }
+
+    document.getElementById('settings-modal').classList.add('open');
+};
+
+window.toggleSettingUI = () => {
+    const btn = document.getElementById('setting-toggle-btn');
+    btn.classList.toggle('active');
+};
+
+window.saveSetting = async () => {
+    let value = '';
+    
+    if (currentEditingSettingType === 'text') {
+        value = document.getElementById('setting-input-field').value;
+    } else if (currentEditingSettingType === 'toggle') {
+        value = document.getElementById('setting-toggle-btn').classList.contains('active') ? 'true' : 'false';
+    }
+
+    try {
+        const res = await fetch('/api/admin/settings/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...getHeaders() },
+            body: JSON.stringify({ key: currentEditingSettingKey, value })
+        });
+
+        if (res.ok) {
+            webapp.showConfirm('Settings updated successfully ✅');
+            closeSettingsModal();
+            refreshData();
+        } else {
+            throw new Error('Update failed');
+        }
+    } catch (err) {
+        console.error('Save setting error:', err);
+        webapp.showAlert('Failed to save settings ❌');
+    }
+};
+
+window.closeSettingsModal = () => {
+    document.getElementById('settings-modal').classList.remove('open');
+};
 
 // NAVIGATION
 window.toggleSidebar = () => {

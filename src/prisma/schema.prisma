@@ -58,3 +58,7 @@ model CountryConfig {
   price       Float    @default(0.25)
   updatedAt   DateTime @updatedAt
 }
+model GlobalSetting {
+  key   String @id
+  value String
+}

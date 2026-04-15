@@ -261,11 +261,60 @@
 
             <!-- Settings -->
             <main id="page-settings" class="page">
-                <div class="section-group">
-                    <div class="section-title"><i>⚙️</i> <span>Settings</span></div>
-                    <div class="info-card">
-                        <span class="info-label">SYSTEM STATUS</span>
-                        <span class="info-value color-green">ACTIVE</span>
+                <div class="settings-list">
+                    <!-- Bot Name -->
+                    <div class="settings-row" onclick="openSettingsEditor('bot_name', 'Bot Name', 'text')">
+                        <div class="settings-icon-box color-red-bg">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="settings-info">
+                            <span class="settings-label">Bot Name</span>
+                        </div>
+                        <i class="fas fa-chevron-right settings-chevron"></i>
+                    </div>
+
+                    <!-- Maintenance Control -->
+                    <div class="settings-row" onclick="openSettingsEditor('maintenance_mode', 'System Maintenance', 'toggle')">
+                        <div class="settings-icon-box color-orange-bg">
+                            <i class="fas fa-tools"></i>
+                        </div>
+                        <div class="settings-info">
+                            <span class="settings-label">System Maintenance</span>
+                        </div>
+                        <i class="fas fa-chevron-right settings-chevron"></i>
+                    </div>
+
+                    <!-- Prices & Commissions -->
+                    <div class="settings-row" onclick="openSettingsEditor('prices', 'Prices & Commissions', 'group')">
+                        <div class="settings-icon-box color-blue-bg">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="settings-info">
+                            <span class="settings-label">Prices & Commissions</span>
+                        </div>
+                        <i class="fas fa-chevron-right settings-chevron"></i>
+                    </div>
+
+                    <!-- Channels & Subscriptions -->
+                    <div class="settings-row" onclick="openSettingsEditor('channels', 'Channels & Subscriptions', 'group')">
+                        <div class="settings-icon-box color-purple-bg">
+                            <i class="fas fa-rss"></i>
+                        </div>
+                        <div class="settings-info">
+                            <span class="settings-label">Channels & Subscriptions</span>
+                        </div>
+                        <i class="fas fa-chevron-right settings-chevron"></i>
+                    </div>
+
+                    <!-- Withdrawal Limits (Placeholders for now) -->
+                    <div class="settings-row" onclick="openSettingsEditor('withdrawals', 'Withdrawal Limits', 'group')">
+                        <div class="settings-icon-box color-green-bg">
+                            <i class="fas fa-tachometer-alt"></i>
+                        </div>
+                        <div class="settings-info">
+                            <span class="settings-label">Withdrawal Limits</span>
+                        </div>
+                        <i class="fas fa-chevron-right settings-chevron"></i>
                     </div>
                 </div>
             </main>
@@ -346,6 +395,27 @@
 
             <!-- Close Action -->
             <button class="btn-close-modal" onclick="closeModal()">
+                Close
+            </button>
+        </div>
+    </div>
+
+    <!-- Settings Edit Modal -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <div class="section-title" id="settings-modal-title" style="margin-top:0">Edit Setting</div>
+            
+            <div class="modal-group" id="settings-input-container">
+                <!-- Inputs injected via JS -->
+            </div>
+
+            <div class="modal-group">
+                <button class="gradient-btn" onclick="saveSetting()" style="width: 100%;" id="btn-save-setting">
+                    Save Changes
+                </button>
+            </div>
+
+            <button class="btn-close-modal" onclick="closeSettingsModal()">
                 Close
             </button>
         </div>
