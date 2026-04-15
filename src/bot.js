@@ -38,13 +38,13 @@ bot.use(session());
  */
 bot.use(async (ctx, next) => {
   if (!ctx.from) return next();
-  
+
   const user = await getOrCreateUser(ctx);
   const lang = user?.language || 'en';
-  
+
   ctx.state.lang = lang;
   ctx.t = (key, params) => i18n.t(lang, key, params);
-  
+
   return next();
 });
 /**
@@ -52,7 +52,7 @@ bot.use(async (ctx, next) => {
  */
 bot.use(async (ctx, next) => {
   if (!ctx.from) return next();
-  
+
   // Skip maintenance check for admins
   const adminIds = (process.env.ADMIN_IDS || process.env.ADMIN_TELEGRAM_ID || "").split(',').map(id => id.trim());
   if (adminIds.includes(ctx.from.id.toString())) {
@@ -107,7 +107,7 @@ bot.use(async (ctx, next) => {
       const buttons = [
         [Markup.button.url('- Click Here .', nextChannel.link)]
       ];
-      
+
       const msgText = '<b>🔒 Subscription Required</b>\n\nSorry, you must join our channel first to use the bot:\n\n<b>✅ After joining, send</b> /start';
       const msgOpts = {
         parse_mode: 'HTML',
@@ -160,28 +160,6 @@ bot.command('admin', async (ctx) => {
 });
 
 /**
- * /resetme command (ADMIN ONLY) - Deletes your own account from the DB to test "New User" flow
- */
-bot.command('resetme', async (ctx) => {
-  const adminIds = (process.env.ADMIN_IDS || process.env.ADMIN_TELEGRAM_ID || "").split(',').map(id => id.trim());
-  const userId = ctx.from.id.toString();
-
-  if (!adminIds.includes(userId)) return;
-
-  try {
-    const user = await prisma.user.findUnique({ where: { telegramId: userId } });
-    if (user) {
-      await prisma.user.delete({ where: { id: user.id } });
-      return ctx.reply('✅ Your account has been deleted from the database. Send /start to simulate a completely NEW user.');
-    } else {
-      return ctx.reply('⚠️ You are not in the database.');
-    }
-  } catch (err) {
-    return ctx.reply('Error: ' + err.message);
-  }
-});
-
-/**
  * Helper to ensure user exists in Database
  */
 async function getOrCreateUser(ctx, referrerTelegramId = null) {
@@ -218,6 +196,7 @@ async function getOrCreateUser(ctx, referrerTelegramId = null) {
           referredById
         }
       });
+      ctx.session.isFirstTime = true;
     } else {
       // PROMPT SYNC: Update user info if it changed since last interaction
       const currentFirstName = ctx.from.first_name || null;
@@ -235,10 +214,10 @@ async function getOrCreateUser(ctx, referrerTelegramId = null) {
         });
       }
     }
-    
+
     // Attach language to session for faster access if needed
     ctx.session.lang = user.language;
-    
+
     return { user, isNew: !userExistsBefore };
   } catch (error) {
     console.error('[DATABASE ERROR] Failed to get/create user:', error.message);
@@ -262,7 +241,9 @@ bot.command('start', async (ctx) => {
       return ctx.reply("⚠️ Sorry, there is a technical issue with the database setup. Please try again in 1 minute.");
     }
 
-    if (isNew) {
+    if (isNew || ctx.session.isFirstTime) {
+      // Clear flag so they don't get stuck in language selection
+      ctx.session.isFirstTime = false; 
       // First time using the bot (after they just subscribed if required)
       return ctx.reply(ctx.t('choose_lang'), keyboards.languageSelect);
     }
@@ -292,19 +273,19 @@ bot.command('lang', (ctx) => {
         where: { telegramId: ctx.from.id.toString() },
         data: { language: lang }
       });
-      ctx.state.lang = lang; 
+      ctx.state.lang = lang;
       ctx.t = (key, params) => i18n.t(lang, key, params); // Refresh translation helper for current request
-      
+
       const langNames = { ar: 'العربية', en: 'English', fa: 'فارسی', bn: 'বাংলা' };
       await ctx.answerCbQuery(ctx.t('lang_set_success', { lang: langNames[lang] || lang }));
-      
+
       // Send fresh start message in new language
       const msg = ctx.t('welcome_bot');
       await ctx.reply(msg, {
         parse_mode: 'HTML',
         reply_markup: keyboards.mainMenu(lang).reply_markup
       });
-      
+
       // Cleanup
       await ctx.deleteMessage();
     } catch (err) { console.error(err); }
@@ -344,18 +325,18 @@ bot.action('action_stats', async (ctx) => {
     _count: { id: true },
     where: { userId: user.id, status: 'COMPLETED' }
   });
-  
+
   const totalSpent = (totalPurchasesResult._sum.price || 0).toFixed(1);
   const totalCount = totalPurchasesResult._count.id;
-  
+
   const activeCount = 0;
 
-  const msg = ctx.t('stats_header', { 
-    active: activeCount, 
-    count: totalCount, 
-    total: totalSpent 
+  const msg = ctx.t('stats_header', {
+    active: activeCount,
+    count: totalCount,
+    total: totalSpent
   });
-  
+
   await ctx.editMessageText(msg, {
     parse_mode: 'HTML',
     reply_markup: keyboards.backToMain(ctx.state.lang).reply_markup
@@ -378,7 +359,7 @@ bot.action('action_deposit', async (ctx) => {
 bot.action('action_invite', async (ctx) => {
   try {
     console.log(`[ACTION] User ${ctx.from.id} clicked Invite button`);
-    await ctx.answerCbQuery().catch(() => {});
+    await ctx.answerCbQuery().catch(() => { });
 
     const user = await getOrCreateUser(ctx);
     if (!user) {
@@ -529,12 +510,12 @@ async function showCountrySelection(ctx, isRefresh = false) {
 
     // Provide a small success notification on refresh
     if (isRefresh) {
-      await ctx.answerCbQuery("🔄").catch(() => {});
+      await ctx.answerCbQuery("🔄").catch(() => { });
     }
   } catch (error) {
     // If message not modified, it means stock is still the same - still technically a success for the user
     if (error.description && error.description.includes('message is not modified')) {
-      return ctx.answerCbQuery("🔄").catch(() => {});
+      return ctx.answerCbQuery("🔄").catch(() => { });
     }
 
     console.error("Error loading countries:", error);
@@ -578,7 +559,7 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
 
   // 1. Check for sufficient balance before starting purchase
   if (user.balance < currentPrice) {
-    const msg = ctx.t('insufficient_balance', { 
+    const msg = ctx.t('insufficient_balance', {
       balance: user.balance.toFixed(2),
       required: currentPrice.toFixed(2)
     });
@@ -826,7 +807,7 @@ bot.action(/action_main_menu|action_cancel/, async (ctx) => {
         console.error('Edit error in main menu:', err.message);
       }
     });
-    await ctx.answerCbQuery().catch(() => {});
+    await ctx.answerCbQuery().catch(() => { });
   } catch (err) {
     console.error('Main menu handler error:', err);
   }
@@ -981,9 +962,9 @@ app.get('/api/admin/users', isAdminMiddleware, async (req, res) => {
     const staleUsers = formattedUsers
       .filter(u => !u.updatedAt || u.updatedAt < fiveMinutesAgo)
       .slice(0, 5);
-      
+
     if (staleUsers.length > 0) {
-       syncSpecificUsers(staleUsers.map(u => u.telegramId)).catch(err => console.error('Silent sync error:', err));
+      syncSpecificUsers(staleUsers.map(u => u.telegramId)).catch(err => console.error('Silent sync error:', err));
     }
 
     res.json(formattedUsers || []);
@@ -995,20 +976,20 @@ app.get('/api/admin/users', isAdminMiddleware, async (req, res) => {
 
 // Helper for silent sync
 async function syncSpecificUsers(telegramIds) {
-    for (const tid of telegramIds) {
-        try {
-            const chat = await bot.telegram.getChat(tid).catch(() => null);
-            if (!chat) continue;
-            const newFirstName = chat.first_name || chat.title || '';
-            const newLastName = chat.last_name || '';
-            const newUsername = chat.username;
-            await prisma.user.update({
-                where: { telegramId: tid },
-                data: { firstName: newFirstName, lastName: newLastName, username: newUsername, updatedAt: new Date() }
-            });
-            await new Promise(r => setTimeout(r, 500)); // Respect rate limits
-        } catch(e) {}
-    }
+  for (const tid of telegramIds) {
+    try {
+      const chat = await bot.telegram.getChat(tid).catch(() => null);
+      if (!chat) continue;
+      const newFirstName = chat.first_name || chat.title || '';
+      const newLastName = chat.last_name || '';
+      const newUsername = chat.username;
+      await prisma.user.update({
+        where: { telegramId: tid },
+        data: { firstName: newFirstName, lastName: newLastName, username: newUsername, updatedAt: new Date() }
+      });
+      await new Promise(r => setTimeout(r, 500)); // Respect rate limits
+    } catch (e) { }
+  }
 }
 
 app.post('/api/admin/user-toggle-ban', isAdminMiddleware, async (req, res) => {
@@ -1036,8 +1017,8 @@ app.get('/api/admin/orders', isAdminMiddleware, async (req, res) => {
     });
 
     const formattedOrders = orders.map(o => ({
-        ...o,
-        user: { ...o.user, firstName: `${o.user?.firstName || ''} ${o.user?.lastName || ''}`.trim() || 'Unknown' }
+      ...o,
+      user: { ...o.user, firstName: `${o.user?.firstName || ''} ${o.user?.lastName || ''}`.trim() || 'Unknown' }
     }));
 
     res.json(formattedOrders || []);
@@ -1055,8 +1036,8 @@ app.get('/api/admin/deposits', isAdminMiddleware, async (req, res) => {
     });
 
     const formattedDeposits = deposits.map(d => ({
-        ...d,
-        user: { ...d.user, firstName: `${d.user?.firstName || ''} ${d.user?.lastName || ''}`.trim() || 'Unknown' }
+      ...d,
+      user: { ...d.user, firstName: `${d.user?.firstName || ''} ${d.user?.lastName || ''}`.trim() || 'Unknown' }
     }));
 
     res.json(formattedDeposits || []);
@@ -1152,7 +1133,7 @@ app.get('/api/admin/countries', isAdminMiddleware, async (req, res) => {
     Object.keys(allCountryMap).forEach(code => {
       const info = allCountryMap[code];
       const config = configMap[code] || { isEnabled: true, price: 0.15 };
-      
+
       countries.push({
         code,
         name: info.name,
@@ -1177,7 +1158,7 @@ app.post('/api/admin/countries/update', isAdminMiddleware, async (req, res) => {
   try {
     const updateData = {};
     if (isEnabled !== undefined) updateData.isEnabled = isEnabled;
-    
+
     if (price !== undefined) {
       const parsedPrice = parseFloat(price);
       if (isNaN(parsedPrice) || parsedPrice < 0) {
@@ -1210,11 +1191,11 @@ app.get('/api/admin/settings', isAdminMiddleware, async (req, res) => {
     const settings = await prisma.globalSetting.findMany();
     // Convert to easy-to-use object
     const settingsMap = settings.reduce((acc, s) => ({ ...acc, [s.key]: s.value }), {});
-    
+
     // Set defaults if missing
     if (!settingsMap.bot_name) settingsMap.bot_name = 'Pulse SMS';
     if (!settingsMap.maintenance_mode) settingsMap.maintenance_mode = 'false';
-    
+
     res.json(settingsMap);
   } catch (err) {
     console.error('Fetch settings error:', err);
@@ -1285,9 +1266,9 @@ app.post('/api/admin/countries/bulk-toggle', isAdminMiddleware, async (req, res)
       // Disable All: Must ensure all valid countries have a 'false' record
       const allCountryMap = durianApi.getAllCountries();
       const codes = Object.keys(allCountryMap);
-      
+
       // Using a batch of upserts for safety and consistency
-      await Promise.all(codes.map(code => 
+      await Promise.all(codes.map(code =>
         prisma.countryConfig.upsert({
           where: { countryCode: code },
           update: { isEnabled: false },
@@ -1377,7 +1358,7 @@ async function syncUserIdentities() {
 async function cleanupStaleOrders() {
   try {
     const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
-    
+
     const staleOrders = await prisma.order.findMany({
       where: {
         status: 'PENDING',
@@ -1387,14 +1368,14 @@ async function cleanupStaleOrders() {
 
     if (staleOrders.length > 0) {
       console.log(`[CLEANUP] Found ${staleOrders.length} stale pending orders. Cancelling...`);
-      
+
       await prisma.order.updateMany({
         where: {
           id: { in: staleOrders.map(o => o.id) }
         },
         data: { status: 'CANCELLED' }
       });
-      
+
       console.log(`[CLEANUP] Successfully cancelled stale orders.`);
     }
   } catch (err) {
