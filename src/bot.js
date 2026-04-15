@@ -1233,6 +1233,14 @@ app.get('/api/admin/channels', isAdminMiddleware, async (req, res) => {
 app.post('/api/admin/channels/add', isAdminMiddleware, async (req, res) => {
   const { username, link } = req.body;
   try {
+    // Duplicate check
+    const existing = await prisma.mandatoryChannel.findFirst({
+      where: { username }
+    });
+    if (existing) {
+      return res.status(400).json({ msg: 'Channel already exists' });
+    }
+
     const channel = await prisma.mandatoryChannel.create({
       data: { username, link }
     });

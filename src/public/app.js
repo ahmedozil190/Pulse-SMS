@@ -827,7 +827,12 @@ window.addMandatoryChannel = async () => {
             
             await refreshData();
         } else {
-            showOzToast('error', 'Operation Failed', 'Could not add the channel.');
+            const errorData = await res.json();
+            if (res.status === 400 && errorData.msg === 'Channel already exists') {
+                showOzToast('error', 'Duplicate Channel', 'This channel is already in your managed list.');
+            } else {
+                showOzToast('error', 'Operation Failed', 'Could not add the channel.');
+            }
         }
     } catch (err) {
         console.error(err);
