@@ -15,13 +15,14 @@ let orderSearchQuery = '';
 let depositSearchQuery = '';
 let allCountries = [];
 let countrySearchQuery = '';
+let currentCountryFilter = 'active'; // 'active' or 'inactive'
 
 // Pagination State
 let currentUserPage = 1;
 const usersPerPage = 5;
 
 let currentCountryPage = 1;
-const countriesPerPage = 10;
+const countriesPerPage = 5;
 
 let currentEditingCountryCode = null;
 let currentEditingCountryEnabled = false;
@@ -449,11 +450,20 @@ window.renderCountries = () => {
     
     list.innerHTML = '';
 
-    const query = (countrySearchQuery || '').toLowerCase();
-    const filtered = allCountries.filter(c => 
-        c.name.toLowerCase().includes(query) || 
-        c.code.toLowerCase().includes(query)
-    );
+    let filtered = allCountries.filter(c => {
+        const isEnabled = c.isEnabled || false;
+        if (currentCountryFilter === 'active') return isEnabled;
+        if (currentCountryFilter === 'inactive') return !isEnabled;
+        return true;
+    });
+
+    if (countrySearchQuery) {
+        const query = countrySearchQuery.toLowerCase();
+        filtered = filtered.filter(c => 
+            c.name.toLowerCase().includes(query) || 
+            c.code.toLowerCase().includes(query)
+        );
+    }
 
     if (filtered.length === 0) {
         list.innerHTML = `<div class="empty-state">No countries found</div>`;
@@ -533,10 +543,10 @@ window.openCountryModal = (code, name, stock, isEnabled, price) => {
     
     const toggleBtn = document.getElementById('modal-country-toggle-btn');
     if (isEnabled) {
-        toggleBtn.textContent = 'Hide Country (Disable)';
+        toggleBtn.textContent = 'Inactive';
         toggleBtn.className = 'gradient-btn btn-ban';
     } else {
-        toggleBtn.textContent = 'Show Country (Enable)';
+        toggleBtn.textContent = 'Active';
         toggleBtn.className = 'gradient-btn btn-unban';
     }
 
@@ -623,6 +633,14 @@ window.setUserFilter = (filter) => {
     document.getElementById('tab-active').classList.toggle('active', filter === 'active');
     document.getElementById('tab-banned').classList.toggle('active', filter === 'banned');
     applyUserFilters();
+};
+
+window.setCountryFilter = (filter) => {
+    currentCountryFilter = filter;
+    document.getElementById('tab-country-active').classList.toggle('active', filter === 'active');
+    document.getElementById('tab-country-inactive').classList.toggle('active', filter === 'inactive');
+    currentCountryPage = 1;
+    renderCountries();
 };
 
 // MODALS

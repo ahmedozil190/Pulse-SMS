@@ -276,6 +276,10 @@
 
                 <div class="glass-container" style="margin-top: 25px;" id="country-management-section">
                     <div class="section-title" style="margin-top:0">Country Configuration</div>
+                    <div class="tabs-row">
+                        <button class="tab-btn active" id="tab-country-active" onclick="setCountryFilter('active')">Active</button>
+                        <button class="tab-btn" id="tab-country-inactive" onclick="setCountryFilter('inactive')">Inactive</button>
+                    </div>
                     <div id="countries-list" class="data-list"></div>
                     <div id="country-pagination" class="pagination-container"></div>
                 </div>
@@ -320,7 +324,7 @@
             <div class="modal-group modal-status-group">
                 <button id="modal-country-toggle-btn" class="gradient-btn" onclick="toggleCountryVisibility()"
                     style="width: 100%;">
-                    <!-- Text set via JS -->
+                    Active
                 </button>
             </div>
 
