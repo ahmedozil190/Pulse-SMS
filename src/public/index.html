@@ -290,17 +290,17 @@
             <main id="page-settings-bot-name" class="page">
                 <div class="sub-header" onclick="switchPage('settings')">
                     <i class="fas fa-arrow-left"></i>
-                    <span>Back to Settings</span>
+                    <span>Back</span>
                 </div>
                 
-                <div class="card" style="margin-top: 20px;">
+                <div class="card" style="margin-top: 20px; padding: 30px;">
                     <div class="modal-group">
-                        <label class="info-label" style="display: block; margin-bottom: 15px;">Enter New Bot Name</label>
+                        <label class="info-label" style="display: block; margin-bottom: 20px; color: #94a3b8; font-weight: 700;">Bot Name</label>
                         <input type="text" id="input-bot-name" class="settings-text-input" placeholder="Pulse Bot">
                     </div>
-                    <div class="modal-group" style="margin-top: 25px;">
-                        <button class="gradient-btn" onclick="saveSetting('bot_name', 'input-bot-name', 'text')" style="width: 100%;">
-                            Save Bot Name
+                    <div class="modal-group" style="margin-top: 30px;">
+                        <button class="gradient-btn btn-update-settings" onclick="saveSetting('bot_name', 'input-bot-name', 'text')">
+                            <i class="fas fa-save"></i> Update Settings
                         </button>
                     </div>
                 </div>
@@ -310,12 +310,12 @@
             <main id="page-settings-maintenance" class="page">
                 <div class="sub-header" onclick="switchPage('settings')">
                     <i class="fas fa-arrow-left"></i>
-                    <span>Back to Settings</span>
+                    <span>Back</span>
                 </div>
 
-                <div class="card" style="margin-top: 20px;">
+                <div class="card" style="margin-top: 20px; padding: 30px;">
                     <div class="modal-group">
-                        <label class="info-label" style="display: block; margin-bottom: 15px;">System Availability</label>
+                        <label class="info-label" style="display: block; margin-bottom: 20px; color: #94a3b8; font-weight: 700;">System Availability</label>
                         <div class="toggle-switch">
                             <span style="color: var(--text-secondary); font-size: 0.95rem;">Maintenance Mode</span>
                             <div id="maintenance-toggle-btn" class="toggle-input" onclick="toggleSettingUI('maintenance-toggle-btn')"></div>
@@ -324,9 +324,9 @@
                             When enabled, regular users will be blocked from using the bot. Admins still have full access.
                         </p>
                     </div>
-                    <div class="modal-group" style="margin-top: 25px;">
-                        <button class="gradient-btn" onclick="saveSetting('maintenance_mode', 'maintenance-toggle-btn', 'toggle')" style="width: 100%;">
-                            Save Status
+                    <div class="modal-group" style="margin-top: 30px;">
+                        <button class="gradient-btn btn-update-settings" onclick="saveSetting('maintenance_mode', 'maintenance-toggle-btn', 'toggle')">
+                            <i class="fas fa-save"></i> Update Settings
                         </button>
                     </div>
                 </div>
