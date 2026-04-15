@@ -1039,3 +1039,24 @@ input[type=number] {
     border-color: var(--accent-blue);
     box-shadow: 0 0 10px rgba(96, 165, 250, 0.1);
 }
+
+.sub-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px 0;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: 0.3s;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.sub-header:hover {
+    color: var(--text-primary);
+    transform: translateX(-5px);
+}
+
+.sub-header i {
+    font-size: 0.9rem;
+}

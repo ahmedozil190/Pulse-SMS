@@ -139,6 +139,16 @@ async function refreshData() {
         if (sActiveCountries) sActiveCountries.textContent = allCountries.filter(c => c.isEnabled).length;
         if (sInactiveCountries) sInactiveCountries.textContent = allCountries.filter(c => !c.isEnabled).length;
 
+        // Populate Sub-page Inputs
+        const inputBotName = document.getElementById('input-bot-name');
+        if (inputBotName) inputBotName.value = allSettings.bot_name || 'Pulse Bot';
+        
+        const maintenanceToggle = document.getElementById('maintenance-toggle-btn');
+        if (maintenanceToggle) {
+            const isMMode = allSettings.maintenance_mode === 'true';
+            maintenanceToggle.classList.toggle('active', isMMode);
+        }
+
         // Update User page stats
         const uStatTotal = document.getElementById('user-stat-total');
         const uStatBanned = document.getElementById('user-stat-banned');
@@ -170,76 +180,33 @@ async function refreshData() {
 
 // --- SETTINGS OVERHAUL ---
 
-window.openSettingsEditor = (key, label, type) => {
-    currentEditingSettingKey = key;
-    currentEditingSettingType = type;
-    
-    document.getElementById('settings-modal-title').textContent = label;
-    const container = document.getElementById('settings-input-container');
-    container.innerHTML = '';
-
-    const currentValue = allSettings[key] || '';
-
-    if (type === 'text') {
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.className = 'settings-text-input';
-        input.value = currentValue;
-        input.id = 'setting-input-field';
-        input.placeholder = 'Enter value...';
-        container.appendChild(input);
-    } else if (type === 'toggle') {
-        const isActive = currentValue === 'true';
-        const wrapper = document.createElement('div');
-        wrapper.className = 'toggle-switch';
-        wrapper.innerHTML = `
-            <span style="color: var(--text-secondary); font-size: 0.95rem;">Enable Module</span>
-            <div id="setting-toggle-btn" class="toggle-input ${isActive ? 'active' : ''}" onclick="toggleSettingUI()"></div>
-        `;
-        container.appendChild(wrapper);
-    } else if (type === 'group') {
-        const info = document.createElement('div');
-        info.style.color = 'var(--text-secondary)';
-        info.style.textAlign = 'center';
-        info.style.padding = '20px';
-        info.textContent = 'This module will be available in the next update. Stay tuned! 🚀';
-        container.appendChild(info);
-        
-        // Hide save button for placeholders
-        document.getElementById('btn-save-setting').style.display = 'none';
-    }
-
-    if (type !== 'group') {
-        document.getElementById('btn-save-setting').style.display = 'block';
-    }
-
-    document.getElementById('settings-modal').classList.add('active');
+window.toggleSettingUI = (targetId) => {
+    const btn = document.getElementById(targetId);
+    if (btn) btn.classList.toggle('active');
 };
 
-window.toggleSettingUI = () => {
-    const btn = document.getElementById('setting-toggle-btn');
-    btn.classList.toggle('active');
-};
-
-window.saveSetting = async () => {
+window.saveSetting = async (key, elementId, type) => {
     let value = '';
     
-    if (currentEditingSettingType === 'text') {
-        value = document.getElementById('setting-input-field').value;
-    } else if (currentEditingSettingType === 'toggle') {
-        value = document.getElementById('setting-toggle-btn').classList.contains('active') ? 'true' : 'false';
+    if (type === 'text') {
+        value = document.getElementById(elementId).value;
+    } else if (type === 'toggle') {
+        value = document.getElementById(elementId).classList.contains('active') ? 'true' : 'false';
     }
 
     try {
         const res = await fetch('/api/admin/settings/update', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', ...getHeaders() },
-            body: JSON.stringify({ key: currentEditingSettingKey, value })
+            body: JSON.stringify({ key, value })
         });
 
         if (res.ok) {
             webapp.showConfirm('Settings updated successfully ✅');
-            closeSettingsModal();
+            if (key === 'bot_name') {
+                const sidebarTitle = document.querySelector('.sidebar-title');
+                if (sidebarTitle) sidebarTitle.textContent = value;
+            }
             refreshData();
         } else {
             throw new Error('Update failed');
@@ -250,8 +217,12 @@ window.saveSetting = async () => {
     }
 };
 
+window.openSettingsEditor = (key, label, type) => {
+    // Legacy function, no longer used with sub-pages
+};
+
 window.closeSettingsModal = () => {
-    document.getElementById('settings-modal').classList.remove('active');
+    // Legacy function, no longer used with sub-pages
 };
 
 // NAVIGATION
@@ -271,7 +242,14 @@ window.switchPage = (pageName) => {
         if (isActive) page.scrollTop = 0; // Reset scroll to top on switch
     });
 
-    const titles = { dashboard: 'Overview', users: 'User Management', orders: 'Orders', deposits: 'Deposits', countries: 'Countries', settings: 'Settings' };
+    const titles = { 
+        dashboard: 'Overview', 
+        users: 'User Management', 
+        countries: 'Countries', 
+        settings: 'Settings',
+        'settings-bot-name': 'Bot Identity',
+        'settings-maintenance': 'System Control'
+    };
     document.getElementById('page-title').textContent = titles[pageName] || 'Overview';
     document.getElementById('sidebar').classList.remove('open');
 };
