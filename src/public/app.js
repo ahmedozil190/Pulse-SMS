@@ -757,24 +757,22 @@ window.renderMandatoryChannels = () => {
     }
 
     list.innerHTML = allChannels.map((channel, idx) => `
-        <div class="user-container">
-            <div class="user-card-index">${idx + 1}</div>
+        <div class="channel-card-v3">
+            <div class="channel-card-v3-badge">${idx + 1}</div>
 
-            <div class="user-row">
-                <span class="user-row-label">USERNAME</span>
-                <span class="user-row-value color-yellow">${channel.username}</span>
+            <div class="channel-card-v3-row">
+                <span class="label">USERNAME</span>
+                <span class="value color-yellow">${channel.username}</span>
             </div>
 
-            <div class="user-row">
-                <span class="user-row-label">LINK</span>
-                <a href="${channel.link}" target="_blank" class="user-row-value" style="color: #60a5fa; font-weight: 700; text-decoration: none; font-size: 0.8rem;">${channel.link}</a>
+            <div class="channel-card-v3-row">
+                <span class="label">LINK</span>
+                <a href="${channel.link}" target="_blank" class="value link">${channel.link}</a>
             </div>
 
-            <div style="margin-top: 12px;">
-                <button class="btn-delete-channel" onclick="deleteMandatoryChannel(${channel.id})">
-                    <i class="fas fa-trash-alt"></i> Delete Channel
-                </button>
-            </div>
+            <button class="channel-card-v3-delete" onclick="deleteMandatoryChannel(${channel.id})">
+                <i class="fas fa-trash-alt"></i> Delete Channel
+            </button>
         </div>
     `).join('');
 };

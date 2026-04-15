@@ -1153,77 +1153,92 @@ input[type=number] {
 }
 
 /* ═══ MANDATORY CHANNELS ═══ */
-.channels-list {
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-    padding-bottom: 30px;
-}
-
-.channel-card {
+.channel-card-v3 {
     position: relative;
     background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.04);
     border-radius: 20px;
-    padding: 20px;
-    padding-top: 30px;
+    padding: 30px 20px 20px;
+    margin-top: 30px; /* Space for trailing badge */
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
-.channel-badge {
+.channel-card-v3-badge {
     position: absolute;
-    top: -12px;
+    top: -14px;
     left: 50%;
     transform: translateX(-50%);
-    background: var(--accent-blue);
+    background: linear-gradient(135deg, #818cf8, #6366f1);
     color: #fff;
-    width: 25px;
-    height: 25px;
-    border-radius: 6px;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     font-weight: 800;
-    box-shadow: 0 0 15px rgba(96, 165, 250, 0.5);
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
     z-index: 10;
 }
 
-.channel-info-row {
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.02);
+.channel-card-v3-row {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 12px;
-    padding: 12px 15px;
+    padding: 15px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    gap: 15px;
 }
 
-.channel-info-label {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: rgba(255, 255, 255, 0.5);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.channel-info-value {
-    font-size: 0.9rem;
+.channel-card-v3-row .label {
+    color: #94a3b8;
+    font-size: 0.8rem;
     font-weight: 800;
-    color: #facc15;
-    /* Yellowish for username */
-    text-align: right;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    flex-shrink: 0;
 }
 
-.channel-info-link {
+.channel-card-v3-row .value {
+    font-weight: 800;
+    font-size: 0.95rem;
+    text-align: right;
+    word-break: break-all;
+}
+
+.channel-card-v3-row .link {
     color: #60a5fa;
     text-decoration: none;
-    font-weight: 600;
     font-size: 0.85rem;
-    max-width: 180px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+}
+
+.channel-card-v3-delete {
+    width: 100%;
+    margin-top: 5px;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 12px;
+    padding: 15px;
+    color: #ef4444;
+    font-weight: 700;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+    outline: none;
+}
+
+.channel-card-v3-delete:hover {
+    background: rgba(239, 68, 68, 0.15);
+    transform: scale(0.98);
 }
 
 .btn-add-channel {
@@ -1234,25 +1249,6 @@ input[type=number] {
     font-weight: 700 !important;
     color: #fff !important;
     box-shadow: 0 5px 15px rgba(168, 85, 247, 0.25) !important;
-}
-
-.btn-delete-channel {
-    width: 100%;
-    background: rgba(239, 68, 68, 0.1) !important;
-    border: 1px solid rgba(239, 68, 68, 0.2) !important;
-    color: #ef4444 !important;
-    border-radius: 12px !important;
-    padding: 12px !important;
-    font-weight: 700 !important;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 5px;
-    transition: 0.3s !important;
-}
-
-.btn-delete-channel:hover {
-    background: rgba(239, 68, 68, 0.2) !important;
-    transform: scale(0.98);
+    border: none;
+    cursor: pointer;
 }
