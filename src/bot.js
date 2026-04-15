@@ -374,7 +374,7 @@ bot.action('action_invite', async (ctx) => {
     const year = dateObj.getFullYear();
     const month = String(dateObj.getMonth() + 1).padStart(2, '0');
     const day = String(dateObj.getDate()).padStart(2, '0');
-    const dateStr = `${day}/${month}/${year}`;
+    const dateStr = `${year}/${month}/${day}`;
 
     // Get team count
     const totalTeam = await prisma.user.count({ where: { referredById: user.id } });
