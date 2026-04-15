@@ -306,14 +306,13 @@
 
             <!-- Price Adjustment Section -->
             <div class="modal-group">
-                <div class="balance-adjust-row">
+                <div class="balance-adjust-row" style="gap: 12px; display: flex;">
                     <input type="number" id="country-price-input" step="0.01" min="0" placeholder="Amount..." 
-                        style="text-align: center; font-weight: 700;">
-                    <div class="adjust-actions">
-                        <button class="adjust-btn btn-plus" onclick="saveCountryPrice()" style="width: 54px; height: 54px;">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                    </div>
+                        style="text-align: center; font-weight: 700; flex: 1; padding: 14px 10px;">
+                    <button class="adjust-btn btn-plus" onclick="saveCountryPrice()" 
+                        style="flex: 1; height: 50px; border-radius: 14px; font-size: 1rem; font-weight: 700; background: linear-gradient(135deg, #6366f1, #a855f7); color: white; border: none; cursor: pointer;">
+                        Save
+                    </button>
                 </div>
             </div>
 
