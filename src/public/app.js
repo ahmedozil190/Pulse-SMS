@@ -134,10 +134,10 @@ async function refreshData() {
         if (cStatInactive) cStatInactive.textContent = allCountries.filter(c => !c.isEnabled).length;
 
         // Render lists
-        try { applyUserFilters(); } catch(e) { console.error('Users render error:', e); }
-        try { applyOrderFilters(); } catch(e) { console.error('Orders render error:', e); }
-        try { applyDepositFilters(); } catch(e) { console.error('Deposits render error:', e); }
-        try { renderCountries(); } catch(e) { console.error('Countries render error:', e); }
+        try { applyUserFilters(); } catch (e) { console.error('Users render error:', e); }
+        try { applyOrderFilters(); } catch (e) { console.error('Orders render error:', e); }
+        try { applyDepositFilters(); } catch (e) { console.error('Deposits render error:', e); }
+        try { renderCountries(); } catch (e) { console.error('Countries render error:', e); }
     } catch (err) {
         console.error('Data refresh error:', err);
         throw err;
@@ -171,20 +171,18 @@ window.triggerSearch = (type) => {
         userSearchQuery = document.getElementById('user-search-v2').value;
         const resetBtn = document.getElementById('reset-search-container');
         if (resetBtn) resetBtn.style.display = userSearchQuery.trim() ? 'block' : 'none';
-        
+
         currentUserPage = 1; // Reset to page 1 on new search
         applyUserFilters();
     } else if (type === 'country') {
         countrySearchQuery = document.getElementById('country-search-v2').value;
         const resetBtn = document.getElementById('reset-country-search-container');
         if (resetBtn) resetBtn.style.display = countrySearchQuery.trim() ? 'block' : 'none';
-        
+
         currentCountryPage = 1;
         renderCountries();
     } else if (type === 'order') {
         orderSearchQuery = document.getElementById('order-search-v2').value;
-        const resetBtn = document.getElementById('reset-order-search-container');
-        if (resetBtn) resetBtn.style.display = orderSearchQuery.trim() ? 'block' : 'none';
         applyOrderFilters();
     } else if (type === 'deposit') {
         depositSearchQuery = document.getElementById('deposit-search-v2').value;
@@ -199,7 +197,7 @@ window.resetSearch = (type) => {
         userSearchQuery = '';
         const resetBtn = document.getElementById('reset-search-container');
         if (resetBtn) resetBtn.style.display = 'none';
-        
+
         currentUserPage = 1;
         applyUserFilters();
     } else if (type === 'country') {
@@ -208,17 +206,11 @@ window.resetSearch = (type) => {
         countrySearchQuery = '';
         const resetBtn = document.getElementById('reset-country-search-container');
         if (resetBtn) resetBtn.style.display = 'none';
-        
+
         currentCountryPage = 1;
-    } else if (type === 'order') {
-        const input = document.getElementById('order-search-v2');
-        if (input) input.value = '';
-        orderSearchQuery = '';
-        const resetBtn = document.getElementById('reset-order-search-container');
-        if (resetBtn) resetBtn.style.display = 'none';
-        applyOrderFilters();
+        renderCountries();
     }
-}
+};
 
 // FILTERS
 function applyUserFilters() {
@@ -272,7 +264,7 @@ function applyDepositFilters() {
 function renderUsersList(users) {
     const list = document.getElementById('users-list');
     if (!list) return;
-    
+
     if (!users.length) {
         list.innerHTML = `<div class="empty-state"><i class="fas fa-users-slash"></i><span>No users found</span></div>`;
         document.getElementById('user-pagination').innerHTML = '';
@@ -329,7 +321,7 @@ function renderUsersList(users) {
 
 function renderPagination(totalPages, currentPage, onPageChange, container, callbackName) {
     if (!container) return;
-    
+
     if (totalPages <= 1) {
         container.innerHTML = '';
         return;
@@ -344,7 +336,7 @@ function renderPagination(totalPages, currentPage, onPageChange, container, call
             <i class="fas fa-chevron-right"></i>
         </button>
     `;
-    
+
     window[callbackName] = (page) => {
         onPageChange(page);
     };
@@ -468,7 +460,7 @@ window.renderCountries = () => {
     const list = document.getElementById('countries-list');
     const paginationContainer = document.getElementById('country-pagination');
     if (!list) return;
-    
+
     list.innerHTML = '';
 
     let filtered = allCountries.filter(c => {
@@ -480,8 +472,8 @@ window.renderCountries = () => {
 
     if (countrySearchQuery) {
         const query = countrySearchQuery.toLowerCase();
-        filtered = filtered.filter(c => 
-            c.name.toLowerCase().includes(query) || 
+        filtered = filtered.filter(c =>
+            c.name.toLowerCase().includes(query) ||
             c.code.toLowerCase().includes(query)
         );
     }
@@ -502,7 +494,7 @@ window.renderCountries = () => {
         const globalIndex = start + index + 1;
         const isLive = (c.stock || 0) > 0;
         const safeName = escapeHtml(c.name).replace(/'/g, "\\'");
-        
+
         return `
         <div class="user-container" style="cursor: pointer;" onclick="openCountryModal('${c.code}', '${safeName}', ${c.stock || 0}, ${c.isEnabled}, ${c.price})">
             <div class="user-card-index">${globalIndex}</div>
@@ -554,12 +546,12 @@ window.renderCountries = () => {
 window.openCountryModal = (code, name, stock, isEnabled, price) => {
     currentEditingCountryCode = code;
     currentEditingCountryEnabled = isEnabled;
-    
+
     document.getElementById('modal-country-name').textContent = name;
     document.getElementById('modal-country-code').textContent = code.toUpperCase();
     document.getElementById('modal-country-stock').textContent = `Stock: ${stock}`;
     document.getElementById('country-price-input').value = price;
-    
+
     const toggleBtn = document.getElementById('modal-country-toggle-btn');
     if (isEnabled) {
         toggleBtn.textContent = 'Inactive';
@@ -581,12 +573,12 @@ window.saveCountryPrice = async () => {
     if (!currentEditingCountryCode) return;
     const priceStr = document.getElementById('country-price-input').value;
     const price = parseFloat(priceStr);
-    
+
     if (isNaN(price) || price < 0) {
         alert('Please enter a valid price.');
         return;
     }
-    
+
     try {
         const res = await fetch('/api/admin/countries/update', {
             method: 'POST',
@@ -693,14 +685,14 @@ window.setOrderFilter = (filter) => {
 // MODALS
 window.openUserModal = (id, name, username, balance, isBanned) => {
     currentEditingUserId = id;
-    
+
     // Set Info Headers
     document.getElementById('modal-user-name').textContent = name;
     document.getElementById('modal-user-handle').textContent = `@${username}`;
     document.getElementById('modal-user-balance').textContent = `$${parseFloat(balance).toFixed(2)}`;
-    
+
     document.getElementById('balance-amount').value = '';
-    
+
     // Setup Ban/Unban Button
     const banBtn = document.getElementById('modal-ban-btn');
     if (isBanned) {
@@ -714,8 +706,8 @@ window.openUserModal = (id, name, username, balance, isBanned) => {
     document.getElementById('user-modal').classList.add('active');
 };
 
-window.closeModal = () => { 
-    document.getElementById('user-modal').classList.remove('active'); 
+window.closeModal = () => {
+    document.getElementById('user-modal').classList.remove('active');
 };
 
 window.performBalanceUpdate = async (operation) => {
@@ -724,12 +716,12 @@ window.performBalanceUpdate = async (operation) => {
         alert('Please enter a valid positive amount.');
         return;
     }
-    
+
     // Adjust based on operation
     if (operation === 'subtract') {
         amount = -amount;
     }
-    
+
     try {
         const res = await fetch('/api/admin/balance', {
             method: 'POST',
