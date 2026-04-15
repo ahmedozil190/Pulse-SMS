@@ -816,11 +816,11 @@ bot.action(/action_main_menu|action_cancel/, async (ctx) => {
 
 
 /**
- * Catch all text for simple testing
+ * Catch all text for simple testing (Removed to ignore unknown text)
  */
-bot.on('text', async (ctx) => {
-  await ctx.reply(ctx.t('welcome', { name: escapeHTML(ctx.from.first_name || 'User') }), { parse_mode: 'HTML' });
-});
+// bot.on('text', async (ctx) => {
+//   await ctx.reply(ctx.t('welcome', { name: escapeHTML(ctx.from.first_name || 'User') }), { parse_mode: 'HTML' });
+// });
 
 /**
  * Handle Settings Placeholder
