@@ -1056,21 +1056,24 @@ app.get('/api/admin/countries', isAdminMiddleware, async (req, res) => {
 app.post('/api/admin/countries/update', isAdminMiddleware, async (req, res) => {
   const { code, isEnabled, price } = req.body;
   try {
-    const parsedPrice = parseFloat(price);
-    if (isNaN(parsedPrice) || parsedPrice < 0) {
-      return res.status(400).json({ msg: 'Invalid price' });
+    const updateData = {};
+    if (isEnabled !== undefined) updateData.isEnabled = isEnabled;
+    
+    if (price !== undefined) {
+      const parsedPrice = parseFloat(price);
+      if (isNaN(parsedPrice) || parsedPrice < 0) {
+        return res.status(400).json({ msg: 'Invalid price' });
+      }
+      updateData.price = parsedPrice;
     }
 
     await prisma.countryConfig.upsert({
       where: { countryCode: code },
-      update: {
-        isEnabled: isEnabled === undefined ? undefined : isEnabled,
-        price: parsedPrice
-      },
+      update: updateData,
       create: {
         countryCode: code,
-        isEnabled: isEnabled === undefined ? true : isEnabled,
-        price: parsedPrice
+        isEnabled: isEnabled !== undefined ? isEnabled : true,
+        price: price !== undefined ? parseFloat(price) : 0.15
       }
     });
 
