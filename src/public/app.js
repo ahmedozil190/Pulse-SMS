@@ -7,7 +7,7 @@ let allUsers = [];
 let allOrders = [];
 let allDeposits = [];
 let currentEditingUserId = null;
-let currentOrderFilter = 'ALL';
+let currentOrderFilter = 'completed';
 let currentDepositFilter = 'ALL';
 let currentUserFilter = 'active'; // 'active' or 'banned'
 let userSearchQuery = '';
@@ -670,9 +670,10 @@ window.setCountryFilter = (filter) => {
 
 window.setOrderFilter = (filter) => {
     currentOrderFilter = filter;
-    document.getElementById('tab-order-all').classList.toggle('active', filter === 'all');
-    document.getElementById('tab-order-completed').classList.toggle('active', filter === 'completed');
-    document.getElementById('tab-order-cancelled').classList.toggle('active', filter === 'cancelled');
+    const tabCompleted = document.getElementById('tab-order-completed');
+    const tabCancelled = document.getElementById('tab-order-cancelled');
+    if (tabCompleted) tabCompleted.classList.toggle('active', filter === 'completed');
+    if (tabCancelled) tabCancelled.classList.toggle('active', filter === 'cancelled');
     applyOrderFilters();
 };
 
