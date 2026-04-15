@@ -303,12 +303,17 @@
                     <i class="fas fa-arrow-left"></i>
                     <span>Back</span>
                 </div>
-                
-                <div class="glass-container" style="margin-top: 20px;">
-                    <div class="section-title" style="margin-top: 0;">Bot Name</div>
-                    <input type="text" id="input-bot-name" class="settings-text-input" placeholder="Pulse Bot" style="margin-top: 5px;">
-                    <div style="margin-top: 20px;">
-                        <button class="gradient-btn btn-update-settings" onclick="saveSetting('bot_name', 'input-bot-name', 'text')">
+
+                <div class="glass-card" style="margin-top: 20px;">
+                    <div class="modal-group">
+                        <label class="info-label"
+                            style="display: block; margin-bottom: 20px; color: #94a3b8; font-weight: 700;">Bot
+                            Name</label>
+                        <input type="text" id="input-bot-name" class="settings-text-input" placeholder="Pulse Bot">
+                    </div>
+                    <div class="modal-group" style="margin-top: 30px;">
+                        <button class="gradient-btn btn-update-settings"
+                            onclick="saveSetting('bot_name', 'input-bot-name', 'text')">
                             <i class="fas fa-save"></i> Update Settings
                         </button>
                     </div>
@@ -322,17 +327,24 @@
                     <span>Back</span>
                 </div>
 
-                <div class="glass-container" style="margin-top: 20px;">
-                    <div class="section-title" style="margin-top: 0;">System Availability</div>
-                    <div class="toggle-switch" style="margin-top: 5px;">
-                        <span style="color: var(--text-secondary); font-size: 0.95rem;">Maintenance Mode</span>
-                        <div id="maintenance-toggle-btn" class="toggle-input" onclick="toggleSettingUI('maintenance-toggle-btn')"></div>
+                <div class="glass-card" style="margin-top: 20px;">
+                    <div class="modal-group">
+                        <label class="info-label"
+                            style="display: block; margin-bottom: 20px; color: #94a3b8; font-weight: 700;">System
+                            Availability</label>
+                        <div class="toggle-switch">
+                            <span style="color: var(--text-secondary); font-size: 0.95rem;">Maintenance Mode</span>
+                            <div id="maintenance-toggle-btn" class="toggle-input"
+                                onclick="toggleSettingUI('maintenance-toggle-btn')"></div>
+                        </div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 15px; line-height: 1.5;">
+                            When enabled, regular users will be blocked from using the bot. Admins still have full
+                            access.
+                        </p>
                     </div>
-                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 12px; line-height: 1.5;">
-                        When enabled, regular users will be blocked from using the bot. Admins still have full access.
-                    </p>
-                    <div style="margin-top: 20px;">
-                        <button class="gradient-btn btn-update-settings" onclick="saveSetting('maintenance_mode', 'maintenance-toggle-btn', 'toggle')">
+                    <div class="modal-group" style="margin-top: 30px;">
+                        <button class="gradient-btn btn-update-settings"
+                            onclick="saveSetting('maintenance_mode', 'maintenance-toggle-btn', 'toggle')">
                             <i class="fas fa-save"></i> Update Settings
                         </button>
                     </div>
@@ -347,11 +359,16 @@
                 </div>
 
                 <!-- Add Channel Card -->
-                <div class="glass-container" style="margin-top: 20px;">
-                    <div class="section-title" style="margin-top: 0;">Add New Channel</div>
-                    <input type="text" id="input-channel-username" class="settings-text-input" placeholder="@username" style="font-size: 0.9rem; padding: 12px; margin-bottom: 12px; margin-top: 5px;">
-                    <input type="text" id="input-channel-link" class="settings-text-input" placeholder="https://t.me/..." style="font-size: 0.9rem; padding: 12px;">
-                    <div style="margin-top: 20px;">
+                <div class="glass-card" style="margin-top: 20px;">
+                    <div class="section-title" style="margin-top: 0; color: #fff; font-size: 0.95rem;">Add New Channel
+                    </div>
+                    <div class="modal-group" style="margin-top: 15px;">
+                        <input type="text" id="input-channel-username" class="settings-text-input"
+                            placeholder="@username" style="font-size: 0.9rem; padding: 12px; margin-bottom: 12px;">
+                        <input type="text" id="input-channel-link" class="settings-text-input"
+                            placeholder="https://t.me/..." style="font-size: 0.9rem; padding: 12px;">
+                    </div>
+                    <div class="modal-group" style="margin-top: 20px;">
                         <button class="gradient-btn btn-add-channel" onclick="addMandatoryChannel()">
                             Add Channel
                         </button>
