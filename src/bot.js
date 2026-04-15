@@ -73,11 +73,8 @@ bot.use(async (ctx, next) => {
 bot.use(async (ctx, next) => {
   if (!ctx.from) return next();
 
-  // Skip for admins
-  const adminIds = (process.env.ADMIN_IDS || process.env.ADMIN_TELEGRAM_ID || "").split(',').map(id => id.trim());
-  if (adminIds.includes(ctx.from.id.toString())) {
-    return next();
-  }
+  // We previously skipped admins, but admins might want to test the subscription requirement on their own account.
+  // if (adminIds.includes(ctx.from.id.toString())) return next();
 
   try {
     const channels = await prisma.mandatoryChannel.findMany();
@@ -86,14 +83,21 @@ bot.use(async (ctx, next) => {
     const notJoined = [];
     for (const channel of channels) {
       try {
-        const member = await ctx.telegram.getChatMember(channel.username, ctx.from.id);
+        let chUsername = channel.username.trim();
+        if (!chUsername.startsWith('@') && !chUsername.startsWith('-') && !chUsername.match(/^\d+$/)) {
+          chUsername = '@' + chUsername;
+        }
+
+        const member = await ctx.telegram.getChatMember(chUsername, ctx.from.id);
         const joinedStatus = ['member', 'administrator', 'creator'];
         if (!joinedStatus.includes(member.status)) {
           notJoined.push(channel);
         }
       } catch (err) {
         console.error(`[SUB CHECK ERROR] ${channel.username}:`, err.message);
-        // If bot is not admin in channel, we skip check for that specific channel to avoid blocking everyone
+        // If bot isn't admin, it fails to check. We block the user and show the button anyway, 
+        // to force the owner to fix the bot's admin status in the channel, rather than failing silently.
+        notJoined.push(channel);
       }
     }
 
