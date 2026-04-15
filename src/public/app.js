@@ -427,8 +427,8 @@ function renderOrdersList(orders) {
         <div class="user-container">
             <div class="user-card-index">${globalIndex}</div>
             <div class="user-row">
-                <span class="user-row-label">Status</span>
-                <span class="user-row-value ${o.status === 'COMPLETED' ? 'color-green' : o.status === 'CANCELLED' ? 'color-red' : 'color-orange'}">${o.status}</span>
+                <span class="user-row-label">Code</span>
+                <span class="user-row-value ${o.smsCode ? 'color-green' : 'color-red'}">${o.smsCode || 'XXXXX'}</span>
             </div>
             <div class="user-row">
                 <span class="user-row-label">User ID</span>
