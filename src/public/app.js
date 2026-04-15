@@ -78,7 +78,7 @@ function getHeaders() {
 
 async function refreshData() {
     try {
-        const [statsRes, usersRes, ordersRes, depositsRes, countriesRes] = await Promise.all([
+        const [statsRes, usersRes, ordersRes, depositsRes, countriesRes, settingsRes] = await Promise.all([
             fetch('/api/admin/stats', { headers: getHeaders() }),
             fetch('/api/admin/users', { headers: getHeaders() }),
             fetch('/api/admin/orders', { headers: getHeaders() }),
