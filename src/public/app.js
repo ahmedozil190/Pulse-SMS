@@ -118,6 +118,8 @@ async function refreshData() {
         if (oStatTotal) oStatTotal.textContent = stats.totalOrdersCount || 0;
         if (oStatApproved) oStatApproved.textContent = stats.successfulOrders || 0;
         if (oStatRejected) oStatRejected.textContent = stats.cancelledOrdersCount || 0;
+        const oStatPending = document.getElementById('order-stat-pending');
+        if (oStatPending) oStatPending.textContent = stats.activeOrdersCount || 0;
 
         // Update Deposit page stats
         const dStatCount = document.getElementById('deposit-stat-count');
@@ -183,9 +185,13 @@ window.triggerSearch = (type) => {
         renderCountries();
     } else if (type === 'order') {
         orderSearchQuery = document.getElementById('order-search-v2').value;
+        const resetBtn = document.getElementById('reset-order-search-container');
+        if (resetBtn) resetBtn.style.display = orderSearchQuery.trim() ? 'block' : 'none';
         applyOrderFilters();
     } else if (type === 'deposit') {
         depositSearchQuery = document.getElementById('deposit-search-v2').value;
+        const resetBtn = document.getElementById('reset-deposit-search-container');
+        if (resetBtn) resetBtn.style.display = depositSearchQuery.trim() ? 'block' : 'none';
         applyDepositFilters();
     }
 };
@@ -216,6 +222,13 @@ window.resetSearch = (type) => {
         const resetBtn = document.getElementById('reset-order-search-container');
         if (resetBtn) resetBtn.style.display = 'none';
         applyOrderFilters();
+    } else if (type === 'deposit') {
+        const input = document.getElementById('deposit-search-v2');
+        if (input) input.value = '';
+        depositSearchQuery = '';
+        const resetBtn = document.getElementById('reset-deposit-search-container');
+        if (resetBtn) resetBtn.style.display = 'none';
+        applyDepositFilters();
     }
 };
 

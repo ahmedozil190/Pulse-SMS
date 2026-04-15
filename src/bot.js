@@ -818,6 +818,7 @@ app.get('/api/admin/stats', isAdminMiddleware, async (req, res) => {
       where: { status: 'APPROVED' }
     });
 
+    const activeOrdersCount = await prisma.order.count({ where: { status: 'PENDING' } });
     const pendingDeposits = await prisma.deposit.count({ where: { status: 'PENDING' } });
 
     res.json({
@@ -826,6 +827,7 @@ app.get('/api/admin/stats', isAdminMiddleware, async (req, res) => {
       successfulOrders,
       totalOrdersCount,
       cancelledOrdersCount,
+      activeOrdersCount,
       totalRevenue: revenueRes._sum.price || 0,
       totalDepositsCount,
       totalDepositsAmount: totalDepositsAmountRes._sum.amount || 0,
