@@ -151,6 +151,8 @@ async function getOrCreateUser(ctx, referrerTelegramId = null) {
     ctx.session = ctx.session || {};
 
     let user = await prisma.user.findUnique({ where: { telegramId } });
+    const userExistsBefore = !!user;
+
     if (!user) {
       let referredById = null;
       if (referrerTelegramId && referrerTelegramId !== telegramId) {
@@ -198,10 +200,10 @@ async function getOrCreateUser(ctx, referrerTelegramId = null) {
     // Attach language to session for faster access if needed
     ctx.session.lang = user.language;
     
-    return user;
+    return { user, isNew: !userExistsBefore };
   } catch (error) {
     console.error('[DATABASE ERROR] Failed to get/create user:', error.message);
-    return null;
+    return { user: null, isNew: false };
   }
 }
 
@@ -216,9 +218,14 @@ bot.command('start', async (ctx) => {
       referrerTelegramId = args[1].replace('ref_', '');
     }
 
-    const user = await getOrCreateUser(ctx, referrerTelegramId);
+    const { user, isNew } = await getOrCreateUser(ctx, referrerTelegramId);
     if (!user) {
       return ctx.reply("⚠️ Sorry, there is a technical issue with the database setup. Please try again in 1 minute.");
+    }
+
+    if (isNew) {
+      // First time using the bot (after they just subscribed if required)
+      return ctx.reply(ctx.t('choose_lang'), keyboards.languageSelect);
     }
 
     const msg = ctx.t('welcome_user', { name: escapeHTML(ctx.from.first_name || 'User') });
