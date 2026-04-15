@@ -370,11 +370,11 @@ bot.action('action_invite', async (ctx) => {
     const botInfo = await ctx.telegram.getMe();
     const inviteLink = `https://t.me/${botInfo.username}?start=ref_${ctx.from.id}`;
 
-    const dateObj = new Date();
+    const dateObj = new Date(new Date().getTime() + (2 * 60 * 60 * 1000)); // Adjust to GMT+2
     const year = dateObj.getFullYear();
     const month = String(dateObj.getMonth() + 1).padStart(2, '0');
     const day = String(dateObj.getDate()).padStart(2, '0');
-    const dateStr = `${year}/${month}/${day}`;
+    const dateStr = `${day}/${month}/${year}`;
 
     // Get team count
     const totalTeam = await prisma.user.count({ where: { referredById: user.id } });
