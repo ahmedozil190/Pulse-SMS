@@ -164,6 +164,12 @@ async function refreshData() {
             maintenanceToggle.classList.toggle('active', isMMode);
         }
 
+        const inputRefPercent = document.getElementById('input-referral-percent');
+        if (inputRefPercent) inputRefPercent.value = allSettings.referral_percent || '5';
+
+        const inputRefMin = document.getElementById('input-referral-min');
+        if (inputRefMin) inputRefMin.value = allSettings.min_withdrawal || '1';
+
         // Update User page stats
         const uStatTotal = document.getElementById('user-stat-total');
         const uStatBanned = document.getElementById('user-stat-banned');
@@ -218,7 +224,7 @@ window.saveSetting = async (key, elementId, type) => {
         });
 
         if (res.ok) {
-            webapp.showConfirm('Settings updated successfully ✅');
+            showOzAlert('Updated!', 'Settings have been saved successfully.');
             if (key === 'bot_name') {
                 const sidebarTitle = document.querySelector('.sidebar-title');
                 if (sidebarTitle) sidebarTitle.textContent = value;
@@ -229,7 +235,33 @@ window.saveSetting = async (key, elementId, type) => {
         }
     } catch (err) {
         console.error('Save setting error:', err);
-        webapp.showAlert('Failed to save settings ❌');
+        showOzToast('error', 'Failed', 'Could not save setting.');
+    }
+};
+
+window.saveReferralSettings = async () => {
+    const percent = document.getElementById('input-referral-percent').value;
+    const min = document.getElementById('input-referral-min').value;
+
+    try {
+        await Promise.all([
+            fetch('/api/admin/settings/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...getHeaders() },
+                body: JSON.stringify({ key: 'referral_percent', value: percent })
+            }),
+            fetch('/api/admin/settings/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...getHeaders() },
+                body: JSON.stringify({ key: 'min_withdrawal', value: min })
+            })
+        ]);
+
+        showOzAlert('Config Saved', 'Referral settings have been updated successfully.');
+        refreshData();
+    } catch (err) {
+        console.error('Save referral settings error:', err);
+        showOzToast('error', 'Error', 'Failed to save referral settings.');
     }
 };
 

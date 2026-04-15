@@ -396,12 +396,20 @@ bot.action('action_invite', async (ctx) => {
       select: { price: true, updatedAt: true }
     });
 
+    // Get referral settings
+    const settings = await prisma.globalSetting.findMany();
+    const settingsMap = settings.reduce((acc, s) => ({ ...acc, [s.key]: s.value }), {});
+    const refPercent = parseFloat(settingsMap.referral_percent || '5');
+    const minWithdraw = parseFloat(settingsMap.min_withdrawal || '1');
+
+    // Calculate earnings with dynamic percent
+    const refMultiplier = refPercent / 100;
     let todayCount = 0, todayEarn = 0;
     let weekCount = 0, weekEarn = 0;
     let monthCount = 0, monthEarn = 0;
 
     for (const o of allRefOrders) {
-      const earn = o.price * 0.05;
+      const earn = o.price * refMultiplier;
       if (o.updatedAt >= startOfToday) {
         todayCount++; todayEarn += earn;
       }
@@ -421,6 +429,8 @@ bot.action('action_invite', async (ctx) => {
 
     const msg = ctx.t('invite_header', {
       link: escapeHTML(inviteLink),
+      percent: refPercent,
+      min: minWithdraw,
       teamCount: totalTeam,
       todayCount: todayCount,
       todayProfit: todayEarn.toFixed(2),
@@ -459,18 +469,25 @@ bot.action('action_withdraw_referral', async (ctx) => {
   const { user } = await getOrCreateUser(ctx);
   const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
 
-  if (dbUser.referralBalance < 1) {
-    const alertMsg = ctx.t('insufficient_ref_balance', { balance: dbUser.referralBalance.toFixed(2) });
-    return ctx.answerCbQuery(alertMsg, { show_alert: true });
-  }
+    const settings = await prisma.globalSetting.findMany();
+    const settingsMap = settings.reduce((acc, s) => ({ ...acc, [s.key]: s.value }), {});
+    const minWithdraw = parseFloat(settingsMap.min_withdrawal || '1');
 
-  await prisma.user.update({
-    where: { id: user.id },
-    data: {
-      balance: { increment: dbUser.referralBalance },
-      referralBalance: 0
+    if (dbUser.referralBalance < minWithdraw) {
+      const alertMsg = ctx.t('insufficient_ref_balance', { 
+        balance: dbUser.referralBalance.toFixed(2),
+        min: minWithdraw
+      });
+      return ctx.answerCbQuery(alertMsg, { show_alert: true });
     }
-  });
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        balance: { increment: dbUser.referralBalance },
+        referralBalance: 0
+      }
+    });
 
   const successMsg = ctx.t('withdrawal_success') + '\n' + ctx.t('withdrawn_to_balance', { amount: dbUser.referralBalance.toFixed(2) });
   return ctx.answerCbQuery(successMsg, { show_alert: true });
@@ -712,7 +729,12 @@ async function completeOrderAndCommission(phoneNumber, smsCode) {
 
     const user = await prisma.user.findUnique({ where: { id: order.userId } });
     if (user && user.referredById) {
-      const commission = order.price * 0.05;
+      // Get referral percent
+      const settings = await prisma.globalSetting.findMany();
+      const settingsMap = settings.reduce((acc, s) => ({ ...acc, [s.key]: s.value }), {});
+      const refPercent = parseFloat(settingsMap.referral_percent || '5');
+      
+      const commission = order.price * (refPercent / 100);
       await prisma.user.update({
         where: { id: user.referredById },
         data: { referralBalance: { increment: commission } }
