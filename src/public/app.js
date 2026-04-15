@@ -24,6 +24,9 @@ const usersPerPage = 5;
 let currentCountryPage = 1;
 const countriesPerPage = 5;
 
+let currentOrderPage = 1;
+const ordersPerPage = 5;
+
 let currentEditingCountryCode = null;
 let currentEditingCountryEnabled = false;
 
@@ -253,20 +256,28 @@ function applyUserFilters() {
 }
 
 function applyOrderFilters() {
-    let filtered = allOrders;
+    currentOrderPage = 1;
+    const filtered = getFilteredOrders();
+    renderOrdersList(filtered);
+}
 
-    // Apply status filter
+// Helper to get filtered orders without resetting page
+function getFilteredOrders() {
+    let filtered = allOrders;
     if (currentOrderFilter === 'completed') {
         filtered = filtered.filter(o => o.status === 'COMPLETED');
     } else if (currentOrderFilter === 'cancelled') {
         filtered = filtered.filter(o => o.status === 'CANCELLED');
     }
-
     if (orderSearchQuery) {
         const q = orderSearchQuery.toLowerCase();
-        filtered = filtered.filter(o => (o.phoneNumber && o.phoneNumber.includes(q)) || (o.user?.telegramId && o.user.telegramId.includes(q)) || (o.user?.firstName && o.user.firstName.toLowerCase().includes(q)));
+        filtered = filtered.filter(o => 
+            (o.phoneNumber && o.phoneNumber.includes(q)) || 
+            (o.user?.telegramId && String(o.user.telegramId).includes(q)) || 
+            (o.user?.firstName && o.user.firstName.toLowerCase().includes(q))
+        );
     }
-    renderOrdersList(filtered);
+    return filtered;
 }
 
 function applyDepositFilters() {
@@ -392,18 +403,29 @@ function applyUserFiltersPaginated() {
 
 function renderOrdersList(orders) {
     const list = document.getElementById('orders-list');
+    const paginationContainer = document.getElementById('order-pagination');
     if (!list) return;
+
     if (!orders.length) {
         list.innerHTML = `<div class="empty-state"><i class="fas fa-receipt"></i><span>No orders found</span></div>`;
+        if (paginationContainer) paginationContainer.innerHTML = '';
         return;
     }
-    list.innerHTML = orders.map((o, index) => {
+
+    const totalPages = Math.ceil(orders.length / ordersPerPage);
+    if (currentOrderPage > totalPages) currentOrderPage = totalPages || 1;
+
+    const start = (currentOrderPage - 1) * ordersPerPage;
+    const paginated = orders.slice(start, start + ordersPerPage);
+
+    list.innerHTML = paginated.map((o, index) => {
+        const globalIndex = start + index + 1;
         const countryInfo = allCountries.find(c => c.code === o.countryId);
         const countryDisplay = countryInfo ? `${countryInfo.flag} ${countryInfo.name}` : (o.countryId || '-');
 
         return `
         <div class="user-container">
-            <div class="user-card-index">${index + 1}</div>
+            <div class="user-card-index">${globalIndex}</div>
             <div class="user-row">
                 <span class="user-row-label">Status</span>
                 <span class="user-row-value ${o.status === 'COMPLETED' ? 'color-green' : o.status === 'CANCELLED' ? 'color-red' : 'color-orange'}">${o.status}</span>
@@ -431,6 +453,20 @@ function renderOrdersList(orders) {
         </div>
         `;
     }).join('');
+
+    renderPagination(
+        totalPages,
+        currentOrderPage,
+        (newPage) => {
+            currentOrderPage = newPage;
+            const target = document.getElementById('page-orders');
+            if (target) target.scrollTo({ top: 0, behavior: 'smooth' });
+            const filteredOrders = getFilteredOrders();
+            renderOrdersList(filteredOrders);
+        },
+        paginationContainer,
+        'orderPaginationCallback'
+    );
 }
 
 function renderDepositsList(deposits) {
