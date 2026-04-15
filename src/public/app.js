@@ -108,6 +108,7 @@ async function refreshData() {
         const sTotalOrders = document.getElementById('stat-total-orders');
         const sTotalCompleted = document.getElementById('stat-total-completed');
         const sTotalCancelled = document.getElementById('stat-total-cancelled');
+        const sTotalDepositsCount = document.getElementById('stat-total-deposits-count');
         const sTotalDepositsAmount = document.getElementById('stat-total-deposits-amount');
         const sTotalCountries = document.getElementById('stat-total-countries');
         const sActiveCountries = document.getElementById('stat-active-countries');
