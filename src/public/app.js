@@ -459,8 +459,8 @@ function renderOrdersList(orders) {
         currentOrderPage,
         (newPage) => {
             currentOrderPage = newPage;
-            const target = document.getElementById('page-orders');
-            if (target) target.scrollTo({ top: 0, behavior: 'smooth' });
+            const target = document.getElementById('order-history-section');
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
             const filteredOrders = getFilteredOrders();
             renderOrdersList(filteredOrders);
         },
