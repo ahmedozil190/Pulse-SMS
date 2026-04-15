@@ -105,7 +105,7 @@ bot.use(async (ctx, next) => {
       // User must join channels
       const buttons = notJoined.map(ch => [Markup.button.url('- Click Here .', ch.link)]);
       
-      return ctx.reply('🔒 Subscription Required\n\nSorry, you must join our channel first to use the bot:\n\n✅ After joining, send /start', {
+      return ctx.reply('<b>🔒 Subscription Required</b>\n\nSorry, you must join our channel first to use the bot:\n\n<b>✅ After joining, send</b> /start', {
         parse_mode: 'HTML',
         reply_markup: {
           inline_keyboard: buttons
