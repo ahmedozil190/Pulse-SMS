@@ -97,12 +97,15 @@ async function refreshData() {
         const sTotalUsers = document.getElementById('stat-total-users');
         const sTotalOrders = document.getElementById('stat-total-orders');
         const sTotalSales = document.getElementById('stat-total-sales');
+        const sTotalCompleted = document.getElementById('stat-total-completed');
+        const sTotalCancelled = document.getElementById('stat-total-cancelled');
         const sPendingDep = document.getElementById('stat-pending-deposits');
         const sRevenue = document.getElementById('stat-total-revenue');
 
         if (sTotalUsers) sTotalUsers.textContent = stats.totalUsers || 0;
         if (sTotalOrders) sTotalOrders.textContent = stats.totalOrdersCount || 0;
-        if (sTotalSales) sTotalSales.textContent = stats.successfulOrders || 0;
+        if (sTotalCompleted) sTotalCompleted.textContent = stats.successfulOrders || 0;
+        if (sTotalCancelled) sTotalCancelled.textContent = stats.cancelledOrdersCount || 0;
         if (sPendingDep) sPendingDep.textContent = stats.pendingDeposits || 0;
         if (sRevenue) sRevenue.textContent = `$${(stats.totalRevenue || 0).toFixed(2)}`;
 
@@ -114,13 +117,7 @@ async function refreshData() {
         if (uStatBanned) uStatBanned.textContent = stats.bannedUsers || 0;
         if (uStatActive) uStatActive.textContent = (stats.totalUsers || 0) - (stats.bannedUsers || 0);
 
-        // Update Order page stats
-        const oStatTotal = document.getElementById('order-stat-total');
-        const oStatApproved = document.getElementById('order-stat-approved');
-        const oStatRejected = document.getElementById('order-stat-rejected');
-        if (oStatTotal) oStatTotal.textContent = stats.totalOrdersCount || 0;
-        if (oStatApproved) oStatApproved.textContent = stats.successfulOrders || 0;
-        if (oStatRejected) oStatRejected.textContent = stats.cancelledOrdersCount || 0;
+
 
         // Update Deposit page stats
         const dStatCount = document.getElementById('deposit-stat-count');
@@ -255,25 +252,7 @@ function applyUserFilters() {
     renderUsersList(filtered);
 }
 
-function applyOrderFilters() {
-    currentOrderPage = 1;
-    const filtered = getFilteredOrders();
-    renderOrdersList(filtered);
-}
 
-function getFilteredOrders() {
-    // Only show COMPLETED orders in History
-    let filtered = allOrders.filter(o => o.status === 'COMPLETED');
-    if (orderSearchQuery) {
-        const q = orderSearchQuery.toLowerCase();
-        filtered = filtered.filter(o => 
-            (o.phoneNumber && o.phoneNumber.includes(q)) || 
-            (o.user?.telegramId && String(o.user.telegramId).includes(q)) || 
-            (o.user?.firstName && o.user.firstName.toLowerCase().includes(q))
-        );
-    }
-    return filtered;
-}
 
 function applyDepositFilters() {
     let filtered = allDeposits;
@@ -396,73 +375,7 @@ function applyUserFiltersPaginated() {
     renderUsersList(filtered);
 }
 
-function renderOrdersList(orders) {
-    const list = document.getElementById('orders-list');
-    const paginationContainer = document.getElementById('order-pagination');
-    if (!list) return;
 
-    if (!orders.length) {
-        list.innerHTML = `<div class="empty-state"><i class="fas fa-receipt"></i><span>No orders found</span></div>`;
-        if (paginationContainer) paginationContainer.innerHTML = '';
-        return;
-    }
-
-    const totalPages = Math.ceil(orders.length / ordersPerPage);
-    if (currentOrderPage > totalPages) currentOrderPage = totalPages || 1;
-
-    const start = (currentOrderPage - 1) * ordersPerPage;
-    const paginated = orders.slice(start, start + ordersPerPage);
-
-    list.innerHTML = paginated.map((o, index) => {
-        const globalIndex = start + index + 1;
-        const countryInfo = allCountries.find(c => c.code === o.countryId);
-        const countryDisplay = countryInfo ? `${countryInfo.flag} ${countryInfo.name}` : (o.countryId || '-');
-
-        return `
-        <div class="user-container">
-            <div class="user-card-index">${globalIndex}</div>
-            <div class="user-row">
-                <span class="user-row-label">Code</span>
-                <span class="user-row-value ${o.smsCode ? 'color-green' : 'color-red'}">${o.smsCode || 'XXXXX'}</span>
-            </div>
-            <div class="user-row">
-                <span class="user-row-label">User ID</span>
-                <span class="user-row-value color-yellow">${o.user?.telegramId || o.userId}</span>
-            </div>
-            <div class="user-row">
-                <span class="user-row-label">Phone</span>
-                <span class="user-row-value color-blue-tint">${o.phoneNumber || '-'}</span>
-            </div>
-            <div class="user-row">
-                <span class="user-row-label">Country</span>
-                <span class="user-row-value color-cyan">${countryDisplay}</span>
-            </div>
-            <div class="user-row">
-                <span class="user-row-label">Price</span>
-                <span class="user-row-value color-green">$${o.price.toFixed(2)}</span>
-            </div>
-            <div class="user-row">
-                <span class="user-row-label">Date</span>
-                <span class="user-row-value color-purple" style="font-size:0.8rem">${formatDate(o.createdAt)}</span>
-            </div>
-        </div>
-        `;
-    }).join('');
-
-    renderPagination(
-        totalPages,
-        currentOrderPage,
-        (newPage) => {
-            currentOrderPage = newPage;
-            const target = document.getElementById('order-history-section');
-            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            const filteredOrders = getFilteredOrders();
-            renderOrdersList(filteredOrders);
-        },
-        paginationContainer,
-        'orderPaginationCallback'
-    );
-}
 
 function renderDepositsList(deposits) {
     const list = document.getElementById('deposits-list');
