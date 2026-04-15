@@ -105,6 +105,8 @@ async function refreshData() {
 
         // Update Overview stats
         const sTotalUsers = document.getElementById('stat-total-users');
+        const sActiveUsers = document.getElementById('stat-active-users');
+        const sBannedUsers = document.getElementById('stat-banned-users');
         const sTotalOrders = document.getElementById('stat-total-orders');
         const sTotalCompleted = document.getElementById('stat-total-completed');
         const sTotalCancelled = document.getElementById('stat-total-cancelled');
@@ -115,6 +117,8 @@ async function refreshData() {
         const sInactiveCountries = document.getElementById('stat-inactive-countries');
 
         if (sTotalUsers) sTotalUsers.textContent = stats.totalUsers || 0;
+        if (sActiveUsers) sActiveUsers.textContent = (stats.totalUsers || 0) - (stats.bannedUsers || 0);
+        if (sBannedUsers) sBannedUsers.textContent = stats.bannedUsers || 0;
         if (sTotalOrders) sTotalOrders.textContent = stats.totalOrdersCount || 0;
         if (sTotalCompleted) sTotalCompleted.textContent = stats.successfulOrders || 0;
         if (sTotalCancelled) sTotalCancelled.textContent = stats.cancelledOrdersCount || 0;
