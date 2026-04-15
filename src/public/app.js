@@ -118,8 +118,6 @@ async function refreshData() {
         if (oStatTotal) oStatTotal.textContent = stats.totalOrdersCount || 0;
         if (oStatApproved) oStatApproved.textContent = stats.successfulOrders || 0;
         if (oStatRejected) oStatRejected.textContent = stats.cancelledOrdersCount || 0;
-        const oStatPending = document.getElementById('order-stat-pending');
-        if (oStatPending) oStatPending.textContent = stats.activeOrdersCount || 0;
 
         // Update Deposit page stats
         const dStatCount = document.getElementById('deposit-stat-count');
