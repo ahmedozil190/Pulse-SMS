@@ -209,6 +209,13 @@ window.resetSearch = (type) => {
 
         currentCountryPage = 1;
         renderCountries();
+    } else if (type === 'order') {
+        const input = document.getElementById('order-search-v2');
+        if (input) input.value = '';
+        orderSearchQuery = '';
+        const resetBtn = document.getElementById('reset-order-search-container');
+        if (resetBtn) resetBtn.style.display = 'none';
+        applyOrderFilters();
     }
 };
 
