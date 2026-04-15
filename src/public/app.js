@@ -183,6 +183,8 @@ window.triggerSearch = (type) => {
         renderCountries();
     } else if (type === 'order') {
         orderSearchQuery = document.getElementById('order-search-v2').value;
+        const resetBtn = document.getElementById('reset-order-search-container');
+        if (resetBtn) resetBtn.style.display = orderSearchQuery.trim() ? 'block' : 'none';
         applyOrderFilters();
     } else if (type === 'deposit') {
         depositSearchQuery = document.getElementById('deposit-search-v2').value;
@@ -208,9 +210,15 @@ window.resetSearch = (type) => {
         if (resetBtn) resetBtn.style.display = 'none';
         
         currentCountryPage = 1;
-        renderCountries();
+    } else if (type === 'order') {
+        const input = document.getElementById('order-search-v2');
+        if (input) input.value = '';
+        orderSearchQuery = '';
+        const resetBtn = document.getElementById('reset-order-search-container');
+        if (resetBtn) resetBtn.style.display = 'none';
+        applyOrderFilters();
     }
-};
+}
 
 // FILTERS
 function applyUserFilters() {
