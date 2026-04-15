@@ -24,13 +24,13 @@ const texts = {
     insufficient_ref_balance: "❌ Your referral balance is insufficient.\n• Current balance: {balance}$\n• Minimum required: 1$",
     lang_set_success: "✅ Language set to {lang}",
     welcome_user: "<b>🔰 Welcome to International Numbers Store 🔰</b>\n\n{name} 👋\n\n<b>Choose the appropriate option from the menu:</b>",
-    welcome_bot: "<b>🔰 Welcome to International Numbers Store 🔰</b>\n\nOzZoO SMS 🩸 👋\n\n<b>Choose the appropriate option from the menu:</b>",
+    welcome_bot: "<b>🔰 Welcome to International Numbers Store 🔰</b>\n\n<b>OzZoO SMS 🩸 </b>👋\n\n<b>Choose the appropriate option from the menu:</b>",
     insufficient_balance: "❌ Insufficient balance! You need {required}$\nYour balance {balance}$",
     refresh_cooldown_msg: "⏳ Please wait {seconds} seconds before refreshing again"
   },
   ar: {
     welcome_user: "<b>🔰 مرحباً بك في متجر الأرقام الدولي 🔰</b>\n\n{name} 👋\n\n<b>اختر الخيار المناسب من القائمة:</b>",
-    welcome_bot: "<b>🔰 مرحباً بك في متجر الأرقام الدولي 🔰</b>\n\nOzZoO SMS 🩸 👋\n\n<b>اختر الخيار المناسب من القائمة:</b>",
+    welcome_bot: "<b>🔰 مرحباً بك في متجر الأرقام الدولي 🔰</b>\n\n<b>OzZoO SMS 🩸 </b>👋\n\n<b>اختر الخيار المناسب من القائمة:</b>",
     lang_set_success: "✅ تم ضبط اللغة على {lang}",
     choose_lang: "❍ Please choose your language\n❍ দয়া করে আপনার ভাষা নির্বাচন করুন\n❍ لطفاً زبان خود را انتخاب کنید\n❍ الرجاء اختيار لغتك",
     balance_header: "<b>💰 رصيدك الحالي</b>\n\n• <b>الرصيد المتاح:</b> {balance}$\n• <b>إجمالي المشتريات:</b> {purchases}$\n\n<b>💎 اختر طريقة الشحن:</b>",
@@ -59,7 +59,7 @@ const texts = {
   },
   fa: {
     welcome_user: "<b>🔰 به فروشگاه اعداد بین المللی خوش آمدید 🔰</b>\n\n{name} 👋\n\n<b>گزینه مناسب را از منو انتخاب کنید:</b>",
-    welcome_bot: "<b>🔰 به فروشگاه اعداد بین المللی خوش آمدید 🔰</b>\n\nOzZoO SMS 🩸 👋\n\n<b>گزینه مناسب را از منو انتخاب کنید:</b>",
+    welcome_bot: "<b>🔰 به فروشگاه اعداد بین المللی خوش آمدید 🔰</b>\n\n<b>OzZoO SMS 🩸 </b>👋\n\n<b>گزینه مناسب را از منو انتخاب کنید:</b>",
     choose_lang: "❍ Please choose your language\n❍ দয়া করে আপনার ভাষা নির্বাচন করুন\n❍ لطفاً زبان خود را انتخاب کنید\n❍ الرجاء اختيار لغتك",
     invite_header: "<b>🔗 دعوت دوست</b>\n\nدوستان خود را دعوت کنید و ۵٪ از خریدهایشان را کسب کنید!\n\n📎 لینک دعوت شما:\n<code>{link}</code>\n\nلینک را کپی کرده و برای دوستانتان ارسال کنید. وقتی از طریق لینک شما عضو شوند و شماره‌ای بخرند، ۵٪ از قیمت خرید را به دست خواهید آورد.\n\n<b>📊 آمار شما</b>\n• 👥 کل تیم شما: {teamCount}\n• امروز: {todayCount} (درآمد: {todayProfit}$)\n• این هفته: {weekCount} (درآمد: {weekProfit}$)\n• این ماه: {monthCount} (درآمد: {monthProfit}$)\n• 💰 موجودی referrals: {refBalance}$\n\nاین موجودی جدا از موجودی اصلی شماست و برای خرید شماره یا برداشت قابل استفاده است\n\n📅 تاریخ: {date}",
     withdraw_btn: "💰 برداشت سود",
@@ -76,7 +76,7 @@ const texts = {
   },
   bn: {
     welcome_user: "<b>🔰 আন্তর্জাতিক নম্বর স্টোরে স্বাগতম 🔰</b>\n\n{name} 👋\n\n<b>মেনু থেকে উপযুক্ত বিকল্প নির্বাচন করুন:</b>",
-    welcome_bot: "<b>🔰 আন্তর্জাতিক নম্বর স্টোরে স্বাগতম 🔰</b>\n\nOzZoO SMS 🩸 👋\n\n<b>মেনু থেকে উপযুক্ত বিকল্প নির্বাচন করুন:</b>",
+    welcome_bot: "<b>🔰 আন্তর্জাতিক নম্বর স্টোরে স্বাগতম 🔰</b>\n\n<b>OzZoO SMS 🩸 </b>👋\n\n<b>মেনু থেকে উপযুক্ত বিকল্প নির্বাচন করুন:</b>",
     choose_lang: "❍ Please choose your language\n❍ দয়া করে আপনার ভাষা নির্বাচন করুন\n❍ لطفاً زبان خود را انتخاب کنید\n❍ الرجاء اختيار লগتك",
     invite_header: "<b>🔗 বন্ধুকে আমন্ত্রণ জানান</b>\n\nআপনার বন্ধুদের আমন্ত্রণ জানান এবং তাদের কেনাকাটার ৫% উপার্জন করুন!\n\n📎 আপনার আমন্ত্রণ লিঙ্ক:\n<code>{link}</code>\n\nলিঙ্কটি কপি করে আপনার বন্ধুদের কাছে পাঠান। তারা যখন আপনার লিঙ্কের মাধ্যমে যোগ দেয় এবং একটি নম্বর কেনে, আপনি কেনার মূল্যের ৫% উপার্জন করবেন।\n\n<b>📊 আপনার পরিসংখ্যান</b>\n• 👥 আপনার মোট দল: {teamCount}\n• আজ: {todayCount} (আয়: {todayProfit}$)\n• এই সপ্তাহ: {weekCount} (আয়: {weekProfit}$)\n• এই মাস: {monthCount} (আয়: {monthProfit}$)\n• 💰 বর্তমান রেফারেল ব্যালেন্স: {refBalance}$\n\nএই ব্যালেন্স আপনার মূল ব্যালেন্স থেকে আলাদা এবং নম্বর কেনা বা উত্তোলনের জন্য ব্যবহার করা যাবে\n\n📅 তারিখ: {date}",
     withdraw_btn: "💰 অর্থ উত্তোলন",
