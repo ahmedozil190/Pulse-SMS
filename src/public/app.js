@@ -213,7 +213,7 @@ window.openSettingsEditor = (key, label, type) => {
         document.getElementById('btn-save-setting').style.display = 'block';
     }
 
-    document.getElementById('settings-modal').classList.add('open');
+    document.getElementById('settings-modal').classList.add('active');
 };
 
 window.toggleSettingUI = () => {
@@ -251,7 +251,7 @@ window.saveSetting = async () => {
 };
 
 window.closeSettingsModal = () => {
-    document.getElementById('settings-modal').classList.remove('open');
+    document.getElementById('settings-modal').classList.remove('active');
 };
 
 // NAVIGATION
