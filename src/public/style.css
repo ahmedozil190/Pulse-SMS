@@ -630,29 +630,14 @@ body.loading {
 /* User Card Styles */
 .user-container {
     position: relative;
+    padding-top: 25px;
     margin-top: 25px;
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 28px;
-    padding: 35px 20px 20px; /* Extra top padding for the badge */
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+    background: rgba(255, 255, 255, 0.01);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 20px;
+    padding: 25px 15px 15px;
     cursor: pointer;
     transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    overflow: hidden; /* Needed for ::before glow */
-}
-
-/* High-end inner glow effect for user cards */
-.user-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
-    pointer-events: none;
 }
 
 .user-container:hover {
@@ -994,11 +979,30 @@ input[type=number] {
 }
 
 /* Settings Icon Colors (Backgrounds) */
-.color-red-bg { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
-.color-orange-bg { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
-.color-blue-bg { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
-.color-purple-bg { background: rgba(168, 85, 247, 0.1); color: #a855f7; }
-.color-green-bg { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+.color-red-bg {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.color-orange-bg {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.color-blue-bg {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+.color-purple-bg {
+    background: rgba(168, 85, 247, 0.1);
+    color: #a855f7;
+}
+
+.color-green-bg {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
 
 .toggle-switch {
     display: flex;
@@ -1015,7 +1019,7 @@ input[type=number] {
     position: relative;
     cursor: pointer;
     transition: 0.3s;
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .toggle-input::after {
@@ -1042,7 +1046,7 @@ input[type=number] {
     width: 100%;
     padding: 16px;
     background: #0f1116;
-    border: 1px solid rgba(255,255,255,0.06);
+    border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 14px;
     color: #fff;
     font-size: 1.1rem;
@@ -1057,7 +1061,8 @@ input[type=number] {
 }
 
 .btn-update-settings {
-    background: #5dade2 !important; /* Specific blue from image */
+    background: #5dade2 !important;
+    /* Specific blue from image */
     box-shadow: 0 5px 20px rgba(93, 173, 226, 0.25);
     border-radius: 18px !important;
     padding: 18px !important;
@@ -1090,35 +1095,19 @@ input[type=number] {
     font-size: 0.9rem;
 }
 
-/* ═══ GLASSMORPHISM OVERHAUL ═══ */
+/* ═══ SETTINGS CARDS STRIPPED ═══ */
 .glass-card {
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 28px;
+    background: #0f1116; /* Flat dark like old modals */
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
     padding: 30px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
-    position: relative;
-    overflow: hidden;
-}
-
-/* High-end inner glow effect */
-.glass-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
-    pointer-events: none;
 }
 
 .settings-text-input {
     width: 100%;
     padding: 16px;
-    background: rgba(0, 0, 0, 0.4); /* Darker box for clarity */
+    background: rgba(0, 0, 0, 0.4);
+    /* Darker box for clarity */
     border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 16px;
     color: #fff;
@@ -1220,7 +1209,8 @@ input[type=number] {
 .channel-info-value {
     font-size: 0.9rem;
     font-weight: 800;
-    color: #facc15; /* Yellowish for username */
+    color: #facc15;
+    /* Yellowish for username */
     text-align: right;
 }
 
