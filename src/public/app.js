@@ -466,7 +466,7 @@ window.renderCountries = () => {
     }
 
     if (filtered.length === 0) {
-        list.innerHTML = `<div class="empty-state">No countries found</div>`;
+        list.innerHTML = `<div class="empty-state"><i class="fas fa-globe"></i><span>No countries found</span></div>`;
         if (paginationContainer) paginationContainer.innerHTML = '';
         return;
     }
