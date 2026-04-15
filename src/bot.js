@@ -39,7 +39,7 @@ bot.use(session());
 bot.use(async (ctx, next) => {
   if (!ctx.from) return next();
 
-  const user = await getOrCreateUser(ctx);
+  const { user } = await getOrCreateUser(ctx);
   const lang = user?.language || 'en';
 
   ctx.state.lang = lang;
@@ -296,7 +296,7 @@ bot.command('lang', (ctx) => {
  * Handle My Balance
  */
 bot.action('action_balance', async (ctx) => {
-  const user = await getOrCreateUser(ctx);
+  const { user } = await getOrCreateUser(ctx);
 
   const totalPurchasesResult = await prisma.order.aggregate({
     _sum: { price: true },
@@ -315,7 +315,7 @@ bot.action('action_balance', async (ctx) => {
  * Handle My Statistics
  */
 bot.action('action_stats', async (ctx) => {
-  const user = await getOrCreateUser(ctx);
+  const { user } = await getOrCreateUser(ctx);
 
   const allOrdersCount = await prisma.order.count({
     where: { userId: user.id }
@@ -361,7 +361,7 @@ bot.action('action_invite', async (ctx) => {
     console.log(`[ACTION] User ${ctx.from.id} clicked Invite button`);
     await ctx.answerCbQuery().catch(() => { });
 
-    const user = await getOrCreateUser(ctx);
+    const { user } = await getOrCreateUser(ctx);
     if (!user) {
       console.error('[INVITE] Failed to get/create user');
       return ctx.answerCbQuery('❌ Error: User record not found.', { show_alert: true });
@@ -456,7 +456,7 @@ bot.action('action_invite', async (ctx) => {
  * Handle Referral Withdrawal
  */
 bot.action('action_withdraw_referral', async (ctx) => {
-  const user = await getOrCreateUser(ctx);
+  const { user } = await getOrCreateUser(ctx);
   const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
 
   if (dbUser.referralBalance < 1) {
@@ -550,7 +550,7 @@ bot.action('action_refresh_countries', async (ctx) => {
 bot.action(/^select_country_(.+)$/, async (ctx) => {
   const countryCode = ctx.match[1];
   const countryInfo = durianApi.getCountryInfo(countryCode);
-  const user = await getOrCreateUser(ctx);
+  const { user } = await getOrCreateUser(ctx);
 
   const countryConfig = await prisma.countryConfig.findUnique({
     where: { countryCode }
@@ -585,7 +585,7 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
       const phoneNumber = response.data;
       const cleanPhone = phoneNumber.startsWith('+') ? phoneNumber.substring(1) : phoneNumber;
 
-      const user = await getOrCreateUser(ctx);
+      const { user } = await getOrCreateUser(ctx);
       await prisma.order.create({
         data: {
           userId: user.id,
