@@ -236,6 +236,14 @@ function applyUserFilters() {
 
 function applyOrderFilters() {
     let filtered = allOrders;
+
+    // Apply status filter
+    if (currentOrderFilter === 'completed') {
+        filtered = filtered.filter(o => o.status === 'COMPLETED');
+    } else if (currentOrderFilter === 'cancelled') {
+        filtered = filtered.filter(o => o.status === 'CANCELLED');
+    }
+
     if (orderSearchQuery) {
         const q = orderSearchQuery.toLowerCase();
         filtered = filtered.filter(o => (o.phoneNumber && o.phoneNumber.includes(q)) || (o.user?.telegramId && o.user.telegramId.includes(q)) || (o.user?.firstName && o.user.firstName.toLowerCase().includes(q)));
@@ -658,6 +666,14 @@ window.setCountryFilter = (filter) => {
     document.getElementById('tab-country-inactive').classList.toggle('active', filter === 'inactive');
     currentCountryPage = 1;
     renderCountries();
+};
+
+window.setOrderFilter = (filter) => {
+    currentOrderFilter = filter;
+    document.getElementById('tab-order-all').classList.toggle('active', filter === 'all');
+    document.getElementById('tab-order-completed').classList.toggle('active', filter === 'completed');
+    document.getElementById('tab-order-cancelled').classList.toggle('active', filter === 'cancelled');
+    applyOrderFilters();
 };
 
 // MODALS
