@@ -79,27 +79,25 @@ function getHeaders() {
 
 async function refreshData() {
     try {
-        const [statsRes, usersRes, ordersRes, depositsRes, countriesRes, settingsRes, channelsRes] = await Promise.all([
+        // Fetch all core data in parallel
+        const [statsRes, usersRes, ordersRes, depositsRes, countriesRes] = await Promise.all([
             fetch('/api/admin/stats', { headers: getHeaders() }),
             fetch('/api/admin/users', { headers: getHeaders() }),
             fetch('/api/admin/orders', { headers: getHeaders() }),
             fetch('/api/admin/deposits', { headers: getHeaders() }),
-            fetch('/api/admin/countries', { headers: getHeaders() }),
-            fetch('/api/admin/settings', { headers: getHeaders() }),
-            fetch('/api/admin/channels', { headers: getHeaders() })
+            fetch('/api/admin/countries', { headers: getHeaders() })
         ]);
 
-        const apiChecks = {
+        // Check core APIs - these must succeed
+        const coreChecks = {
             'Stats': statsRes,
             'Users': usersRes,
             'Orders': ordersRes,
             'Deposits': depositsRes,
-            'Countries': countriesRes,
-            'Settings': settingsRes,
-            'Channels': channelsRes
+            'Countries': countriesRes
         };
 
-        for (const [name, res] of Object.entries(apiChecks)) {
+        for (const [name, res] of Object.entries(coreChecks)) {
             if (!res.ok) {
                 throw new Error(`API Error (${name}): ${res.status} ${res.statusText}`);
             }
@@ -110,8 +108,17 @@ async function refreshData() {
         allOrders = await ordersRes.json();
         allDeposits = await depositsRes.json();
         allCountries = await countriesRes.json();
-        allSettings = await settingsRes.json();
-        allChannels = await channelsRes.json();
+
+        // Fetch secondary APIs with graceful fallback
+        try {
+            const settingsRes = await fetch('/api/admin/settings', { headers: getHeaders() });
+            if (settingsRes.ok) { allSettings = await settingsRes.json(); }
+        } catch (e) { console.warn('[WARN] Settings API unavailable:', e.message); }
+
+        try {
+            const channelsRes = await fetch('/api/admin/channels', { headers: getHeaders() });
+            if (channelsRes.ok) { allChannels = await channelsRes.json(); }
+        } catch (e) { console.warn('[WARN] Channels API unavailable:', e.message); }
 
         // Update Bot Name in Sidebar
         const sidebarTitle = document.querySelector('.sidebar-title');
@@ -730,9 +737,13 @@ function formatDate(dateStr) {
 
 function escapeHtml(str) {
     if (!str) return '';
+    return String(str).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
 // --- MANDATORY CHANNELS LOGIC ---
 
 window.renderMandatoryChannels = () => {
+
     const list = document.getElementById('mandatory-channels-list');
     if (!list) return;
 
