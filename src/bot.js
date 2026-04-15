@@ -117,7 +117,7 @@ bot.use(async (ctx, next) => {
       // 2- Mutate current message if interaction came from a button click
       if (ctx.callbackQuery) {
         try {
-          await ctx.answerCbQuery('🔒 Subscription Required');
+          await ctx.answerCbQuery(); // Acknowledge without a popup text
           await ctx.editMessageText(msgText, msgOpts);
           return;
         } catch (e) {
