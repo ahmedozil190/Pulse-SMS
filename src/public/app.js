@@ -400,7 +400,7 @@ function renderOrdersList(orders) {
             </div>
             <div class="user-row">
                 <span class="user-row-label">Country</span>
-                <span class="user-row-value color-purple">${countryDisplay}</span>
+                <span class="user-row-value color-cyan">${countryDisplay}</span>
             </div>
             <div class="user-row">
                 <span class="user-row-label">Price</span>
@@ -408,7 +408,7 @@ function renderOrdersList(orders) {
             </div>
             <div class="user-row">
                 <span class="user-row-label">Date</span>
-                <span class="user-row-value color-blue-tint" style="font-size:0.8rem">${formatDate(o.createdAt)}</span>
+                <span class="user-row-value color-purple" style="font-size:0.8rem">${formatDate(o.createdAt)}</span>
             </div>
         </div>
         `;
