@@ -826,55 +826,26 @@ window.addMandatoryChannel = async () => {
             linkInput.value = '';
             
             // Premium success notification
-            Swal.fire({
-                icon: 'success',
-                title: 'Channel Added',
-                text: 'The channel has been successfully registered.',
-                timer: 2000,
-                timerProgressBar: true,
-                showConfirmButton: false,
-                background: '#1e293b',
-                color: '#fff',
-                iconColor: '#22c55e'
-            });
+            showOzToast('success', 'Channel Added', 'The channel has been successfully registered.');
 
             await refreshData();
         } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Operation Failed',
-                text: 'Could not add the channel. Please check the details.',
-                background: '#1e293b',
-                color: '#fff'
-            });
+            showOzToast('error', 'Operation Failed', 'Could not add the channel.');
         }
     } catch (err) {
         console.error(err);
-        Swal.fire({
-            icon: 'error',
-            title: 'System Error',
-            text: 'A connection error occurred.',
-            background: '#1e293b',
-            color: '#fff'
-        });
+        showOzToast('error', 'System Error', 'A connection error occurred.');
     }
 };
 
 window.deleteMandatoryChannel = async (id) => {
-    const result = await Swal.fire({
-        title: 'Are you sure?',
-        text: "You won't be able to revert this!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#9f1239',
-        cancelButtonColor: '#475569',
-        confirmButtonText: 'Yes, delete it!',
-        background: '#1e293b',
-        color: '#fff',
-        iconColor: '#f43f5e'
-    });
+    const isConfirmed = await showOzConfirm(
+        'Delete Channel?',
+        'This action is permanent and cannot be undone.',
+        '🗑️'
+    );
 
-    if (!result.isConfirmed) return;
+    if (!isConfirmed) return;
 
     try {
         const res = await fetch('/api/admin/channels/delete', {
@@ -884,29 +855,78 @@ window.deleteMandatoryChannel = async (id) => {
         });
 
         if (res.ok) {
-            Swal.fire({
-                icon: 'success',
-                title: 'Deleted!',
-                text: 'The channel has been removed.',
-                timer: 1500,
-                showConfirmButton: false,
-                background: '#1e293b',
-                color: '#fff',
-                iconColor: '#22c55e'
-            });
+            showOzToast('success', 'Deleted', 'The channel has been removed.');
             await refreshData();
         } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Failed to delete channel.',
-                background: '#1e293b',
-                color: '#fff'
-            });
+            showOzToast('error', 'Error', 'Failed to delete channel.');
         }
     } catch (err) {
         console.error(err);
     }
+};
+
+// --- OZ UI UTILITIES ---
+
+window.showOzToast = (type, title, msg) => {
+    const container = document.getElementById('oz-notifications');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `oz-toast ${type}`;
+    
+    const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+    
+    toast.innerHTML = `
+        <i class="fas ${icon}"></i>
+        <div class="oz-toast-content">
+            <div class="oz-toast-title">${title}</div>
+            <div class="oz-toast-msg">${msg}</div>
+        </div>
+    `;
+
+    container.appendChild(toast);
+
+    // Auto remove
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-20px)';
+        toast.style.transition = '0.4s';
+        setTimeout(() => toast.remove(), 400);
+    }, 3000);
+};
+
+window.showOzConfirm = (title, msg, icon = '❓') => {
+    return new Promise((resolve) => {
+        const root = document.getElementById('oz-modal-root');
+        if (!root) return resolve(false);
+
+        root.innerHTML = `
+            <div class="oz-modal">
+                <div class="oz-modal-icon">${icon}</div>
+                <div class="oz-modal-title">${title}</div>
+                <div class="oz-modal-msg">${msg}</div>
+                <div class="oz-modal-actions">
+                    <button class="oz-modal-btn cancel">Cancel</button>
+                    <button class="oz-modal-btn confirm">Confirm</button>
+                </div>
+            </div>
+        `;
+
+        root.classList.remove('hide');
+
+        const confirmBtn = root.querySelector('.confirm');
+        const cancelBtn = root.querySelector('.cancel');
+
+        confirmBtn.onclick = () => {
+            root.classList.add('hide');
+            resolve(true);
+        };
+
+        cancelBtn.onclick = () => {
+            root.classList.add('hide');
+            resolve(false);
+        };
+    });
 };
 
 // START

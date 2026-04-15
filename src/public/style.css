@@ -1252,3 +1252,96 @@ input[type=number] {
     border: none;
     cursor: pointer;
 }
+
+/* ═══ OZ CUSTOM NOTIFICATIONS ═══ */
+#oz-notifications {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.oz-toast {
+    pointer-events: auto;
+    min-width: 280px;
+    padding: 12px 20px;
+    background: rgba(15, 23, 42, 0.9);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    animation: ozSlideDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.oz-toast.success { border-left: 4px solid var(--success); }
+.oz-toast.error { border-left: 4px solid var(--danger); }
+
+.oz-toast i { font-size: 1.2rem; }
+.oz-toast.success i { color: var(--success); }
+.oz-toast.error i { color: var(--danger); }
+
+.oz-toast-content { display: flex; flex-direction: column; }
+.oz-toast-title { font-weight: 700; font-size: 0.9rem; color: #fff; }
+.oz-toast-msg { font-size: 0.8rem; color: var(--text-secondary); }
+
+@keyframes ozSlideDown {
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.oz-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9000;
+    transition: 0.3s;
+}
+
+.oz-modal-overlay.hide { opacity: 0; pointer-events: none; }
+
+.oz-modal {
+    width: 90%;
+    max-width: 350px;
+    background: #141822;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    transform: scale(0.9);
+    transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.oz-modal-overlay:not(.hide) .oz-modal { transform: scale(1); }
+
+.oz-modal-icon { font-size: 3rem; margin-bottom: 20px; text-align: center; }
+.oz-modal-title { font-size: 1.25rem; font-weight: 800; color: #fff; text-align: center; margin-bottom: 10px; }
+.oz-modal-msg { font-size: 0.95rem; color: var(--text-secondary); text-align: center; margin-bottom: 25px; line-height: 1.5; }
+
+.oz-modal-actions { display: flex; gap: 12px; }
+.oz-modal-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.oz-modal-btn.confirm { background: var(--danger); color: #fff; }
+.oz-modal-btn.cancel { background: rgba(255,255,255,0.05); color: var(--text-secondary); }
+
+.oz-modal-btn:active { transform: scale(0.95); }
