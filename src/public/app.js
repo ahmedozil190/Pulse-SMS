@@ -39,15 +39,8 @@ async function init() {
         const userSearch = document.getElementById('user-search-v2');
         if (userSearch) userSearch.addEventListener('input', (e) => { userSearchQuery = e.target.value; });
 
-        const orderSearch = document.getElementById('order-search-v2');
-        if (orderSearch) orderSearch.addEventListener('input', (e) => { orderSearchQuery = e.target.value; applyOrderFilters(); });
-
-        const depositSearch = document.getElementById('deposit-search-v2');
-        if (depositSearch) depositSearch.addEventListener('input', (e) => { depositSearchQuery = e.target.value; applyDepositFilters(); });
-
         const countrySearch = document.getElementById('country-search-v2');
         if (countrySearch) {
-            // Only update query, don't trigger render automatically
             countrySearch.addEventListener('input', (e) => { countrySearchQuery = e.target.value; });
         }
 
@@ -64,7 +57,14 @@ async function init() {
     } catch (err) {
         console.error('Init error:', err);
         document.body.classList.remove('loading');
-        document.getElementById('loader').innerHTML = '<div class="loader-content"><span>⚠️ Failed to load dashboard</span></div>';
+        document.getElementById('loader').innerHTML = `
+            <div class="loader-content" style="text-align: center; padding: 20px;">
+                <span style="font-size: 2rem; display: block; margin-bottom: 10px;">⚠️</span>
+                <span style="font-weight: 700; color: #fff; display: block; margin-bottom: 5px;">Failed to load dashboard</span>
+                <span style="font-size: 0.8rem; color: #94a3b8; opacity: 0.8;">${err.message}</span>
+                <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; cursor: pointer;">Retry</button>
+            </div>
+        `;
     }
 }
 
@@ -83,8 +83,18 @@ async function refreshData() {
             fetch('/api/admin/countries', { headers: getHeaders() })
         ]);
 
-        if (!statsRes.ok || !usersRes.ok || !ordersRes.ok || !depositsRes.ok || !countriesRes.ok) {
-            throw new Error('One or more API requests failed');
+        const apiChecks = {
+            'Stats': statsRes,
+            'Users': usersRes,
+            'Orders': ordersRes,
+            'Deposits': depositsRes,
+            'Countries': countriesRes
+        };
+
+        for (const [name, res] of Object.entries(apiChecks)) {
+            if (!res.ok) {
+                throw new Error(`API Error (${name}): ${res.status} ${res.statusText}`);
+            }
         }
 
         const stats = await statsRes.json();
@@ -96,7 +106,8 @@ async function refreshData() {
         // Update Overview stats
         const sTotalUsers = document.getElementById('stat-total-users');
         const sTotalOrders = document.getElementById('stat-total-orders');
-        const sTotalSales = document.getElementById('stat-total-sales');
+        const sTotalCompleted = document.getElementById('stat-total-completed');
+        const sTotalCancelled = document.getElementById('stat-total-cancelled');
         const sTotalDepositsCount = document.getElementById('stat-total-deposits-count');
         const sTotalDepositsAmount = document.getElementById('stat-total-deposits-amount');
 
@@ -129,8 +140,6 @@ async function refreshData() {
 
         // Render lists
         try { applyUserFilters(); } catch (e) { console.error('Users render error:', e); }
-        try { applyOrderFilters(); } catch (e) { console.error('Orders render error:', e); }
-        try { applyDepositFilters(); } catch (e) { console.error('Deposits render error:', e); }
         try { renderCountries(); } catch (e) { console.error('Countries render error:', e); }
     } catch (err) {
         console.error('Data refresh error:', err);
