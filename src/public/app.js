@@ -264,6 +264,11 @@ window.switchPage = (pageName) => {
     };
     document.getElementById('page-title').textContent = titles[pageName] || 'Overview';
     document.getElementById('sidebar').classList.remove('open');
+
+    // Re-render channel list on page visit to ensure empty state shows
+    if (pageName === 'settings-channels') {
+        renderMandatoryChannels();
+    }
 };
 
 window.triggerSearch = (type) => {
