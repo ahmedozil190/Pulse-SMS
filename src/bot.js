@@ -1183,6 +1183,43 @@ async function syncUserIdentities() {
   }
 }
 
+/**
+ * STALE ORDER CLEANUP
+ * Automatically cancels PENDING orders that have exceeded the timeout (e.g., 15 minutes)
+ */
+async function cleanupStaleOrders() {
+  try {
+    const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
+    
+    const staleOrders = await prisma.order.findMany({
+      where: {
+        status: 'PENDING',
+        createdAt: { lt: fifteenMinutesAgo }
+      }
+    });
+
+    if (staleOrders.length > 0) {
+      console.log(`[CLEANUP] Found ${staleOrders.length} stale pending orders. Cancelling...`);
+      
+      await prisma.order.updateMany({
+        where: {
+          id: { in: staleOrders.map(o => o.id) }
+        },
+        data: { status: 'CANCELLED' }
+      });
+      
+      console.log(`[CLEANUP] Successfully cancelled stale orders.`);
+    }
+  } catch (err) {
+    console.error('[CLEANUP ERROR]', err);
+  }
+}
+
+// Run cleanup every 30 minutes
+setInterval(cleanupStaleOrders, 30 * 60 * 1000);
+// Initial cleanup run after 5 seconds of server start
+setTimeout(cleanupStaleOrders, 5000);
+
 // Run sync every 30 minutes
 setInterval(syncUserIdentities, 30 * 60 * 1000);
 // Initial run after 1 minute of server start
