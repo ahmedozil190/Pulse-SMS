@@ -97,17 +97,15 @@ async function refreshData() {
         const sTotalUsers = document.getElementById('stat-total-users');
         const sTotalOrders = document.getElementById('stat-total-orders');
         const sTotalSales = document.getElementById('stat-total-sales');
-        const sTotalCompleted = document.getElementById('stat-total-completed');
-        const sTotalCancelled = document.getElementById('stat-total-cancelled');
-        const sPendingDep = document.getElementById('stat-pending-deposits');
-        const sRevenue = document.getElementById('stat-total-revenue');
+        const sTotalDepositsCount = document.getElementById('stat-total-deposits-count');
+        const sTotalDepositsAmount = document.getElementById('stat-total-deposits-amount');
 
         if (sTotalUsers) sTotalUsers.textContent = stats.totalUsers || 0;
         if (sTotalOrders) sTotalOrders.textContent = stats.totalOrdersCount || 0;
         if (sTotalCompleted) sTotalCompleted.textContent = stats.successfulOrders || 0;
         if (sTotalCancelled) sTotalCancelled.textContent = stats.cancelledOrdersCount || 0;
-        if (sPendingDep) sPendingDep.textContent = stats.pendingDeposits || 0;
-        if (sRevenue) sRevenue.textContent = `$${(stats.totalRevenue || 0).toFixed(2)}`;
+        if (sTotalDepositsCount) sTotalDepositsCount.textContent = stats.totalDepositsCount || 0;
+        if (sTotalDepositsAmount) sTotalDepositsAmount.textContent = `$${(stats.totalDepositsAmount || 0).toFixed(2)}`;
 
         // Update User page stats
         const uStatTotal = document.getElementById('user-stat-total');
@@ -119,11 +117,7 @@ async function refreshData() {
 
 
 
-        // Update Deposit page stats
-        const dStatCount = document.getElementById('deposit-stat-count');
-        const dStatAmount = document.getElementById('deposit-stat-amount');
-        if (dStatCount) dStatCount.textContent = stats.totalDepositsCount || 0;
-        if (dStatAmount) dStatAmount.textContent = `$${(stats.totalDepositsAmount || 0).toFixed(2)}`;
+
 
         // Update Countries stats
         const cStatTotal = document.getElementById('country-stat-total');
@@ -186,11 +180,6 @@ window.triggerSearch = (type) => {
         const resetBtn = document.getElementById('reset-order-search-container');
         if (resetBtn) resetBtn.style.display = orderSearchQuery.trim() ? 'block' : 'none';
         applyOrderFilters();
-    } else if (type === 'deposit') {
-        depositSearchQuery = document.getElementById('deposit-search-v2').value;
-        const resetBtn = document.getElementById('reset-deposit-search-container');
-        if (resetBtn) resetBtn.style.display = depositSearchQuery.trim() ? 'block' : 'none';
-        applyDepositFilters();
     }
 };
 
@@ -220,13 +209,6 @@ window.resetSearch = (type) => {
         const resetBtn = document.getElementById('reset-order-search-container');
         if (resetBtn) resetBtn.style.display = 'none';
         applyOrderFilters();
-    } else if (type === 'deposit') {
-        const input = document.getElementById('deposit-search-v2');
-        if (input) input.value = '';
-        depositSearchQuery = '';
-        const resetBtn = document.getElementById('reset-deposit-search-container');
-        if (resetBtn) resetBtn.style.display = 'none';
-        applyDepositFilters();
     }
 };
 
@@ -254,14 +236,7 @@ function applyUserFilters() {
 
 
 
-function applyDepositFilters() {
-    let filtered = allDeposits;
-    if (depositSearchQuery) {
-        const q = depositSearchQuery.toLowerCase();
-        filtered = filtered.filter(d => (d.user?.telegramId && d.user.telegramId.includes(q)) || (d.user?.firstName && d.user.firstName.toLowerCase().includes(q)) || (d.method && d.method.toLowerCase().includes(q)));
-    }
-    renderDepositsList(filtered);
-}
+
 
 // RENDERERS
 function renderUsersList(users) {
@@ -377,45 +352,7 @@ function applyUserFiltersPaginated() {
 
 
 
-function renderDepositsList(deposits) {
-    const list = document.getElementById('deposits-list');
-    if (!list) return;
-    if (!deposits.length) {
-        list.innerHTML = `<div class="empty-state"><i class="fas fa-wallet"></i><span>No deposits found</span></div>`;
-        return;
-    }
-    list.innerHTML = deposits.map((d, index) => `
-        <div class="user-container">
-            <div class="user-card-index">${index + 1}</div>
-            <div class="user-row">
-                <span class="user-row-label">Status</span>
-                <span class="user-row-value ${d.status === 'APPROVED' ? 'color-green' : d.status === 'REJECTED' ? 'color-red' : 'color-orange'}">${d.status}</span>
-            </div>
-            <div class="user-row">
-                <span class="user-row-label">User</span>
-                <span class="user-row-value color-yellow">${escapeHtml(d.user?.firstName || 'User #' + d.userId)}</span>
-            </div>
-            <div class="user-row">
-                <span class="user-row-label">Amount</span>
-                <span class="user-row-value color-green">$${d.amount.toFixed(2)}</span>
-            </div>
-            <div class="user-row">
-                <span class="user-row-label">Method</span>
-                <span class="user-row-value color-blue-tint">${d.method || '-'}</span>
-            </div>
-            <div class="user-row">
-                <span class="user-row-label">Date</span>
-                <span class="user-row-value" style="font-size:0.8rem">${formatDate(d.createdAt)}</span>
-            </div>
-            ${d.status === 'PENDING' ? `
-                <div class="data-card-actions" style="margin-top:15px; border-top:none; display:flex; gap:10px;">
-                    <button class="gradient-btn" style="background:#10b981; padding:8px" onclick="handleDeposit(${d.id}, 'APPROVED')">Approve</button>
-                    <button class="gradient-btn" style="background:transparent; border:1px solid #ef4444; color:#ef4444; padding:8px" onclick="handleDeposit(${d.id}, 'REJECTED')">Reject</button>
-                </div>
-            ` : ''}
-        </div>
-    `).join('');
-}
+
 
 // --- COUNTRIES LOGIC ---
 window.renderCountries = () => {
@@ -609,16 +546,7 @@ window.bulkToggleCountries = async (isEnabled) => {
     } catch (err) { console.error(err); }
 };
 
-window.handleDeposit = async (depositId, action) => {
-    try {
-        const res = await fetch('/api/admin/deposit-action', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', ...getHeaders() },
-            body: JSON.stringify({ depositId, action })
-        });
-        if (res.ok) await refreshData(); else alert('Failed');
-    } catch (err) { console.error(err); }
-};
+
 
 window.setUserFilter = (filter) => {
     currentUserFilter = filter;
