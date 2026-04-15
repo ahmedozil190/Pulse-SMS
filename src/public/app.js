@@ -108,8 +108,10 @@ async function refreshData() {
         const sTotalOrders = document.getElementById('stat-total-orders');
         const sTotalCompleted = document.getElementById('stat-total-completed');
         const sTotalCancelled = document.getElementById('stat-total-cancelled');
-        const sTotalDepositsCount = document.getElementById('stat-total-deposits-count');
         const sTotalDepositsAmount = document.getElementById('stat-total-deposits-amount');
+        const sTotalCountries = document.getElementById('stat-total-countries');
+        const sActiveCountries = document.getElementById('stat-active-countries');
+        const sInactiveCountries = document.getElementById('stat-inactive-countries');
 
         if (sTotalUsers) sTotalUsers.textContent = stats.totalUsers || 0;
         if (sTotalOrders) sTotalOrders.textContent = stats.totalOrdersCount || 0;
@@ -117,6 +119,10 @@ async function refreshData() {
         if (sTotalCancelled) sTotalCancelled.textContent = stats.cancelledOrdersCount || 0;
         if (sTotalDepositsCount) sTotalDepositsCount.textContent = stats.totalDepositsCount || 0;
         if (sTotalDepositsAmount) sTotalDepositsAmount.textContent = `$${(stats.totalDepositsAmount || 0).toFixed(2)}`;
+
+        if (sTotalCountries) sTotalCountries.textContent = allCountries.length;
+        if (sActiveCountries) sActiveCountries.textContent = allCountries.filter(c => c.isEnabled).length;
+        if (sInactiveCountries) sInactiveCountries.textContent = allCountries.filter(c => !c.isEnabled).length;
 
         // Update User page stats
         const uStatTotal = document.getElementById('user-stat-total');
