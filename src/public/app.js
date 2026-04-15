@@ -743,7 +743,6 @@ function escapeHtml(str) {
 // --- MANDATORY CHANNELS LOGIC ---
 
 window.renderMandatoryChannels = () => {
-
     const list = document.getElementById('mandatory-channels-list');
     if (!list) return;
 
@@ -758,25 +757,28 @@ window.renderMandatoryChannels = () => {
     }
 
     list.innerHTML = allChannels.map((channel, idx) => `
-        <div class="channel-card">
-            <div class="channel-badge">${idx + 1}</div>
-            
-            <div class="channel-info-row">
-                <span class="channel-info-label">Username</span>
-                <span class="channel-info-value">${channel.username}</span>
+        <div class="user-container">
+            <div class="user-card-index">${idx + 1}</div>
+
+            <div class="user-row">
+                <span class="user-row-label">USERNAME</span>
+                <span class="user-row-value color-yellow">${channel.username}</span>
             </div>
 
-            <div class="channel-info-row">
-                <span class="channel-info-label">Link</span>
-                <a href="${channel.link}" target="_blank" class="channel-info-link">${channel.link}</a>
+            <div class="user-row">
+                <span class="user-row-label">LINK</span>
+                <a href="${channel.link}" target="_blank" class="user-row-value" style="color: #60a5fa; font-weight: 700; text-decoration: none; font-size: 0.8rem;">${channel.link}</a>
             </div>
 
-            <button class="btn-delete-channel" onclick="deleteMandatoryChannel(${channel.id})">
-                <i class="fas fa-trash-alt"></i> Delete Channel
-            </button>
+            <div style="margin-top: 12px;">
+                <button class="btn-delete-channel" onclick="deleteMandatoryChannel(${channel.id})">
+                    <i class="fas fa-trash-alt"></i> Delete Channel
+                </button>
+            </div>
         </div>
     `).join('');
 };
+
 
 window.addMandatoryChannel = async () => {
     const usernameInput = document.getElementById('input-channel-username');
