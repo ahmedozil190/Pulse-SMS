@@ -34,6 +34,10 @@ const ordersPerPage = 5;
 let currentEditingCountryCode = null;
 let currentEditingCountryEnabled = false;
 
+// Channel pagination
+let currentChannelPage = 1;
+const channelsPerPage = 5;
+
 // INIT
 async function init() {
     try {
@@ -749,16 +753,22 @@ function escapeHtml(str) {
 
 window.renderMandatoryChannels = () => {
     const list = document.getElementById('mandatory-channels-list');
+    const paginationContainer = document.getElementById('channel-pagination');
     if (!list) return;
 
     if (allChannels.length === 0) {
         list.innerHTML = `<div class="empty-state"><i class="fas fa-rss"></i><span>No channels added yet</span></div>`;
+        if (paginationContainer) paginationContainer.innerHTML = '';
         return;
     }
 
-    list.innerHTML = allChannels.map((channel, idx) => `
+    const start = (currentChannelPage - 1) * channelsPerPage;
+    const paginated = allChannels.slice(start, start + channelsPerPage);
+    const totalPages = Math.ceil(allChannels.length / channelsPerPage);
+
+    list.innerHTML = paginated.map((channel, idx) => `
         <div class="channel-card-v3">
-            <div class="channel-card-v3-badge">${idx + 1}</div>
+            <div class="channel-card-v3-badge">${start + idx + 1}</div>
 
             <div class="channel-card-v3-row">
                 <span class="label">USERNAME</span>
@@ -775,6 +785,19 @@ window.renderMandatoryChannels = () => {
             </button>
         </div>
     `).join('');
+
+    renderPagination(
+        totalPages,
+        currentChannelPage,
+        (newPage) => {
+            currentChannelPage = newPage;
+            const target = document.getElementById('managed-channels-section');
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            renderMandatoryChannels();
+        },
+        paginationContainer,
+        'channelPaginationCallback'
+    );
 };
 
 
