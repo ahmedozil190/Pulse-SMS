@@ -826,6 +826,7 @@ window.addMandatoryChannel = async () => {
             linkInput.value = '';
             
             await refreshData();
+            showOzAlert('Channel Added!', 'The new channel has been added to your subscription list successfully. ✨');
         } else {
             const errorData = await res.json();
             if (res.status === 400 && errorData.msg === 'Channel already exists') {
@@ -858,6 +859,7 @@ window.deleteMandatoryChannel = async (id) => {
 
         if (res.ok) {
             await refreshData();
+            showOzAlert('Deleted Successfully', 'The channel has been removed from the mandatory subscription list.');
         } else {
             showOzToast('error', 'Error', 'Failed to delete channel.');
         }
@@ -869,14 +871,12 @@ window.deleteMandatoryChannel = async (id) => {
 // --- OZ UI UTILITIES ---
 
 window.showOzToast = (type, title, msg) => {
+    // Keeping toast as a secondary lighter feedback if needed for other things
     const container = document.getElementById('oz-notifications');
     if (!container) return;
-
     const toast = document.createElement('div');
     toast.className = `oz-toast ${type}`;
-    
     const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
-    
     toast.innerHTML = `
         <i class="fas ${icon}"></i>
         <div class="oz-toast-content">
@@ -884,10 +884,7 @@ window.showOzToast = (type, title, msg) => {
             <div class="oz-toast-msg">${msg}</div>
         </div>
     `;
-
     container.appendChild(toast);
-
-    // Auto remove
     setTimeout(() => {
         toast.style.opacity = '0';
         toast.style.transform = 'translateY(-20px)';
@@ -896,26 +893,62 @@ window.showOzToast = (type, title, msg) => {
     }, 3000);
 };
 
-window.showOzConfirm = (title, msg, icon = '❓') => {
+window.showOzAlert = (title, msg, type = 'success') => {
     return new Promise((resolve) => {
         const root = document.getElementById('oz-modal-root');
-        if (!root) return resolve(false);
+        if (!root) return resolve();
 
+        const icon = type === 'success' ? 'fa-check' : 'fa-info';
+        
         root.innerHTML = `
             <div class="oz-modal">
-                <div class="oz-modal-icon">${icon}</div>
+                <div class="oz-modal-icon-wrapper">
+                    <div class="oz-modal-icon-inner">
+                        <i class="fas ${icon}"></i>
+                    </div>
+                </div>
                 <div class="oz-modal-title">${title}</div>
                 <div class="oz-modal-msg">${msg}</div>
                 <div class="oz-modal-actions">
-                    <button class="oz-modal-btn cancel">Cancel</button>
-                    <button class="oz-modal-btn confirm">Confirm</button>
+                    <button class="oz-modal-btn dismiss">Dismiss</button>
                 </div>
             </div>
         `;
 
         root.classList.remove('hide');
 
-        const confirmBtn = root.querySelector('.confirm');
+        const dismissBtn = root.querySelector('.dismiss');
+        dismissBtn.onclick = () => {
+            root.classList.add('hide');
+            resolve();
+        };
+    });
+};
+
+window.showOzConfirm = (title, msg, iconEmoji = '🗑️') => {
+    return new Promise((resolve) => {
+        const root = document.getElementById('oz-modal-root');
+        if (!root) return resolve(false);
+
+        root.innerHTML = `
+            <div class="oz-modal">
+                <div class="oz-modal-icon-wrapper" style="border-color: rgba(244, 63, 94, 0.1); background: radial-gradient(circle, rgba(244, 63, 94, 0.1) 0%, transparent 70%);">
+                    <div class="oz-modal-icon-inner" style="border-color: var(--danger); color: var(--danger); background: rgba(244, 63, 94, 0.1);">
+                        <i class="fas fa-trash-alt"></i>
+                    </div>
+                </div>
+                <div class="oz-modal-title">${title}</div>
+                <div class="oz-modal-msg">${msg}</div>
+                <div class="oz-modal-actions">
+                    <button class="oz-modal-btn confirm-danger">Confirm</button>
+                    <button class="oz-modal-btn cancel">Cancel</button>
+                </div>
+            </div>
+        `;
+
+        root.classList.remove('hide');
+
+        const confirmBtn = root.querySelector('.confirm-danger');
         const cancelBtn = root.querySelector('.cancel');
 
         confirmBtn.onclick = () => {
