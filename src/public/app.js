@@ -261,14 +261,9 @@ function applyOrderFilters() {
     renderOrdersList(filtered);
 }
 
-// Helper to get filtered orders without resetting page
 function getFilteredOrders() {
-    let filtered = allOrders;
-    if (currentOrderFilter === 'completed') {
-        filtered = filtered.filter(o => o.status === 'COMPLETED');
-    } else if (currentOrderFilter === 'cancelled') {
-        filtered = filtered.filter(o => o.status === 'CANCELLED');
-    }
+    // Only show COMPLETED orders in History
+    let filtered = allOrders.filter(o => o.status === 'COMPLETED');
     if (orderSearchQuery) {
         const q = orderSearchQuery.toLowerCase();
         filtered = filtered.filter(o => 
