@@ -457,11 +457,14 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
   const countryConfig = await prisma.countryConfig.findUnique({
     where: { countryCode }
   });
-  const currentPrice = countryConfig ? countryConfig.price : 0.25;
+  const currentPrice = countryConfig ? countryConfig.price : 0.15;
 
   // 1. Check for sufficient balance before starting purchase
   if (user.balance < currentPrice) {
-    const msg = ctx.t('insufficient_balance', { balance: user.balance.toFixed(1) });
+    const msg = ctx.t('insufficient_balance', { 
+      balance: user.balance.toFixed(2),
+      required: currentPrice.toFixed(2)
+    });
     return ctx.answerCbQuery(msg, { show_alert: true });
   }
 
@@ -1029,7 +1032,7 @@ app.get('/api/admin/countries', isAdminMiddleware, async (req, res) => {
     const countries = [];
     Object.keys(allCountryMap).forEach(code => {
       const info = allCountryMap[code];
-      const config = configMap[code] || { isEnabled: true, price: 0.25 };
+      const config = configMap[code] || { isEnabled: true, price: 0.15 };
       
       countries.push({
         code,

@@ -306,17 +306,14 @@
 
             <!-- Price Adjustment Section -->
             <div class="modal-group">
-                <label class="input-label" style="display:flex; justify-content:space-between;">
-                    <span>Custom Price ($)</span>
-                </label>
-                <div class="flex" style="gap: 15px; flex-direction: column;">
-                    <div class="search-box-v2" style="margin: 0; position: relative;">
-                        <input type="number" id="country-price-input" step="0.01" min="0" placeholder="e.g. 0.25"
-                            style="width: 100%; border:none; outline:none; background:transparent; color:#fff; font-size:1rem; padding:15px; padding-left:30px;">
-                        <span style="position: absolute; left: 15px; top: 15px; color: #94a3b8;">$</span>
+                <div style="display: flex; gap: 10px; align-items: stretch;">
+                    <div class="search-box-v2" style="margin: 0; position: relative; flex: 1;">
+                        <input type="number" id="country-price-input" step="0.01" min="0" placeholder="0.15"
+                            style="width: 100%; border:none; outline:none; background:transparent; color:#fff; font-size:1rem; padding:14px; padding-left:30px;">
+                        <span style="position: absolute; left: 15px; top: 14px; color: #94a3b8;">$</span>
                     </div>
-                    <button class="gradient-btn" style="width:100%" onclick="saveCountryPrice()">
-                        <i class="fas fa-save"></i> Save Price
+                    <button class="gradient-btn" style="padding: 0 20px; border-radius: 12px; white-space: nowrap; height: auto;" onclick="saveCountryPrice()">
+                        <i class="fas fa-save"></i> Save
                     </button>
                 </div>
             </div>

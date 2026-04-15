@@ -62,7 +62,7 @@ const keyboards = {
       const info = durianApi.getCountryInfo(code);
       const stock = distribution[code];
       const cfg = configMap[code];
-      const price = cfg ? cfg.price : 0.25;
+      const price = cfg ? cfg.price : 0.15;
       
       // 3. Match Competitor Label: Flag Name (Stock) Price$
       const label = `${info.flag} ${info.name} (${stock}) ${price}$`;
