@@ -17,6 +17,7 @@ let allCountries = [];
 let countrySearchQuery = '';
 let currentCountryFilter = 'active'; // 'active' or 'inactive'
 let allSettings = {};
+let allChannels = [];
 let currentEditingSettingKey = null;
 let currentEditingSettingType = 'text';
 
@@ -78,13 +79,14 @@ function getHeaders() {
 
 async function refreshData() {
     try {
-        const [statsRes, usersRes, ordersRes, depositsRes, countriesRes, settingsRes] = await Promise.all([
+        const [statsRes, usersRes, ordersRes, depositsRes, countriesRes, settingsRes, channelsRes] = await Promise.all([
             fetch('/api/admin/stats', { headers: getHeaders() }),
             fetch('/api/admin/users', { headers: getHeaders() }),
             fetch('/api/admin/orders', { headers: getHeaders() }),
             fetch('/api/admin/deposits', { headers: getHeaders() }),
             fetch('/api/admin/countries', { headers: getHeaders() }),
-            fetch('/api/admin/settings', { headers: getHeaders() })
+            fetch('/api/admin/settings', { headers: getHeaders() }),
+            fetch('/api/admin/channels', { headers: getHeaders() })
         ]);
 
         const apiChecks = {
@@ -93,7 +95,8 @@ async function refreshData() {
             'Orders': ordersRes,
             'Deposits': depositsRes,
             'Countries': countriesRes,
-            'Settings': settingsRes
+            'Settings': settingsRes,
+            'Channels': channelsRes
         };
 
         for (const [name, res] of Object.entries(apiChecks)) {
@@ -108,6 +111,7 @@ async function refreshData() {
         allDeposits = await depositsRes.json();
         allCountries = await countriesRes.json();
         allSettings = await settingsRes.json();
+        allChannels = await channelsRes.json();
 
         // Update Bot Name in Sidebar
         const sidebarTitle = document.querySelector('.sidebar-title');
@@ -248,7 +252,8 @@ window.switchPage = (pageName) => {
         countries: 'Countries', 
         settings: 'Settings',
         'settings-bot-name': 'Bot Identity',
-        'settings-maintenance': 'System Control'
+        'settings-maintenance': 'System Control',
+        'settings-channels': 'Subscription Channels'
     };
     document.getElementById('page-title').textContent = titles[pageName] || 'Overview';
     document.getElementById('sidebar').classList.remove('open');
@@ -725,8 +730,96 @@ function formatDate(dateStr) {
 
 function escapeHtml(str) {
     if (!str) return '';
-    return String(str).replace(/'/g, "\\'").replace(/"/g, '&quot;');
-}
+// --- MANDATORY CHANNELS LOGIC ---
+
+window.renderMandatoryChannels = () => {
+    const list = document.getElementById('mandatory-channels-list');
+    if (!list) return;
+
+    if (allChannels.length === 0) {
+        list.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-rss"></i>
+                <span>No mandatory channels added yet.</span>
+            </div>
+        `;
+        return;
+    }
+
+    list.innerHTML = allChannels.map((channel, idx) => `
+        <div class="channel-card">
+            <div class="channel-badge">${idx + 1}</div>
+            
+            <div class="channel-info-row">
+                <span class="channel-info-label">Username</span>
+                <span class="channel-info-value">${channel.username}</span>
+            </div>
+
+            <div class="channel-info-row">
+                <span class="channel-info-label">Link</span>
+                <a href="${channel.link}" target="_blank" class="channel-info-link">${channel.link}</a>
+            </div>
+
+            <button class="btn-delete-channel" onclick="deleteMandatoryChannel(${channel.id})">
+                <i class="fas fa-trash-alt"></i> Delete Channel
+            </button>
+        </div>
+    `).join('');
+};
+
+window.addMandatoryChannel = async () => {
+    const usernameInput = document.getElementById('input-channel-username');
+    const linkInput = document.getElementById('input-channel-link');
+    
+    const username = usernameInput.value.trim();
+    const link = linkInput.value.trim();
+
+    if (!username || !link) {
+        webapp.showAlert('Please enter both username and link ❌');
+        return;
+    }
+
+    try {
+        const res = await fetch('/api/admin/channels/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...getHeaders() },
+            body: JSON.stringify({ username, link })
+        });
+
+        if (res.ok) {
+            usernameInput.value = '';
+            linkInput.value = '';
+            webapp.showConfirm('Channel added successfully ✅');
+            await refreshData();
+        } else {
+            alert('Failed to add channel');
+        }
+    } catch (err) {
+        console.error(err);
+        webapp.showAlert('Server error ❌');
+    }
+};
+
+window.deleteMandatoryChannel = async (id) => {
+    if (!confirm('Are you sure you want to delete this channel?')) return;
+
+    try {
+        const res = await fetch('/api/admin/channels/delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...getHeaders() },
+            body: JSON.stringify({ id })
+        });
+
+        if (res.ok) {
+            webapp.showConfirm('Channel deleted 🗑️');
+            await refreshData();
+        } else {
+            alert('Delete failed');
+        }
+    } catch (err) {
+        console.error(err);
+    }
+};
 
 // START
 document.addEventListener('DOMContentLoaded', () => {

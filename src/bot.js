@@ -48,21 +48,52 @@ bot.use(async (ctx, next) => {
   return next();
 });
 
+  return next();
+});
+
 /**
- * Maintenance Mode Middleware
+ * Mandatory Subscription Middleware
  */
 bot.use(async (ctx, next) => {
   if (!ctx.from) return next();
-  
-  // Skip maintenance check for admins
+
+  // Skip for admins
   const adminIds = (process.env.ADMIN_IDS || process.env.ADMIN_TELEGRAM_ID || "").split(',').map(id => id.trim());
   if (adminIds.includes(ctx.from.id.toString())) {
     return next();
   }
 
-  const maintenance = await prisma.globalSetting.findUnique({ where: { key: 'maintenance_mode' } });
-  if (maintenance && maintenance.value === 'true') {
-    return ctx.reply('🛠️ <b>System Under Maintenance</b>\n\nWe are currently performing scheduled maintenance to improve our service. Please try again later.\n\nThank you for your patience!', { parse_mode: 'HTML' });
+  try {
+    const channels = await prisma.mandatoryChannel.findMany();
+    if (channels.length === 0) return next();
+
+    const notJoined = [];
+    for (const channel of channels) {
+      try {
+        const member = await ctx.telegram.getChatMember(channel.username, ctx.from.id);
+        const joinedStatus = ['member', 'administrator', 'creator'];
+        if (!joinedStatus.includes(member.status)) {
+          notJoined.push(channel);
+        }
+      } catch (err) {
+        console.error(`[SUB CHECK ERROR] ${channel.username}:`, err.message);
+        // If bot is not admin in channel, we skip check for that specific channel to avoid blocking everyone
+      }
+    }
+
+    if (notJoined.length > 0) {
+      // User must join channels
+      const buttons = notJoined.map(ch => [Markup.button.url('🚀 - Click Here .', ch.link)]);
+      
+      return ctx.reply('🔒 <b>Subscription Required</b>\n\nSorry, you must join our channel first to use the bot:\n\n✅ <b>After joining, send /start</b>', {
+        parse_mode: 'HTML',
+        reply_markup: {
+          inline_keyboard: buttons
+        }
+      });
+    }
+  } catch (err) {
+    console.error('[SUB MIDDLEWARE ERROR]', err);
   }
 
   return next();
@@ -1137,6 +1168,42 @@ app.post('/api/admin/settings/update', isAdminMiddleware, async (req, res) => {
   } catch (err) {
     console.error('Update setting error:', err);
     res.status(500).json({ msg: 'Failed to update setting' });
+  }
+});
+
+// --- MANDATORY CHANNELS APIs ---
+
+app.get('/api/admin/channels', isAdminMiddleware, async (req, res) => {
+  try {
+    const channels = await prisma.mandatoryChannel.findMany();
+    res.json(channels);
+  } catch (err) {
+    console.error('Fetch channels error:', err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+app.post('/api/admin/channels/add', isAdminMiddleware, async (req, res) => {
+  const { username, link } = req.body;
+  try {
+    const channel = await prisma.mandatoryChannel.create({
+      data: { username, link }
+    });
+    res.json(channel);
+  } catch (err) {
+    console.error('Add channel error:', err);
+    res.status(500).json({ msg: 'Failed to add channel' });
+  }
+});
+
+app.post('/api/admin/channels/delete', isAdminMiddleware, async (req, res) => {
+  const { id } = req.body;
+  try {
+    await prisma.mandatoryChannel.delete({ where: { id: parseInt(id) } });
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Delete channel error:', err);
+    res.status(500).json({ msg: 'Failed to delete channel' });
   }
 });
 

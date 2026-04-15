@@ -283,6 +283,17 @@
                         </div>
                         <i class="fas fa-chevron-right settings-chevron"></i>
                     </div>
+
+                    <!-- Mandatory Channels -->
+                    <div class="settings-row" onclick="switchPage('settings-channels')">
+                        <div class="settings-icon-box color-purple-bg">
+                            <i class="fas fa-rss"></i>
+                        </div>
+                        <div class="settings-info">
+                            <span class="settings-label">Mandatory Subscriptions</span>
+                        </div>
+                        <i class="fas fa-chevron-right settings-chevron"></i>
+                    </div>
                 </div>
             </main>
 
@@ -329,6 +340,33 @@
                             <i class="fas fa-save"></i> Update Settings
                         </button>
                     </div>
+                </div>
+            </main>
+
+            <!-- Settings Sub-Page: Mandatory Channels -->
+            <main id="page-settings-channels" class="page">
+                <div class="sub-header" onclick="switchPage('settings')">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Back</span>
+                </div>
+
+                <!-- Add Channel Card -->
+                <div class="glass-card" style="margin-top: 20px;">
+                    <div class="section-title" style="margin-top: 0; color: #fff; font-size: 0.95rem;">Add New Channel</div>
+                    <div class="modal-group" style="margin-top: 15px;">
+                        <input type="text" id="input-channel-username" class="settings-text-input" placeholder="@username" style="font-size: 0.9rem; padding: 12px; margin-bottom: 12px;">
+                        <input type="text" id="input-channel-link" class="settings-text-input" placeholder="https://t.me/..." style="font-size: 0.9rem; padding: 12px;">
+                    </div>
+                    <div class="modal-group" style="margin-top: 20px;">
+                        <button class="gradient-btn btn-add-channel" onclick="addMandatoryChannel()">
+                            Add Channel
+                        </button>
+                    </div>
+                </div>
+
+                <div class="section-title" style="margin-bottom: 10px;">Managed Channels</div>
+                <div id="mandatory-channels-list" class="channels-list">
+                    <!-- Channels injected via JS -->
                 </div>
             </main>
         </div>

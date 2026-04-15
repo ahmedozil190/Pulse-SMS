@@ -1146,3 +1146,107 @@ input[type=number] {
 .btn-update-settings i {
     font-size: 1.25rem;
 }
+
+/* ═══ MANDATORY CHANNELS ═══ */
+.channels-list {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    padding-bottom: 30px;
+}
+
+.channel-card {
+    position: relative;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 20px;
+    padding-top: 30px;
+}
+
+.channel-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent-blue);
+    color: #fff;
+    width: 25px;
+    height: 25px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 800;
+    box-shadow: 0 0 15px rgba(96, 165, 250, 0.5);
+    z-index: 10;
+}
+
+.channel-info-row {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+    padding: 12px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.channel-info-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.channel-info-value {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: #facc15; /* Yellowish for username */
+    text-align: right;
+}
+
+.channel-info-link {
+    color: #60a5fa;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.85rem;
+    max-width: 180px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.btn-add-channel {
+    width: 100%;
+    background: linear-gradient(135deg, #a855f7, #6366f1) !important;
+    border-radius: 14px !important;
+    padding: 12px !important;
+    font-weight: 700 !important;
+    color: #fff !important;
+    box-shadow: 0 5px 15px rgba(168, 85, 247, 0.25) !important;
+}
+
+.btn-delete-channel {
+    width: 100%;
+    background: rgba(239, 68, 68, 0.1) !important;
+    border: 1px solid rgba(239, 68, 68, 0.2) !important;
+    color: #ef4444 !important;
+    border-radius: 12px !important;
+    padding: 12px !important;
+    font-weight: 700 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 5px;
+    transition: 0.3s !important;
+}
+
+.btn-delete-channel:hover {
+    background: rgba(239, 68, 68, 0.2) !important;
+    transform: scale(0.98);
+}

@@ -62,3 +62,9 @@ model GlobalSetting {
   key   String @id
   value String
 }
+
+model MandatoryChannel {
+  id       Int    @id @default(autoincrement())
+  username String @unique // e.g. @channelusername
+  link     String        // e.g. https://t.me/channelusername
+}
