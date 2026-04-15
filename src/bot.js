@@ -47,6 +47,22 @@ bot.use(async (ctx, next) => {
   
   return next();
 });
+/**
+ * Maintenance Mode Middleware
+ */
+bot.use(async (ctx, next) => {
+  if (!ctx.from) return next();
+  
+  // Skip maintenance check for admins
+  const adminIds = (process.env.ADMIN_IDS || process.env.ADMIN_TELEGRAM_ID || "").split(',').map(id => id.trim());
+  if (adminIds.includes(ctx.from.id.toString())) {
+    return next();
+  }
+
+  const maintenance = await prisma.globalSetting.findUnique({ where: { key: 'maintenance_mode' } });
+  if (maintenance && maintenance.value === 'true') {
+    return ctx.reply('🛠️ <b>System Under Maintenance</b>\n\nWe are currently performing scheduled maintenance to improve our service. Please try again later.\n\nThank you for your patience!', { parse_mode: 'HTML' });
+  }
 
   return next();
 });
