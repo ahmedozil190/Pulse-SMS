@@ -515,7 +515,9 @@ bot.action(/^toggle_alert_(.+)_(.+)$/, async (ctx) => {
       await prisma.notificationSubscription.delete({
         where: { id: existing.id }
       });
-      await ctx.answerCbQuery('🔕 Alert disabled for this country').catch(() => {});
+      const countryInfo = durianApi.getCountryInfo(countryCode, ctx.state.lang);
+      const msg = ctx.t('alert_disabled', { country: countryInfo.localizedName });
+      await ctx.answerCbQuery(msg).catch(() => {});
     } else {
       // Toggle ON: Check balance first
       const countryConfig = await prisma.countryConfig.findUnique({ where: { countryCode } });
@@ -528,7 +530,9 @@ bot.action(/^toggle_alert_(.+)_(.+)$/, async (ctx) => {
       await prisma.notificationSubscription.create({
         data: { userId: user.id, countryCode }
       });
-      await ctx.answerCbQuery('🔔 Alert enabled! We will notify you when new stock arrives.').catch(() => {});
+      const countryInfo = durianApi.getCountryInfo(countryCode, ctx.state.lang);
+      const msg = ctx.t('alert_enabled', { country: countryInfo.localizedName });
+      await ctx.answerCbQuery(msg).catch(() => {});
     }
     
     // Refresh the current page
