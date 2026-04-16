@@ -302,8 +302,8 @@ bot.action('action_balance', async (ctx) => {
     _sum: { price: true },
     where: { userId: user.id, status: 'COMPLETED' }
   });
-  const totalPurchases = (totalPurchasesResult._sum.price || 0).toFixed(0);
-  const availableBalance = user.balance.toFixed(0);
+  const totalPurchases = (totalPurchasesResult._sum.price || 0).toFixed(2);
+  const availableBalance = user.balance.toFixed(2);
 
   const msg = ctx.t('balance_header', { balance: availableBalance, purchases: totalPurchases });
   await ctx.editMessageText(msg, {
@@ -326,7 +326,7 @@ bot.action('action_stats', async (ctx) => {
     where: { userId: user.id, status: 'COMPLETED' }
   });
 
-  const totalSpent = (totalPurchasesResult._sum.price || 0).toFixed(1);
+  const totalSpent = (totalPurchasesResult._sum.price || 0).toFixed(2);
   const totalCount = totalPurchasesResult._count.id;
 
   const activeCount = 0;
