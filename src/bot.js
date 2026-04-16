@@ -587,7 +587,7 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
 
   const percentages = ['10%', '30%', '70%', '100%'];
   for (let percent of percentages) {
-    await ctx.editMessageText(`🔄 Trying to purchase number...`, {
+    await ctx.editMessageText(ctx.t('purchase_process'), {
       reply_markup: {
         inline_keyboard: [[{ text: percent, callback_data: 'ignore' }]]
       }
