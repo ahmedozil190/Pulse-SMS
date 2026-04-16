@@ -34,9 +34,10 @@ const texts = {
     refresh_cooldown_msg: "⏳ Please wait {seconds} seconds before refreshing again",
     use_code_now_hint: "You can use the code now",
     alert_settings_header: "<b>🎯 Alert Settings</b>\n\nChoose your notification method for countries:\n\n📰 What will you be alerted about?\n• Price changes\n• Country availability\n• Numbers out of stock",
-    alert_settings_note: "\n\n\n💡 Note: Disabled countries ⛔️ cannot be activated due to insufficient balance",
+    alert_settings_note: "\n\n\n<i>💡 Note: Disabled countries ⛔️ cannot be activated due to insufficient balance</i>",
     next_page_btn: "Next ➡️",
     prev_page_btn: "⬅️ Previous",
+    main_menu_btn: "⬅️ Main Menu",
     alert_notification: "🔔 <b>Stock Update!</b>\n\nNumbers are now available for <b>{flag} {name}</b>!\n\n🚀 <b>Current Stock:</b> {stock}\n\n🛒 <i>Go to \"Buy Number\" to grab yours now!</i>"
   },
   ar: {
@@ -75,9 +76,10 @@ const texts = {
     no_numbers_error: "❌ لا توجد أرقام متاحة حالياً\n\n🔄 جرب مرة أخرى بعد قليل",
     use_code_now_hint: "يمكنك استخدام الكود الآن",
     alert_settings_header: "<b>🎯 إعدادات التنبيهات</b>\n\nاختر طريقة إشعاراتك للدول:\n\n📰 ما الذي يتم تنبيهك به؟\n• تغيّر الأسعار\n• توفر الدولة\n• نفاد الأرقام",
-    alert_settings_note: "\n\n\n💡 ملاحظة: الدول المعطلة ⛔️ لا يمكن تفعيلها بسبب نقص الرصيد",
+    alert_settings_note: "\n\n\n<i>💡 ملاحظة: الدول المعطلة ⛔️ لا يمكن تفعيلها بسبب نقص الرصيد</i>",
     next_page_btn: "التالي ➡️",
-    prev_page_btn: "⬅️ السابق",
+    prev_page_btn: "السابق ⬅️",
+    main_menu_btn: "القائمة الرئيسية ⬅️",
     alert_notification: "🔔 <b>تحديث المخزون!</b>\n\nالأرقام متوفرة الآن لدولة <b>{flag} {name}</b>!\n\n🚀 <b>المخزون الحالي:</b> {stock}\n\n🛒 <i>انتقل إلى \"شراء رقم\" للحصول على رقمك الآن!</i>",
     alert_item: "• {name}: {status}"
   },
@@ -112,10 +114,10 @@ const texts = {
     purchase_cooldown: "⌛ صبر کنید {seconds} ثانیه قبل از خرید بعدی",
     no_numbers_error: "❌ در حال حاضر شماره‌ای برای این کشور در دسترس نیست. لطفا دوباره امتحان کنید.",
     use_code_now_hint: "اکنون می‌توانید از کد استفاده کنید",
-    alert_settings_header: "<b>🎯 تنظیمات هشدارها</b>\n\nروش اطلاعرسانی خود را برای کشورها انتخاب کنید:\n\n📰 از چه چیزهایی مطلع خواهید شد؟\n• تغییرات قیمت\n• موجود بودن کشور\n• تمام شدن شمارهها",
-    alert_settings_note: "\n\n\n💡 توجه: کشورهای غیرفعال ⛔️ به دلیل موجودی ناکافی قابل فعالسازی نیستند",
-    next_page_btn: "بعدی ➡️",
-    prev_page_btn: "⬅️ قبلی",
+    alert_settings_note: "\n\n\n<i>💡 توجه: کشورهای غیرفعال ⛔️ به دلیل موجودی ناکافی قابل فعالسازی نیستند</i>",
+    next_page_btn: "➡️ بعدی",
+    prev_page_btn: "قبلی ⬅️",
+    main_menu_btn: "منوی اصلی ⬅️",
     alert_notification: "🔔 <b>به‌روزرسانی موجودی!</b>\n\nشماره‌ها هم‌اکنون برای کشور <b>{flag} {name}</b> در دسترس هستند!\n\n🚀 <b>موجودی فعلی:</b> {stock}\n\n🛒 <i>برای خرید همین حالا به قسمت \"خرید شماره\" بروید!</i>",
     alert_item: "• {name}: {status}"
   },
@@ -151,9 +153,10 @@ const texts = {
     no_numbers_error: "❌ বর্তমানে কোনো নম্বর পাওয়া যাচ্ছে না\n\n🔄 আবার চেষ্টা করুন",
     use_code_now_hint: "আপনি এখন কোডটি ব্যবহার করতে পারেন",
     alert_settings_header: "<b>🎯 অ্যালার্ট সেটিংস</b>\n\nদেশগুলোর জন্য আপনার নোটিফিকেশন পদ্ধতি নির্বাচন করুন:\n\n📰 আপনি কি সম্পর্কে অ্যালার্ট পাবেন?\n• দাম পরিবর্তন\n• দেশের প্রাপ্যতা\n• নম্বর ফুরিয়ে যাওয়া",
-    alert_settings_note: "\n\n\n💡 নোট: নিষ্ক্রিয় দেশগুলি ⛔️ অপর্যাপ্ত ব্যালেন্সের কারণে সক্রিয় করা যাবে না",
+    alert_settings_note: "\n\n\n<i>💡 নোট: নিষ্ক্রিয় দেশগুলি ⛔️ অপর্যাপ্ত ব্যালেন্সের কারণে সক্রিয় করা যাবে না</i>",
     next_page_btn: "পরবর্তী ➡️",
     prev_page_btn: "⬅️ পূর্ববর্তী",
+    main_menu_btn: "⬅️ প্রধান মেনু",
     alert_item: "• {name}: {status}"
   }
 };
