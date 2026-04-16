@@ -596,8 +596,6 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
     return ctx.answerCbQuery(msg, { show_alert: true });
   }
 
-  // Update cooldown timestamp
-  ctx.session.lastPurchase = now;
 
   await ctx.answerCbQuery().catch(() => { });
 
@@ -629,6 +627,9 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
           status: 'PENDING'
         }
       });
+
+      // Start cooldown only on successful purchase
+      ctx.session.lastPurchase = Date.now();
 
       const msg = `${ctx.t('purchase_success')}\n\n• <b>${ctx.t('number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${ctx.t('country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryInfo.name)}\n• <b>${ctx.t('code_label')}</b>: <code>XXXXX</code>\n\n<b>🔄 ${ctx.t('request_code_btn')}</b>`;
 
