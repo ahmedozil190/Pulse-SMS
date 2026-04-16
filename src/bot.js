@@ -481,11 +481,30 @@ bot.action(/^(action_settings|alert_page_(\d+))$/, async (ctx) => {
     const configs = await prisma.countryConfig.findMany();
     const configMap = configs.reduce((acc, c) => ({ ...acc, [c.countryCode]: c }), {});
     
+    // Auto-clean any subscriptions that this user can no longer afford
+    const subsToClean = [];
+    const validSubs = [];
+    for (const subCode of subCodes) {
+      const cfg = configMap[subCode];
+      const price = cfg ? cfg.price : 0.25;
+      if (user.balance < price) {
+        subsToClean.push(subCode);
+      } else {
+        validSubs.push(subCode);
+      }
+    }
+    
+    if (subsToClean.length > 0) {
+      await prisma.notificationSubscription.deleteMany({
+        where: { userId: user.id, countryCode: { in: subsToClean } }
+      });
+    }
+    
     const msg = ctx.t('alert_settings_header') + ctx.t('alert_settings_note');
     
     await ctx.editMessageText(msg, {
       parse_mode: 'HTML',
-      reply_markup: keyboards.buildAlertKeyboard(user.balance, subCodes, ctx.state.lang, page, configMap).reply_markup
+      reply_markup: keyboards.buildAlertKeyboard(user.balance, validSubs, ctx.state.lang, page, configMap).reply_markup
     });
     
     await ctx.answerCbQuery().catch(() => {});
@@ -1625,6 +1644,12 @@ hunter.start(5000, async (code, stock) => {
 
     for (const s of subs) {
       if (!s.user || s.user.isBanned) continue;
+      
+      // Auto-disable if balance drops below required price
+      if (s.user.balance < price) {
+        prisma.notificationSubscription.delete({ where: { id: s.id } }).catch(() => {});
+        continue;
+      }
       
       const lang = s.user.language || 'en';
       const info = durianApi.getCountryInfo(code, lang);
