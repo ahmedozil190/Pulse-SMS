@@ -597,18 +597,7 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
   }
 
 
-  await ctx.answerCbQuery().catch(() => { });
-
-  const percentages = ['10%', '30%', '70%', '100%'];
-  for (let percent of percentages) {
-    await ctx.editMessageText(ctx.t('purchase_process'), {
-      reply_markup: {
-        inline_keyboard: [[{ text: percent, callback_data: 'ignore' }]]
-      }
-    }).catch(() => { });
-    await new Promise(r => setTimeout(r, 600));
-  }
-
+  // 2. DO NOT answer query yet. Check stock first to ensure alert visibility!
   try {
     const response = await durianApi.getMobile('0257', countryCode);
 
@@ -616,7 +605,19 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
       const phoneNumber = response.data;
       const cleanPhone = phoneNumber.startsWith('+') ? phoneNumber.substring(1) : phoneNumber;
 
-      const { user } = await getOrCreateUser(ctx);
+      // Number secured! Now we can answer and show progress
+      await ctx.answerCbQuery().catch(() => { });
+
+      const percentages = ['10%', '30%', '70%', '100%'];
+      for (let percent of percentages) {
+        await ctx.editMessageText(ctx.t('purchase_process'), {
+          reply_markup: {
+            inline_keyboard: [[{ text: percent, callback_data: 'ignore' }]]
+          }
+        }).catch(() => { });
+        await new Promise(r => setTimeout(r, 600));
+      }
+
       await prisma.order.create({
         data: {
           userId: user.id,
@@ -642,24 +643,15 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
         }
       });
 
-      // ... polling logic remains the same ...
       startPolling(ctx, phoneNumber, countryCode);
 
     } else {
-      // 1. Show the popup alert first
+      // Failed to get number. Show popup IMMEDIATELY while still on country list
       await ctx.answerCbQuery(ctx.t('no_numbers_error'), { show_alert: true }).catch(() => { });
-      
-      // 2. Add a slight delay to ensure the alert renders on all clients
-      await new Promise(r => setTimeout(r, 500));
-
-      // 3. Restore the country selection menu (refresh mode)
-      await showCountrySelection(ctx, true);
     }
   } catch (error) {
     console.error("Purchase error:", error);
     await ctx.answerCbQuery(ctx.t('no_numbers_error'), { show_alert: true }).catch(() => { });
-    await new Promise(r => setTimeout(r, 500));
-    await showCountrySelection(ctx, true);
   }
 });
 
