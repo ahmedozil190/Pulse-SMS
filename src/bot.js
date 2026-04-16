@@ -646,19 +646,14 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
       startPolling(ctx, phoneNumber, countryCode);
 
     } else {
-      await ctx.editMessageText(ctx.t('no_numbers_error'), {
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: `🔙 ${ctx.t('back_btn')}`, callback_data: 'action_buy_number' }]
-          ]
-        }
-      });
+      await ctx.answerCbQuery(ctx.t('no_numbers_error'), { show_alert: true }).catch(() => { });
+      // Restore the country selection menu
+      await showCountrySelection(ctx, false);
     }
   } catch (error) {
     console.error("Purchase error:", error);
-    await ctx.editMessageText(ctx.t('no_numbers_error'), {
-      reply_markup: keyboards.backToMain(ctx.state.lang).reply_markup
-    });
+    await ctx.answerCbQuery(ctx.t('no_numbers_error'), { show_alert: true }).catch(() => { });
+    await showCountrySelection(ctx, false);
   }
 });
 
