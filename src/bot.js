@@ -646,7 +646,7 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
       startPolling(ctx, phoneNumber, countryCode);
 
     } else {
-      await ctx.editMessageText(`❌ Failed to get number: ${response.msg}\n\nPlease try another country or refresh the list.`, {
+      await ctx.editMessageText(ctx.t('no_numbers_error'), {
         reply_markup: {
           inline_keyboard: [
             [{ text: `🔙 ${ctx.t('back_btn')}`, callback_data: 'action_buy_number' }]
@@ -655,7 +655,8 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
       });
     }
   } catch (error) {
-    await ctx.editMessageText(`❌ System error. Try again later.`, {
+    console.error("Purchase error:", error);
+    await ctx.editMessageText(ctx.t('no_numbers_error'), {
       reply_markup: keyboards.backToMain(ctx.state.lang).reply_markup
     });
   }
