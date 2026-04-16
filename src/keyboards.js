@@ -99,11 +99,16 @@ const keyboards = {
   buildAlertKeyboard: (userBalance, activeSubscriptions, lang, page = 0, configMap = {}) => {
     const pageSize = 20;
     const allCountries = durianApi.getAllCountries();
-    const codes = Object.keys(allCountries).sort((a,b) => {
-      const infoA = durianApi.getCountryInfo(a, lang);
-      const infoB = durianApi.getCountryInfo(b, lang);
-      return infoA.localizedName.localeCompare(infoB.localizedName);
-    });
+    const codes = Object.keys(allCountries)
+      .filter(c => {
+        const cfg = configMap[c];
+        return cfg ? cfg.isEnabled : true;
+      })
+      .sort((a,b) => {
+        const infoA = durianApi.getCountryInfo(a, lang);
+        const infoB = durianApi.getCountryInfo(b, lang);
+        return infoA.localizedName.localeCompare(infoB.localizedName);
+      });
     
     const start = page * pageSize;
     const paginated = codes.slice(start, start + pageSize);
