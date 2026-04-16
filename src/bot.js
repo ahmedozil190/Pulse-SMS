@@ -692,15 +692,17 @@ bot.action(/^select_country_([^_]+)(?:_(.+))?$/, async (ctx) => {
   }
 
 
-  // Start the UX animation immediately (DON'T answer query yet)
-  const percentages = ['10%', '30%', '70%', '100%'];
-  for (let percent of percentages) {
-    await ctx.editMessageText(ctx.t('purchase_process'), {
-      reply_markup: {
-        inline_keyboard: [[{ text: percent, callback_data: 'ignore' }]]
-      }
-    }).catch(() => { });
-    await new Promise(r => setTimeout(r, 600));
+  // Start the UX animation immediately (DON'T answer query yet) ONLY if not alert
+  if (source !== 'alert') {
+    const percentages = ['10%', '30%', '70%', '100%'];
+    for (let percent of percentages) {
+      await ctx.editMessageText(ctx.t('purchase_process'), {
+        reply_markup: {
+          inline_keyboard: [[{ text: percent, callback_data: 'ignore' }]]
+        }
+      }).catch(() => { });
+      await new Promise(r => setTimeout(r, 600));
+    }
   }
 
   // Now check stock

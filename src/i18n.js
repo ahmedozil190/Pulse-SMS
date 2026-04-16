@@ -163,7 +163,7 @@ const texts = {
     prev_page_btn: "⬅️ আগের",
     main_menu_btn: "🔙 মূল মেনুতে ফিরুন",
     alert_disabled: "✅ {country}: বন্ধ",
-    alert_notification: "<b>🥳 🎉 দেশ এখন উপলব্ধ\n\n{flag} {name}\n✅ এখন ক্রয়ের জন্য উপলব্ধ\n💰 ক্রয় মূল্য: {price}$</b>\n\n🛒 এখনই কিনুন",
+    alert_notification: "🥳 🎉 দেশ এখন উপলব্ধ\n\n{flag} {name}\n✅ এখন ক্রয়ের জন্য উপলব্ধ\n💰 ক্রয় মূল্য: {price}$\n\n🛒 এখনই কিনুন",
     alert_buy_btn: "🛒 এখনই কিনুন"
   }
 };
