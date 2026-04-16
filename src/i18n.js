@@ -86,7 +86,7 @@ const texts = {
     refresh_btn: "🔄 به‌روزرسانی لیست",
     main_menu_btn: "🔙 منوی اصلی",
     purchase_success: "🎉 <b>خرید موفقیت آمیز بود!</b>",
-    purchase_success_plain: "🎉 خرید موفقیت آمیز بود",
+    purchase_success_plain: "🎉 خرید با موفقیت انجام شد",
     number_label: "شماره",
     country_label: "کشور",
     code_label: "کد",
