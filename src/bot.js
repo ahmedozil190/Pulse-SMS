@@ -753,7 +753,7 @@ bot.action(/^select_country_([^_]+)(?:_(.+))?$/, async (ctx) => {
       else if (lang === 'fa' && countryInfo.name_fa) countryName = countryInfo.name_fa;
       else if (lang === 'bn' && countryInfo.name_bn) countryName = countryInfo.name_bn;
 
-      const msg = `${ctx.t('purchase_success')}\n\n• <b>${ctx.t('number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${ctx.t('country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryName)}\n• <b>${ctx.t('code_label')}</b>: <code>XXXXX</code>\n\n<b>${ctx.t('request_code_btn')}</b>`;
+      const msg = `${ctx.t('purchase_success')}\n\n• ${ctx.t('number_label')}: <b><code>+${cleanPhone}</code></b>\n• ${ctx.t('country_label')}: <b>${countryInfo.flag} ${escapeHTML(countryName)}</b>\n• ${ctx.t('code_label')}: <b><code>XXXXX</code></b>\n\n${ctx.t('request_code_btn')}`;
 
       await ctx.editMessageText(msg, {
         parse_mode: 'HTML',
@@ -865,7 +865,7 @@ bot.action(/^check_code_(.+)_(.+)$/, async (ctx) => {
     const smsRes = await durianApi.getMsg('0257', phoneNumber);
     if (smsRes.code === 200 && smsRes.data && smsRes.data.length > 0) {
       await completeOrderAndCommission(phoneNumber, smsRes.data);
-      const msg = `${ctx.t('purchase_success')}\n\n• <b>${ctx.t('number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${ctx.t('country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryName)}\n• <b>${ctx.t('code_label')}</b>:  <code>${escapeHTML(smsRes.data)}</code>\n\n✅ ${ctx.t('use_code_now_hint') || 'You can use the code now'}`;
+      const msg = `${ctx.t('purchase_success')}\n\n• ${ctx.t('number_label')}: <b><code>+${cleanPhone}</code></b>\n• ${ctx.t('country_label')}: <b>${countryInfo.flag} ${escapeHTML(countryName)}</b>\n• ${ctx.t('code_label')}: <b><code>${escapeHTML(smsRes.data)}</code></b>\n\n✅ ${ctx.t('use_code_now_hint') || 'You can use the code now'}`;
       await ctx.editMessageText(msg, {
         parse_mode: 'HTML',
         reply_markup: {
@@ -971,7 +971,7 @@ async function startPolling(ctx, phoneNumber, countryCode) {
           ctx.chat.id,
           ctx.callbackQuery.message.message_id,
           null,
-          `${ctx.t('purchase_success')}\n\n• <b>${ctx.t('number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${ctx.t('country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryName)}\n• <b>${ctx.t('code_label')}</b>:  <code>${escapeHTML(smsRes.data)}</code>\n\n✅ ${ctx.t('use_code_now_hint') || 'You can use the code now'}`,
+          `${ctx.t('purchase_success')}\n\n• ${ctx.t('number_label')}: <b><code>+${cleanPhone}</code></b>\n• ${ctx.t('country_label')}: <b>${countryInfo.flag} ${escapeHTML(countryName)}</b>\n• ${ctx.t('code_label')}: <b><code>${escapeHTML(smsRes.data)}</code></b>\n\n✅ ${ctx.t('use_code_now_hint') || 'You can use the code now'}`,
           {
             parse_mode: 'HTML',
             reply_markup: {
