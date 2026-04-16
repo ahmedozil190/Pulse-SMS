@@ -23,6 +23,7 @@ const texts = {
     withdrawn_to_balance: "{amount}$ has been added to your main balance.",
     insufficient_ref_balance: "❌ Your referral balance is insufficient.\n• Current balance: {balance}$\n• Minimum required: {min}$",
     purchase_process: "🔄 Trying to purchase number...",
+    purchase_cooldown: "⌛ Wait {seconds} seconds before next purchase",
     lang_set_success: "✅ Language set to {lang}",
     welcome_user: "<b>🔰 Welcome to International Numbers Store 🔰</b>\n\n{name} 👋\n\n<b>Choose the appropriate option from the menu:</b>",
     welcome_bot: "<b>🔰 Welcome to International Numbers Store 🔰</b>\n\n<b>OzZoO SMS 🩸 </b>👋\n\n<b>Choose the appropriate option from the menu:</b>",
@@ -57,7 +58,8 @@ const texts = {
     activation_channel_btn: "📢 قناة التفعيلات",
     insufficient_balance: "❌ رصيدك غير كافي! تحتاج {required}$ ورصيدك {balance}$",
     refresh_cooldown_msg: "⏳ يرجى الانتظار {seconds} ثوانٍ قبل التحديث مرة أخرى",
-    purchase_process: "🔄 جاري محاولة شراء الرقم..."
+    purchase_process: "🔄 جاري محاولة شراء الرقم...",
+    purchase_cooldown: "⌛ يجب الانتظار {seconds} ثانية قبل الشراء التالي"
   },
   fa: {
     welcome_user: "<b>🔰 به فروشگاه اعداد بین المللی خوش آمدید 🔰</b>\n\n{name} 👋\n\n<b>گزینه مناسب را از منو انتخاب کنید:</b>",
@@ -76,7 +78,8 @@ const texts = {
     insufficient_balance: "❌ موجودی کافی نیست! نیاز دارید {required}$ موجودی شما {balance}$",
     refresh_cooldown_msg: "⏳ لطفاً {seconds} ثانیه صبر کنید قبل از به‌روزرسانی مجدد",
     insufficient_ref_balance: "❌ موجودی معرفی شما کافی نیست.\n• موجودی فعلی: {balance}$\n• حداقل مورد نیاز: {min}$",
-    purchase_process: "🔄 در حال تلاش برای خرید شماره..."
+    purchase_process: "🔄 در حال تلاش برای خرید شماره...",
+    purchase_cooldown: "⌛ صبر کنید {seconds} ثانیه قبل از خرید بعدی"
   },
   bn: {
     welcome_user: "<b>🔰 আন্তর্জাতিক নম্বর স্টোরে স্বাগতম 🔰</b>\n\n{name} 👋\n\n<b>মেনু থেকে উপযুক্ত বিকল্প নির্বাচন করুন:</b>",
@@ -95,7 +98,8 @@ const texts = {
     insufficient_balance: "❌ পর্যাপ্ত ব্যালেন্স নেই! আপনার দরকার {required}$ আপনার ব্যালেন্স {balance}$",
     refresh_cooldown_msg: "⏳ আবার রিফ্রেশ করার আগে {seconds} সেকেন্ড অপেক্ষা করুন",
     insufficient_ref_balance: "❌ আপনার রেফারেল ব্যালেন্স পর্যাপ্ত নয়।\n• বর্তমান ব্যালেন্স: {balance}$\n• প্রয়োজনীয় ন্যূনতম: {min}$",
-    purchase_process: "🔄 নম্বর কেনার চেষ্টা চলছে..."
+    purchase_process: "🔄 নম্বর কেনার চেষ্টা চলছে...",
+    purchase_cooldown: "⌛ অপেক্ষা করুন {seconds} সেকেন্ড পরবর্তী ক্রয়ের আগে"
   },
 };
 

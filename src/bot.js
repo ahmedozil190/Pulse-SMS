@@ -574,6 +574,19 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
   });
   const currentPrice = countryConfig ? countryConfig.price : 0.15;
 
+  // 0. Cooldown check (30 seconds)
+  ctx.session = ctx.session || {};
+  const now = Date.now();
+  const lastPurchase = ctx.session.lastPurchase || 0;
+  const elapsed = now - lastPurchase;
+  const cooldownMs = 30000;
+
+  if (elapsed < cooldownMs) {
+    const remaining = Math.ceil((cooldownMs - elapsed) / 1000);
+    const msg = ctx.t('purchase_cooldown', { seconds: remaining });
+    return ctx.answerCbQuery(msg, { show_alert: true });
+  }
+
   // 1. Check for sufficient balance before starting purchase
   if (user.balance < currentPrice) {
     const msg = ctx.t('insufficient_balance', {
@@ -582,6 +595,9 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
     });
     return ctx.answerCbQuery(msg, { show_alert: true });
   }
+
+  // Update cooldown timestamp
+  ctx.session.lastPurchase = now;
 
   await ctx.answerCbQuery().catch(() => { });
 
