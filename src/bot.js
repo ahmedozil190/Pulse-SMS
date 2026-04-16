@@ -707,7 +707,7 @@ bot.action(/^check_code_(.+)_(.+)$/, async (ctx) => {
       await ctx.editMessageText(animMsg, {
         parse_mode: 'HTML',
         reply_markup: {
-          inline_keyboard: [[{ text: ctx.t('request_code_btn'), callback_data: `check_code_${countryCode}_${phoneNumber}` }]]
+          inline_keyboard: [[{ text: ctx.t('requesting_code_msg'), callback_data: `check_code_${countryCode}_${phoneNumber}` }]]
         }
       });
       await new Promise(resolve => setTimeout(resolve, 600));
