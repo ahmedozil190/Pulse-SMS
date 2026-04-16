@@ -649,12 +649,16 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
       // 1. Show the popup alert first
       await ctx.answerCbQuery(ctx.t('no_numbers_error'), { show_alert: true }).catch(() => { });
       
-      // 2. Restore the country selection menu (using true to skip redundant answerCbQuery)
+      // 2. Add a slight delay to ensure the alert renders on all clients
+      await new Promise(r => setTimeout(r, 500));
+
+      // 3. Restore the country selection menu (refresh mode)
       await showCountrySelection(ctx, true);
     }
   } catch (error) {
     console.error("Purchase error:", error);
     await ctx.answerCbQuery(ctx.t('no_numbers_error'), { show_alert: true }).catch(() => { });
+    await new Promise(r => setTimeout(r, 500));
     await showCountrySelection(ctx, true);
   }
 });
