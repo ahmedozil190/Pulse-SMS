@@ -243,7 +243,7 @@ bot.command('start', async (ctx) => {
 
     if (isNew || ctx.session.isFirstTime) {
       // Clear flag so they don't get stuck in language selection
-      ctx.session.isFirstTime = false; 
+      ctx.session.isFirstTime = false;
       // First time using the bot (after they just subscribed if required)
       return ctx.reply(ctx.t('choose_lang'), keyboards.languageSelect);
     }
@@ -469,25 +469,25 @@ bot.action('action_withdraw_referral', async (ctx) => {
   const { user } = await getOrCreateUser(ctx);
   const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
 
-    const settings = await prisma.globalSetting.findMany();
-    const settingsMap = settings.reduce((acc, s) => ({ ...acc, [s.key]: s.value }), {});
-    const minWithdraw = parseFloat(settingsMap.min_withdrawal || '1');
+  const settings = await prisma.globalSetting.findMany();
+  const settingsMap = settings.reduce((acc, s) => ({ ...acc, [s.key]: s.value }), {});
+  const minWithdraw = parseFloat(settingsMap.min_withdrawal || '1');
 
-    if (dbUser.referralBalance < minWithdraw) {
-      const alertMsg = ctx.t('insufficient_ref_balance', { 
-        balance: dbUser.referralBalance.toFixed(2),
-        min: minWithdraw
-      });
-      return ctx.answerCbQuery(alertMsg, { show_alert: true });
-    }
-
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        balance: { increment: dbUser.referralBalance },
-        referralBalance: 0
-      }
+  if (dbUser.referralBalance < minWithdraw) {
+    const alertMsg = ctx.t('insufficient_ref_balance', {
+      balance: dbUser.referralBalance.toFixed(2),
+      min: minWithdraw
     });
+    return ctx.answerCbQuery(alertMsg, { show_alert: true });
+  }
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      balance: { increment: dbUser.referralBalance },
+      referralBalance: 0
+    }
+  });
 
   const successMsg = ctx.t('withdrawal_success') + '\n' + ctx.t('withdrawn_to_balance', { amount: dbUser.referralBalance.toFixed(2) });
   return ctx.answerCbQuery(successMsg, { show_alert: true });
@@ -646,14 +646,16 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
       startPolling(ctx, phoneNumber, countryCode);
 
     } else {
+      // 1. Show the popup alert first
       await ctx.answerCbQuery(ctx.t('no_numbers_error'), { show_alert: true }).catch(() => { });
-      // Restore the country selection menu
-      await showCountrySelection(ctx, false);
+      
+      // 2. Restore the country selection menu (using true to skip redundant answerCbQuery)
+      await showCountrySelection(ctx, true);
     }
   } catch (error) {
     console.error("Purchase error:", error);
     await ctx.answerCbQuery(ctx.t('no_numbers_error'), { show_alert: true }).catch(() => { });
-    await showCountrySelection(ctx, false);
+    await showCountrySelection(ctx, true);
   }
 });
 
@@ -746,7 +748,7 @@ async function completeOrderAndCommission(phoneNumber, smsCode) {
       const settings = await prisma.globalSetting.findMany();
       const settingsMap = settings.reduce((acc, s) => ({ ...acc, [s.key]: s.value }), {});
       const refPercent = parseFloat(settingsMap.referral_percent || '5');
-      
+
       const commission = order.price * (refPercent / 100);
       await prisma.user.update({
         where: { id: user.referredById },
