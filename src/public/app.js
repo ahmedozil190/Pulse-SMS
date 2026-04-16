@@ -378,7 +378,6 @@ function applyUserFilters() {
             return tid.includes(q) || uname.includes(q) || fname.includes(q);
         });
     }
-    currentUserPage = 1; // Reset to first page on filter/search change
     renderUsersList(filtered);
 }
 
@@ -696,10 +695,10 @@ window.bulkToggleCountries = async (isEnabled) => {
 
 
 
-window.setUserFilter = (filter) => {
     currentUserFilter = filter;
     document.getElementById('tab-active').classList.toggle('active', filter === 'active');
     document.getElementById('tab-banned').classList.toggle('active', filter === 'banned');
+    currentUserPage = 1; // Reset to page 1 when switching tabs
     applyUserFilters();
 };
 
