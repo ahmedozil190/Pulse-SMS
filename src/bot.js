@@ -636,7 +636,7 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
       const isAr = user.language === 'ar';
       const countryName = (isAr && countryInfo.name_ar) ? countryInfo.name_ar : countryInfo.name;
 
-      const msg = `${ctx.t('purchase_success')}\n\n• <b>${ctx.t('number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${ctx.t('country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryName)}\n• <b>${ctx.t('code_label')}</b>: <code>XXXXX</code>\n\n${ctx.t('request_code_btn')}`;
+      const msg = `${ctx.t('purchase_success')}\n\n• <b>${ctx.t('number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${ctx.t('country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryName)}\n• <b>${ctx.t('code_label')}</b>: <code>XXXXX</code>\n\n<b>${ctx.t('request_code_btn')}</b>`;
 
       await ctx.editMessageText(msg, {
         parse_mode: 'HTML',
@@ -702,7 +702,7 @@ bot.action(/^check_code_(.+)_(.+)$/, async (ctx) => {
   // Random animation effect
   for (let i = 0; i < 3; i++) {
     const randomCode = Math.floor(10000 + Math.random() * 90000);
-    const animMsg = `${ctx.t('purchase_success')}\n\n• <b>${ctx.t('number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${ctx.t('country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryName)}\n• <b>${ctx.t('code_label')}</b>: <code>${randomCode}</code>\n\n${ctx.t('requesting_code_msg')}`;
+    const animMsg = `${ctx.t('purchase_success')}\n\n• <b>${ctx.t('number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${ctx.t('country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryName)}\n• <b>${ctx.t('code_label')}</b>: <code>${randomCode}</code>\n\n<b>${ctx.t('requesting_code_msg')}</b>`;
     try {
       await ctx.editMessageText(animMsg, {
         parse_mode: 'HTML',
@@ -729,7 +729,7 @@ bot.action(/^check_code_(.+)_(.+)$/, async (ctx) => {
         }
       });
     } else {
-      const msg = `${ctx.t('purchase_success')}\n\n• <b>${ctx.t('number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${ctx.t('country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryName)}\n• <b>${ctx.t('code_label')}</b>:  <code>XXXXX</code>\n\n${ctx.t('code_not_retrieved')}`;
+      const msg = `${ctx.t('purchase_success')}\n\n• <b>${ctx.t('number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${ctx.t('country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryName)}\n• <b>${ctx.t('code_label')}</b>:  <code>XXXXX</code>\n\n<b>${ctx.t('code_not_retrieved')}</b>`;
       await ctx.editMessageText(msg, {
         parse_mode: 'HTML',
         reply_markup: {
@@ -741,7 +741,7 @@ bot.action(/^check_code_(.+)_(.+)$/, async (ctx) => {
       });
     }
   } catch (err) {
-    const errorMsg = `${ctx.t('purchase_success')}\n\n• <b>${ctx.t('number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${ctx.t('country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryName)}\n• <b>${ctx.t('code_label')}</b>:  <code>XXXXX</code>\n\n${ctx.t('code_not_retrieved')}`;
+    const errorMsg = `${ctx.t('purchase_success')}\n\n• <b>${ctx.t('number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${ctx.t('country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryName)}\n• <b>${ctx.t('code_label')}</b>:  <code>XXXXX</code>\n\n<b>${ctx.t('code_not_retrieved')}</b>`;
     await ctx.editMessageText(errorMsg, {
       parse_mode: 'HTML',
       reply_markup: {
@@ -849,7 +849,7 @@ async function startPolling(ctx, phoneNumber, countryCode) {
           ctx.chat.id,
           ctx.callbackQuery.message.message_id,
           null,
-          `${ctx.t('purchase_success')}\n\n• <b>${ctx.t('number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${ctx.t('country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryName)}\n• <b>${ctx.t('code_label')}</b>:  <code>XXXXX</code>\n\n${ctx.t('code_not_retrieved')}`,
+          `${ctx.t('purchase_success')}\n\n• <b>${ctx.t('number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${ctx.t('country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryName)}\n• <b>${ctx.t('code_label')}</b>:  <code>XXXXX</code>\n\n<b>${ctx.t('code_not_retrieved')}</b>`,
           {
             parse_mode: 'HTML',
             reply_markup: {
