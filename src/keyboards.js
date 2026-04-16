@@ -91,7 +91,52 @@ const keyboards = {
       Markup.button.callback('🇮🇷 فارسی', 'set_lang_fa'),
       Markup.button.callback('🇧🇩 বাংলা', 'set_lang_bn')
     ]
-  ])
+  ]),
+
+  /**
+   * Generates a paginated keyboard for country alert settings
+   */
+  buildAlertKeyboard: (userBalance, activeSubscriptions, lang, page = 0, configMap = {}) => {
+    const pageSize = 20;
+    const allCountries = durianApi.getAllCountries();
+    const codes = Object.keys(allCountries).sort((a,b) => {
+      const nameA = i18n.t(lang, `country_${a}`) !== `country_${a}` ? i18n.t(lang, `country_${a}`) : allCountries[a].name;
+      const nameB = i18n.t(lang, `country_${b}`) !== `country_${b}` ? i18n.t(lang, `country_${b}`) : allCountries[b].name;
+      return nameA.localeCompare(nameB);
+    });
+    
+    const start = page * pageSize;
+    const paginated = codes.slice(start, start + pageSize);
+    const totalPages = Math.ceil(codes.length / pageSize);
+    
+    const buttons = paginated.map(code => {
+      const info = allCountries[code];
+      const cfg = configMap[code] || { price: 0.25 };
+      const price = cfg.price;
+      const isSubscribed = activeSubscriptions.includes(code);
+      
+      let statusIcon = isSubscribed ? '🔔' : '🔇';
+      if (userBalance < price) statusIcon = '⛔';
+      
+      const label = `${info.flag} ${info.name} ${statusIcon} ${price}$`;
+      return Markup.button.callback(label, `toggle_alert_${code}_${page}`);
+    });
+    
+    const rows = [];
+    for (let i = 0; i < buttons.length; i += 2) {
+      rows.push(buttons.slice(i, i + 2));
+    }
+    
+    // Pagination Row
+    const navRow = [];
+    if (page > 0) navRow.push(Markup.button.callback(i18n.t(lang, 'prev_page_btn'), `alert_page_${page - 1}`));
+    if (page < totalPages - 1) navRow.push(Markup.button.callback(i18n.t(lang, 'next_page_btn'), `alert_page_${page + 1}`));
+    if (navRow.length > 0) rows.push(navRow);
+    
+    rows.push([Markup.button.callback(i18n.t(lang, 'main_menu_btn'), 'action_main_menu')]);
+    
+    return Markup.inlineKeyboard(rows);
+  }
 };
 
 module.exports = keyboards;

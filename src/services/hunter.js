@@ -4,6 +4,8 @@ class HunterService {
   constructor() {
     this.liveDistribution = {};
     this.freshArrivals = {}; // { code: expiryTimestamp }
+    this.lastNotified = {}; // { code: lastTimestamp } to prevent spam
+    this.onFreshArrival = null;
     this.lastUpdated = null;
     this.interval = null;
     this.pid = '0257'; // Telegram Project ID
@@ -11,10 +13,11 @@ class HunterService {
 
   /**
    * Start the background poller
-   * @param {number} intervalMs - Polling interval in ms
+   * @param {Function} callback - Callback for fresh arrivals
    */
-  start(intervalMs = 5000) {
+  start(intervalMs = 5000, callback = null) {
     if (this.interval) return;
+    this.onFreshArrival = callback;
     
     console.log(`[Hunter] Starting Live Stock Monitor (Interval: ${intervalMs}ms)`);
     
@@ -45,6 +48,13 @@ class HunterService {
           // If stock increased and it's not a huge jump (avoid initial load noise)
           if (newStock > oldStock && Object.keys(oldData).length > 0) {
             this.freshArrivals[code] = now + (2 * 60 * 1000); // Mark as fresh for 2 minutes
+            
+            // Trigger notification callback if cooldown passed (5 minutes)
+            const lastNotif = this.lastNotified[code] || 0;
+            if (this.onFreshArrival && (now - lastNotif > 5 * 60 * 1000)) {
+              this.lastNotified[code] = now;
+              this.onFreshArrival(code, newStock);
+            }
           }
         });
 

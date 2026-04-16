@@ -13,7 +13,7 @@ const hunter = require('./services/hunter');
 dotenv.config();
 
 // Start the Live Hunting Monitor (5s interval)
-hunter.start(5000);
+// hunter.start(5000); // Moved to end of file to ensure bot is ready
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 
@@ -459,6 +459,96 @@ bot.action('action_invite', async (ctx) => {
   } catch (err) {
     console.error('CRITICAL ERROR in action_invite handler:', err);
     await ctx.answerCbQuery('❌ A system error occurred. Please try again later.', { show_alert: true });
+  }
+});
+
+/**
+ * Handle Country Alert Settings
+ */
+bot.action(/^(action_settings|alert_page_(\d+))$/, async (ctx) => {
+  try {
+    const page = ctx.match[2] ? parseInt(ctx.match[2]) : 0;
+    const { user } = await getOrCreateUser(ctx);
+    
+    // Get all active subscriptions for this user
+    const subs = await prisma.notificationSubscription.findMany({
+      where: { userId: user.id },
+      select: { countryCode: true }
+    });
+    const subCodes = subs.map(s => s.countryCode);
+    
+    // Get country configs for prices
+    const configs = await prisma.countryConfig.findMany();
+    const configMap = configs.reduce((acc, c) => ({ ...acc, [c.countryCode]: c }), {});
+    
+    const msg = ctx.t('alert_settings_header') + ctx.t('alert_settings_note');
+    
+    await ctx.editMessageText(msg, {
+      parse_mode: 'HTML',
+      reply_markup: keyboards.buildAlertKeyboard(user.balance, subCodes, ctx.state.lang, page, configMap).reply_markup
+    });
+    
+    await ctx.answerCbQuery().catch(() => {});
+  } catch (err) {
+    console.error('[ALERT SETTINGS ERROR]', err);
+    await ctx.answerCbQuery('❌ Error opening alert settings', { show_alert: true });
+  }
+});
+
+/**
+ * Toggle Alert Subscription
+ */
+bot.action(/^toggle_alert_(.+)_(.+)$/, async (ctx) => {
+  const countryCode = ctx.match[1];
+  const page = parseInt(ctx.match[2]);
+  
+  try {
+    const { user } = await getOrCreateUser(ctx);
+    
+    // Check if subscription already exists
+    const existing = await prisma.notificationSubscription.findUnique({
+      where: { userId_countryCode: { userId: user.id, countryCode } }
+    });
+    
+    if (existing) {
+      // Toggle OFF: Remove subscription
+      await prisma.notificationSubscription.delete({
+        where: { id: existing.id }
+      });
+      await ctx.answerCbQuery('🔕 Alert disabled for this country').catch(() => {});
+    } else {
+      // Toggle ON: Check balance first
+      const countryConfig = await prisma.countryConfig.findUnique({ where: { countryCode } });
+      const price = countryConfig ? countryConfig.price : 0.25;
+      
+      if (user.balance < price) {
+        return ctx.answerCbQuery(`❌ Low balance! You need $${price.toFixed(2)} to enable alerts for this country.`, { show_alert: true });
+      }
+      
+      await prisma.notificationSubscription.create({
+        data: { userId: user.id, countryCode }
+      });
+      await ctx.answerCbQuery('🔔 Alert enabled! We will notify you when new stock arrives.').catch(() => {});
+    }
+    
+    // Refresh the current page
+    const subs = await prisma.notificationSubscription.findMany({
+      where: { userId: user.id },
+      select: { countryCode: true }
+    });
+    const subCodes = subs.map(s => s.countryCode);
+    const configs = await prisma.countryConfig.findMany();
+    const configMap = configs.reduce((acc, c) => ({ ...acc, [c.countryCode]: c }), {});
+    
+    const msg = ctx.t('alert_settings_header') + ctx.t('alert_settings_note');
+    await ctx.editMessageText(msg, {
+      parse_mode: 'HTML',
+      reply_markup: keyboards.buildAlertKeyboard(user.balance, subCodes, ctx.state.lang, page, configMap).reply_markup
+    });
+    
+  } catch (err) {
+    console.error('[TOGGLE ALERT ERROR]', err);
+    await ctx.answerCbQuery('❌ Error toggling alert', { show_alert: true });
   }
 });
 
@@ -1482,3 +1572,47 @@ setTimeout(syncUserIdentities, 60 * 1000);
 // Enable graceful stop
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
+
+// --- LIVE HUNTER ALERTS & BOT STARTUP ---
+hunter.start(5000, async (code, stock) => {
+  try {
+    const info = durianApi.getCountryInfo(code);
+    const subs = await prisma.notificationSubscription.findMany({
+      where: { countryCode: code },
+      include: { user: true }
+    });
+
+    if (subs.length > 0) {
+      console.log(`[HUNTER ALERT] Stock for ${code} is ${stock}. Notifying ${subs.length} users...`);
+    }
+
+    for (const s of subs) {
+      if (!s.user || s.user.isBanned) continue;
+      
+      const lang = s.user.language || 'en';
+      const msg = i18n.t(lang, 'alert_notification', {
+        flag: info.flag,
+        name: info.name,
+        stock: stock
+      });
+
+      bot.telegram.sendMessage(s.user.telegramId, msg, { parse_mode: 'HTML' }).catch(err => {
+        if (!err.message.includes('blocked by the user') && !err.message.includes('chat not found')) {
+           console.error(`[HUNTER MSG ERROR] User ${s.user.telegramId}:`, err.message);
+        }
+      });
+      
+      // Small sleep to prevent flood
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+  } catch (err) {
+    console.error('[HUNTER BROADCAST ERROR]', err);
+  }
+});
+
+// Launch the bot
+bot.launch().then(() => {
+  console.log('[BOT] Pulse SMS Bot is now running!');
+}).catch(err => {
+  console.error('[BOT ERROR] Failed to launch bot:', err);
+});

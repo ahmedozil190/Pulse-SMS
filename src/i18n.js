@@ -32,7 +32,12 @@ const texts = {
     welcome_bot: "<b>🔰 Welcome to International Numbers Store 🔰</b>\n\n<b>OzZoO SMS 🩸 </b>👋\n\n<b>Choose the appropriate option from the menu:</b>",
     insufficient_balance: "❌ Insufficient balance! You need {required}$\nYour balance {balance}$",
     refresh_cooldown_msg: "⏳ Please wait {seconds} seconds before refreshing again",
-    use_code_now_hint: "You can use the code now"
+    use_code_now_hint: "You can use the code now",
+    alert_settings_header: "🎯 <b>Alert Settings</b>\n\nChoose your notification method for countries:\n\n📺 <b>What will you be alerted about?</b>\n- Price changes\n- Country availability\n- Numbers out of stock",
+    alert_settings_note: "\n\n💡 <i>Note: Disabled countries ⛔ cannot be activated due to insufficient balance</i>",
+    next_page_btn: "Next ➡️",
+    prev_page_btn: "⬅️ Previous",
+    alert_notification: "🔔 <b>Stock Update!</b>\n\nNumbers are now available for <b>{flag} {name}</b>!\n\n🚀 <b>Current Stock:</b> {stock}\n\n🛒 <i>Go to \"Buy Number\" to grab yours now!</i>"
   },
   ar: {
     welcome_user: "<b>🔰 مرحباً بك في متجر الأرقام الدولي 🔰</b>\n\n{name} 👋\n\n<b>اختر الخيار المناسب من القائمة:</b>",
@@ -68,7 +73,13 @@ const texts = {
     purchase_process: "🔄 جاري محاولة شراء الرقم...",
     purchase_cooldown: "⌛ يجب الانتظار {seconds} ثانية قبل الشراء التالي",
     no_numbers_error: "❌ لا توجد أرقام متاحة حالياً\n\n🔄 جرب مرة أخرى بعد قليل",
-    use_code_now_hint: "يمكنك استخدام الكود الآن"
+    use_code_now_hint: "يمكنك استخدام الكود الآن",
+    alert_settings_header: "🎯 <b>إعدادات التنبيهات</b>\n\nاختر طريقة التنبيه للدول:\n\n📺 <b>ما الذي سيتم تنبيهك بشأنه؟</b>\n- تغييرات الأسعار\n- توفر الدول\n- نفاذ الأرقام من المخزون",
+    alert_settings_note: "\n\n💡 <i>ملاحظة: الدول المعطلة ⛔ لا يمكن تفعيلها بسبب عدم كفاية الرصيد</i>",
+    next_page_btn: "التالي ➡️",
+    prev_page_btn: "⬅️ السابق",
+    alert_notification: "🔔 <b>تحديث المخزون!</b>\n\nالأرقام متوفرة الآن لدولة <b>{flag} {name}</b>!\n\n🚀 <b>المخزون الحالي:</b> {stock}\n\n🛒 <i>انتقل إلى \"شراء رقم\" للحصول على رقمك الآن!</i>",
+    alert_item: "• {name}: {status}"
   },
   fa: {
     welcome_user: "<b>🔰 به فروشگاه اعداد بین المللی خوش آمدید 🔰</b>\n\n{name} 👋\n\n<b>گزینه مناسب را از منو انتخاب کنید:</b>",
@@ -81,7 +92,6 @@ const texts = {
     stats_header: "📊 <b>آمار شخصی شما</b>\n\n• <b>شماره های فعال:</b> {active}\n• <b>کل خریدها:</b> {count}\n• <b>کل خریدها:</b> {total} $\n\n🎯 <b>ادامه خرید!</b>",
     deposit_header: "<b>💎 روش شارژ را انتخاب کنید:</b>",
     binance_btn: "💳 بایننس",
-    back_btn: "🔙 بازگشت",
     buy_number_header: "<b>🌍 کشور مورد نظر را انتخاب کنید</b>\n\n• همه به‌روزرسانی‌ها را اولین نفر دریافت کنید\n• کشور مورد نظر برای خرید شماره را انتخاب کنید:",
     refresh_btn: "🔄 به‌روزرسانی لیست",
     main_menu_btn: "🔙 منوی اصلی",
@@ -101,7 +111,13 @@ const texts = {
     purchase_process: "🔄 در حال تلاش برای خرید شماره...",
     purchase_cooldown: "⌛ صبر کنید {seconds} ثانیه قبل از خرید بعدی",
     no_numbers_error: "❌ در حال حاضر شماره‌ای برای این کشور در دسترس نیست. لطفا دوباره امتحان کنید.",
-    use_code_now_hint: "اکنون می‌توانید از کد استفاده کنید"
+    use_code_now_hint: "اکنون می‌توانید از کد استفاده کنید",
+    alert_settings_header: "🎯 <b>تنظیمات هشدار</b>\n\nروش اطلاع‌رسانی خود را برای کشورها انتخاب کنید:\n\n📺 <b>در مورد چه چیزی به شما هشدار داده می‌شود؟</b>\n- تغییرات قیمت\n- در دسترس بودن کشور\n- اتمام موجودی شماره‌ها",
+    alert_settings_note: "\n\n💡 <i>توجه: کشورهای غیرفعال ⛔ به دلیل عدم موجودی کافی فعال نمی‌شوند</i>",
+    next_page_btn: "بعدی ➡️",
+    prev_page_btn: "⬅️ قبلی",
+    alert_notification: "🔔 <b>به‌روزرسانی موجودی!</b>\n\nشماره‌ها هم‌اکنون برای کشور <b>{flag} {name}</b> در دسترس هستند!\n\n🚀 <b>موجودی فعلی:</b> {stock}\n\n🛒 <i>برای خرید همین حالا به قسمت \"خرید شماره\" بروید!</i>",
+    alert_item: "• {name}: {status}"
   },
   bn: {
     welcome_user: "<b>🔰 আন্তর্জাতিক নম্বর স্টোরে স্বাগতম 🔰</b>\n\n{name} 👋\n\n<b>মেনু থেকে উপযুক্ত বিকল্প নির্বাচন করুন:</b>",
@@ -114,7 +130,6 @@ const texts = {
     stats_header: "📊 <b>আপনার ব্যক্তিগত পরিসংখ্যান</b>\n\n• <b>সক্রিয় নম্বর:</b> {active}\n• <b>মোট ক্রয়:</b> {count}\n• <b>মোট ক্রয়:</b> {total} $\n\n🎯 <b>কেনাকাটা চালিয়ে যান!</b>",
     deposit_header: "<b>💎 ডিপোজিট পদ্ধতি নির্বাচন করুন:</b>",
     binance_btn: "💳 বাইন্যান্স",
-    back_btn: "🔙 ফিরে যান",
     buy_number_header: "<b>🌍 প্রয়োজনীয় দেশ নির্বাচন করুন</b>\n\n• সব আপডেট সবার আগে পান\n• যে দেশ থেকে নম্বর কিনতে চান তা নির্বাচন করুন:",
     refresh_btn: "🔄 তালিকা রিফ্রেশ",
     main_menu_btn: "🔙 প্রধান মেনু",
@@ -134,7 +149,12 @@ const texts = {
     purchase_process: "🔄 নম্বর কেনার চেষ্টা চলছে...",
     purchase_cooldown: "⌛ অপেক্ষা করুন {seconds} সেকেন্ড পরবর্তী ক্রয়ের আগে",
     no_numbers_error: "❌ বর্তমানে কোনো নম্বর পাওয়া যাচ্ছে না\n\n🔄 আবার চেষ্টা করুন",
-    use_code_now_hint: "আপনি এখন কোডটি ব্যবহার করতে পারেন"
+    use_code_now_hint: "আপনি এখন কোডটি ব্যবহার করতে পারেন",
+    alert_settings_header: "🎯 <b>অ্যালার্ট সেটিংস</b>\n\nদেশগুলোর জন্য আপনার নোটিফিকেশন পদ্ধতি বেছে নিন:\n\n📺 <b>আপনাকে কী বিষয়ে সতর্ক করা হবে?</b>\n- মূল্য পরিবর্তন\n- দেশের প্রাপ্যতা\n- স্টক শেষ হয়ে যাওয়া নম্বর",
+    alert_settings_note: "\n\n💡 <i>দ্রষ্টব্য: পর্যাপ্ত ব্যালেন্স না থাকায় নিষ্ক্রিয় দেশগুলো ⛔ সক্রিয় করা যাবে না</i>",
+    next_page_btn: "পরবর্তী ➡️",
+    prev_page_btn: "⬅️ পূর্ববর্তী",
+    alert_item: "• {name}: {status}"
   }
 };
 

@@ -24,6 +24,7 @@ model User {
   updatedAt       DateTime  @updatedAt
   orders          Order[]
   deposits        Deposit[]
+  subscriptions   NotificationSubscription[]
 }
 
 model Order {
@@ -67,4 +68,14 @@ model MandatoryChannel {
   id       Int    @id @default(autoincrement())
   username String @unique // e.g. @channelusername
   link     String        // e.g. https://t.me/channelusername
+}
+
+model NotificationSubscription {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  countryCode String
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, countryCode])
 }
