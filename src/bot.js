@@ -631,7 +631,8 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
       });
 
       // Start cooldown only on successful purchase
-      const { user } = await getOrCreateUser(ctx);
+      ctx.session.lastPurchase = Date.now();
+
       const isAr = user.language === 'ar';
       const countryName = (isAr && countryInfo.name_ar) ? countryInfo.name_ar : countryInfo.name;
 
