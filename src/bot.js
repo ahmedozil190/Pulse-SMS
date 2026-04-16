@@ -676,10 +676,10 @@ bot.action(/^check_code_(.+)_(.+)$/, async (ctx) => {
     orderBy: { id: 'desc' }
   });
 
-  if (!order) return ctx.answerCbQuery("❌ Order not found.").catch(() => { });
+  if (!order) return;
 
   // Safety check: ensure balance is still sufficient
-  if (user.balance < order.price) {
+  if (user.balance < order.price || user.balance <= 0) {
     const msg = ctx.t('insufficient_balance', {
       balance: user.balance.toFixed(2),
       required: order.price.toFixed(2)
