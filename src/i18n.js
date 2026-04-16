@@ -1,6 +1,6 @@
 const texts = {
   en: {
-    welcome: "<b>🔰 Welcome to International Numbers Store 🔰</b>\n\n{name} 👋\n\n<b>Choose the appropriate option from the menu:</b>",
+    welcome_user: "<b>🔰 Welcome to International Numbers Store 🔰</b>\n\n{name} 👋\n\n<b>Choose the appropriate option from the menu:</b>",
     choose_lang: "❍ Please choose your language\n❍ দয়া করে আপনার ভাষা নির্বাচন করুন\n❍ لطفاً زبان خود را انتخاب کنید\n❍ الرجاء اختيار لغتك",
     balance_header: "<b>💰 Your Current Balance</b>\n\n• <b>Available Balance:</b> {balance}$\n• <b>Total Purchases:</b> {purchases}$\n\n<b>💎 Choose Deposit Method:</b>",
     stats_header: "📊 <b>Your Personal Statistics</b>\n\n• <b>Active Numbers:</b> {active}\n• <b>Total Purchases:</b> {count}\n• <b>Total Purchases:</b> {total} $\n\n🎯 <b>Continue Shopping!</b>",
