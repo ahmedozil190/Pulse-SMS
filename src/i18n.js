@@ -38,6 +38,7 @@ const texts = {
     next_page_btn: "Next ➡️",
     prev_page_btn: "⬅️ Previous",
     main_menu_btn: "🔙 Back to Main",
+    alert_enabled: "✅ {country}: Enable",
     alert_disabled: "✅ {country}: Disable",
     alert_notification: "<b>🥳 🎉 Country Available Now\n\n{flag} {name}\n✅ Now available for purchase\n💰 Purchase price: {price}$</b>\n\n🛒 Buy Now",
     alert_buy_btn: "🛒 Buy Now"
@@ -82,6 +83,7 @@ const texts = {
     next_page_btn: "التالي ➡️",
     prev_page_btn: "⬅️ السابق",
     main_menu_btn: "🔙 العودة للرئيسية",
+    alert_enabled: "✅ {country}: تشغيل",
     alert_disabled: "✅ {country}: إيقاف",
     alert_notification: "<b>🥳 🎉 الدولة متاحة الآن\n\n{flag} {name}\n✅ أصبحت متاحة للشراء\n💰 سعر الشراء: {price}$</b>\n\n🛒 شراء الآن",
     alert_buy_btn: "🛒 شراء الآن"
@@ -122,6 +124,7 @@ const texts = {
     next_page_btn: "بعدی ➡️",
     prev_page_btn: "⬅️ قبلی",
     main_menu_btn: "🔙 بازگشت به منوى اصلى",
+    alert_enabled: "{country}: فعال ✅",
     alert_disabled: "{country}: غیرفعال ✅",
     alert_notification: "<b>🥳 🎉 کشور الآن موجود است\n\n{flag} {name}\n✅ اکنون برای خرید موجود است\n💰 قیمت خرید: {price}$</b>\n\n🛒 خرید الآن",
     alert_buy_btn: "🛒 خرید الآن"
@@ -162,6 +165,7 @@ const texts = {
     next_page_btn: "পরবর্তী ➡️",
     prev_page_btn: "⬅️ আগের",
     main_menu_btn: "🔙 মূল মেনুতে ফিরুন",
+    alert_enabled: "✅ {country}: চালু",
     alert_disabled: "✅ {country}: বন্ধ",
     alert_notification: "🥳 🎉 দেশ এখন উপলব্ধ\n\n{flag} {name}\n✅ এখন ক্রয়ের জন্য উপলব্ধ\n💰 ক্রয় মূল্য: {price}$\n\n🛒 এখনই কিনুন",
     alert_buy_btn: "🛒 এখনই কিনুন"
