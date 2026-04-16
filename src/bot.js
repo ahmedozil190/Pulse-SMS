@@ -647,17 +647,17 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
       startPolling(ctx, phoneNumber, countryCode);
 
     } else {
-      // 1. Restore the country selection menu FIRST
-      await showCountrySelection(ctx, true);
-      
-      // 2. NOW show the popup alert (this will work because we haven't answered the query yet)
+      // 1. Show the popup alert FIRST (this must be first to secure the callback answer)
       await ctx.answerCbQuery(ctx.t('no_numbers_error'), { show_alert: true }).catch(() => { });
+      
+      // 2. NOW restore the country selection menu
+      await showCountrySelection(ctx, true);
     }
   } catch (error) {
     console.error("Purchase error:", error);
-    // Restoration fallback
-    await showCountrySelection(ctx, true);
+    // Restoration fallback: alert first!
     await ctx.answerCbQuery(ctx.t('no_numbers_error'), { show_alert: true }).catch(() => { });
+    await showCountrySelection(ctx, true);
   }
 });
 
