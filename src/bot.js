@@ -676,7 +676,9 @@ bot.action(/^check_code_(.+)_(.+)$/, async (ctx) => {
     orderBy: { id: 'desc' }
   });
 
-  if (!order) return;
+  if (!order) {
+    return ctx.answerCbQuery().catch(() => { });
+  }
 
   // Safety check: ensure balance is still sufficient
   if (user.balance < order.price || user.balance <= 0) {
