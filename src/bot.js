@@ -1125,12 +1125,13 @@ app.get('/api/admin/deposits', isAdminMiddleware, async (req, res) => {
 
 app.post('/api/admin/balance', isAdminMiddleware, async (req, res) => {
   const { userId, amount } = req.body;
-  if (isNaN(amount)) return res.status(400).json({ msg: 'Invalid amount' });
+  const parsedAmount = parseFloat(amount);
+  if (isNaN(parsedAmount)) return res.status(400).json({ msg: 'Invalid amount' });
 
   try {
     const updated = await prisma.user.update({
       where: { id: userId },
-      data: { balance: { increment: amount } }
+      data: { balance: { increment: parsedAmount } }
     });
     res.json(updated);
   } catch (err) {
