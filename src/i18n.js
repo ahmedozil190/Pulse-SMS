@@ -119,7 +119,7 @@ const texts = {
     refresh_btn: "🔄 তালিকা রিফ্রেশ",
     main_menu_btn: "🔙 প্রধান মেনু",
     purchase_success: "🎉 <b>ক্রয় সফল!</b>",
-    purchase_success_plain: "🎉 ক্রয় সফল",
+    purchase_success_plain: "🎉 ক্রয় সফল হয়েছে",
     number_label: "নম্বর",
     country_label: "দেশ",
     code_label: "কোড",

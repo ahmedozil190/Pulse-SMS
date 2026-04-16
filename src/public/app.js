@@ -157,7 +157,7 @@ async function refreshData() {
         // Populate Sub-page Inputs
         const inputBotName = document.getElementById('input-bot-name');
         if (inputBotName) inputBotName.value = allSettings.bot_name || 'Pulse Bot';
-        
+
         const maintenanceToggle = document.getElementById('maintenance-toggle-btn');
         if (maintenanceToggle) {
             const isMMode = allSettings.maintenance_mode === 'true';
@@ -209,7 +209,7 @@ window.toggleSettingUI = (targetId) => {
 
 window.saveSetting = async (key, elementId, type) => {
     let value = '';
-    
+
     if (type === 'text') {
         value = document.getElementById(elementId).value;
     } else if (type === 'toggle') {
@@ -290,10 +290,10 @@ window.switchPage = (pageName) => {
         if (isActive) page.scrollTop = 0; // Reset scroll to top on switch
     });
 
-    const titles = { 
-        dashboard: 'Overview', 
-        users: 'User Management', 
-        countries: 'Countries', 
+    const titles = {
+        dashboard: 'Overview',
+        users: 'User Management',
+        countries: 'Countries',
         settings: 'Settings',
         'settings-bot-name': 'Bot Identity',
         'settings-maintenance': 'System Control',
@@ -837,7 +837,7 @@ window.renderMandatoryChannels = () => {
 window.addMandatoryChannel = async () => {
     const usernameInput = document.getElementById('input-channel-username');
     const linkInput = document.getElementById('input-channel-link');
-    
+
     const username = usernameInput.value.trim();
     const link = linkInput.value.trim();
 
@@ -856,7 +856,7 @@ window.addMandatoryChannel = async () => {
         if (res.ok) {
             usernameInput.value = '';
             linkInput.value = '';
-            
+
             await refreshData();
             showOzAlert('Channel Added!', 'The new channel has been added to your subscription list successfully. ✨');
         } else {
@@ -931,7 +931,7 @@ window.showOzAlert = (title, msg, type = 'success') => {
         if (!root) return resolve();
 
         const icon = type === 'success' ? 'fa-check' : 'fa-info';
-        
+
         root.innerHTML = `
             <div class="oz-modal">
                 <div class="oz-modal-icon-wrapper">

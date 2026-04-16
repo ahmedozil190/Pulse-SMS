@@ -655,7 +655,7 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
     } else {
       // 1. Show the popup alert FIRST (this must be first to secure the callback answer)
       await ctx.answerCbQuery(ctx.t('no_numbers_error'), { show_alert: true }).catch(() => { });
-      
+
       // 2. NOW restore the country selection menu
       await showCountrySelection(ctx, true);
     }
@@ -678,7 +678,7 @@ bot.action(/^check_code_(.+)_(.+)$/, async (ctx) => {
 
   // Force a fresh fetch of the user to get the latest balance
   const user = await prisma.user.findUnique({ where: { telegramId: ctx.from.id.toString() } });
-  
+
   const order = await prisma.order.findFirst({
     where: { phoneNumber, status: 'PENDING' },
     orderBy: { id: 'desc' }
