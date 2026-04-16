@@ -4,7 +4,7 @@ const texts = {
     choose_lang: "❍ Please choose your language\n❍ দয়া করে আপনার ভাষা নির্বাচন করুন\n❍ لطفاً زبان خود را انتخاب کنید\n❍ الرجاء اختيار لغتك",
     balance_header: "<b>💰 Your Current Balance</b>\n\n• <b>Available Balance:</b> {balance}$\n• <b>Total Purchases:</b> {purchases}$\n\n<b>💎 Choose Deposit Method:</b>",
     stats_header: "📊 <b>Your Personal Statistics</b>\n\n• <b>Active Numbers:</b> {active}\n• <b>Total Purchases:</b> {count}\n• <b>Total Purchases:</b> {total} $\n\n🎯 <b>Continue Shopping!</b>",
-    invite_header: "<b>🔗 Invite a Friend</b>\n\nInvite your friends and earn {percent}% of their purchases!\n\n📎 Your invite link:\n<code>{link}</code>\n\nCopy the link and send it to your friends. When they join through your link and buy a number, you'll earn {percent}% of the purchase price.\n\n<b>📊 Your Statistics</b>\n• 👥 Your total team: {teamCount}\n• Today: {todayCount} (Earnings: {todayProfit}$)\n• This week: {weekCount} (Earnings: {weekProfit}$)\n• This month: {monthCount} (Earnings: {monthProfit}$)\n• 💰 Current referral balance: {refBalance}$\n\nThis balance is separate from your main balance and can be used to buy numbers or withdraw\n\n📅 Date: {date}",
+    invite_header: "<b>🔗 Invite a Friend</b>\n\nInvite your friends and earn {percent}% of their purchases!\n\n📎 Your invite link:\n<code>{link}</code>",
     withdraw_btn: "💰 Withdraw Earnings",
     back_btn: "🔙 Back",
     main_menu_btn: "🔙 Main Menu",
@@ -20,7 +20,7 @@ const texts = {
     request_code_btn: "🔄 Request Code",
     requesting_code_msg: "🔄 Requesting Code",
     retry_btn: "🔄 Retry",
-    buy_another_btn: "🛒 Buy Another Number",
+    buy_another_btn: "🛍️ Buy Another Number",
     code_not_retrieved: "❌ The code was not retrieved. Please try again.",
     withdrawal_success: "✅ Withdrawal Successful!",
     withdrawn_to_balance: "{amount}$ has been added to your main balance.",
@@ -41,7 +41,7 @@ const texts = {
     choose_lang: "❍ Please choose your language\n❍ দয়া করে আপনার ভাষা নির্বাচন করুন\n❍ لطفاً زبان خود را انتخاب کنید\n❍ الرجاء اختيار لغتك",
     balance_header: "<b>💰 رصيدك الحالي</b>\n\n• <b>الرصيد المتاح:</b> {balance}$\n• <b>إجمالي المشتريات:</b> {purchases}$\n\n<b>💎 اختر طريقة الشحن:</b>",
     stats_header: "📊 <b>إحصائياتك الشخصية</b>\n\n• <b>الأرقام النشطة:</b> {active}\n• <b>إجمالي المشتريات:</b> {count}\n• <b>إجمالي المشتريات:</b> {total} $\n\n🎯 <b>استمر في الشراء!</b>",
-    invite_header: "<b>🔗 دعوة صديق</b>\n\nادعُ أصدقاءك واربح {percent}% من مشترياتهم!\n\n📎 رابط دعوتك:\n<code>{link}</code>\n\nانسخ الرابط وأرسله لأصدقائك، عندما يشترك أحدهم عبر رابطك ويشتري رقماً ستربح {percent}% من سعر الشراء.\n\n<b>📊 إحصائياتك</b>\n• 👥 إجمالي فريقك: {teamCount}\n• اليوم: {todayCount} (أرباح: {todayProfit}$)\n• هذا الأسبوع: {weekCount} (أرباح: {weekProfit}$)\n• هذا الشهر: {monthCount} (أرباح: {monthProfit}$)\n• 💰 رصيد الإحالات الحالي: {refBalance}$\n\nهذا الرصيد منفصل عن رصيدك الرئيسي ويمكن استخدامه لشراء الأرقام أو سحبه\n\n📅 التاريخ: {date}",
+    invite_header: "<b>🔗 دعوة صديق</b>\n\nادعُ أصدقاءك واربح {percent}% من مشترياتهم!\n\n📎 رابط دعوتك:\n<code>{link}</code>",
     withdraw_btn: "💰 سحب الأرباح",
     back_btn: "🔙 رجوع",
     main_menu_btn: "🔙 القائمة الرئيسية",
@@ -74,7 +74,7 @@ const texts = {
     welcome_user: "<b>🔰 به فروشگاه اعداد بین المللی خوش آمدید 🔰</b>\n\n{name} 👋\n\n<b>گزینه مناسب را از منو انتخاب کنید:</b>",
     welcome_bot: "<b>🔰 به فروشگاه اعداد بین المللی خوش آمدید 🔰</b>\n\n<b>OzZoO SMS 🩸 </b>👋\n\n<b>گزینه مناسب را از منو انتخاب کنید:</b>",
     choose_lang: "❍ Please choose your language\n❍ দয়া করে আপনার ভাষা নির্বাচন করুন\n❍ لطفاً زبان خود را انتخاب کنید\n❍ الرجاء اختيار لغتك",
-    invite_header: "<b>🔗 دعوت دوست</b>\n\nدوستان خود را دعوت کنید و {percent}٪ از خریدهایشان را کسب کنید!\n\n📎 لینک دعوت شما:\n<code>{link}</code>\n\nلینک را کپی کرده و برای دوستانتان ارسال کنید. وقتی از طریق لینک شما عضو شوند و شماره‌ای بخرند، {percent}٪ از قیمت خرید را به دست خواهید آورد.\n\n<b>📊 آمار شما</b>\n• 👥 کل تیم شما: {teamCount}\n• امروز: {todayCount} (درآمد: {todayProfit}$)\n• این هفته: {weekCount} (درآمد: {weekProfit}$)\n• این ماه: {monthCount} (درآمد: {monthProfit}$)\n• 💰 موجودی referrals: {refBalance}$\n\nاین موجودی جدا از موجودی اصلی شماست و برای خرید شماره یا برداشت قابل استفاده است\n\n📅 تاریخ: {date}",
+    invite_header: "<b>🔗 دعوت دوست</b>\n\nدوستان خود را دعوت کنید و {percent}٪ از خریدهایشان را کسب کنید!\n\n📎 لینک دعوت شما:\n<code>{link}</code>",
     withdraw_btn: "💰 برداشت سود",
     back_btn: "🔙 بازگشت",
     balance_header: "<b>💰 موجودی فعلی شما</b>\n\n• <b>موجودی قابل استفاده:</b> {balance}$\n• <b>کل خریدها:</b> {purchases}$\n\n<b>💎 روش شارژ را انتخاب کنید:</b>",
@@ -85,28 +85,29 @@ const texts = {
     buy_number_header: "<b>🌍 کشور مورد نظر را انتخاب کنید</b>\n\n• همه به‌روزرسانی‌ها را اولین نفر دریافت کنید\n• کشور مورد نظر برای خرید شماره را انتخاب کنید:",
     refresh_btn: "🔄 به‌روزرسانی لیست",
     main_menu_btn: "🔙 منوی اصلی",
-    purchase_success: "🎉 <b>خرید با موفقیت انجام شد!</b>",
+    purchase_success: "🎉 <b>خرید موفقیت آمیز بود!</b>",
+    purchase_success_plain: "🎉 خرید موفقیت آمیز بود",
     number_label: "شماره",
     country_label: "کشور",
     code_label: "کد",
-    request_code_btn: "🔄 دریافت کد",
+    request_code_btn: "🔄 درخواست کد",
     requesting_code_msg: "🔄 در حال دریافت کد",
     retry_btn: "🔄 تلاش مجدد",
-    buy_another_btn: "🛒 خرید شماره دیگر",
-    code_not_retrieved: "❌ کد دریافت نشد. لطفا دوباره تلاش کنید.",
+    buy_another_btn: "🛍️ خرید شماره دیگر",
+    code_not_retrieved: "❌ کد بازیابی نشد. لطفا دوباره امتحان کنید.",
     insufficient_balance: "❌ موجودی کافی نیست! نیاز دارید {required}$ موجودی شما {balance}$",
     refresh_cooldown_msg: "⏳ لطفاً {seconds} ثانیه صبر کنید قبل از به‌روزرسانی مجدد",
     insufficient_ref_balance: "❌ موجودی معرفی شما کافی نیست.\n• موجودی فعلی: {balance}$\n• حداقل مورد نیاز: {min}$",
     purchase_process: "🔄 در حال تلاش برای خرید شماره...",
     purchase_cooldown: "⌛ صبر کنید {seconds} ثانیه قبل از خرید بعدی",
-    no_numbers_error: "❌ در حال حاضر شماره‌ای موجود نیست\n\n🔄 دوباره تلاش کنید",
+    no_numbers_error: "❌ در حال حاضر شماره‌ای برای این کشور در دسترس نیست. لطفا دوباره امتحان کنید.",
     use_code_now_hint: "اکنون می‌توانید از کد استفاده کنید"
   },
   bn: {
     welcome_user: "<b>🔰 আন্তর্জাতিক নম্বর স্টোরে স্বাগতম 🔰</b>\n\n{name} 👋\n\n<b>মেনু থেকে উপযুক্ত বিকল্প নির্বাচন করুন:</b>",
     welcome_bot: "<b>🔰 আন্তর্জাতিক নম্বর স্টোরে স্বাগতম 🔰</b>\n\n<b>OzZoO SMS 🩸 </b>👋\n\n<b>মেনু থেকে উপযুক্ত বিকল্প নির্বাচন করুন:</b>",
     choose_lang: "❍ Please choose your language\n❍ দয়া করে আপনার ভাষা নির্বাচন করুন\n❍ لطفاً زبان خود را انتخاب کنید\n❍ الرجاء اختيار লগتك",
-    invite_header: "<b>🔗 বন্ধুকে আমন্ত্রণ জানান</b>\n\nআপনার বন্ধুদের আমন্ত্রণ জানান এবং তাদের কেনাকাটার {percent}% উপার্জন করুন!\n\n📎 আপনার আমন্ত্রণ লিঙ্ক:\n<code>{link}</code>\n\nলিঙ্কটি কপি করে আপনার বন্ধুদের কাছে পাঠান। তারা যখন আপনার লিঙ্কের মাধ্যমে যোগ দেয় এবং একটি নম্বর কেনে, আপনি কেনার মূল্যের {percent}% উপার্জন করবেন।\n\n<b>📊 আপনার পরিসংখ্যান</b>\n• 👥 আপনার মোট দল: {teamCount}\n• আজ: {todayCount} (আয়: {todayProfit}$)\n• এই সপ্তাহ: {weekCount} (আয়: {weekProfit}$)\n• এই মাস: {monthCount} (আয়: {monthProfit}$)\n• 💰 বর্তমান রেফারেল ব্যালেন্স: {refBalance}$\n\nএই ব্যালেন্স আপনার মূল ব্যالেন্স থেকে আলাদা এবং নম্বর কেনা বা উত্তোলনের জন্য ব্যবহার করা যাবে\n\n📅 তারিখ: {date}",
+    invite_header: "<b>🔗 বন্ধুকে আমন্ত্রণ জানান</b>\n\nআপনার বন্ধুদের আমন্ত্রণ জানান এবং তাদের কেনাকাটার {percent}% উপার্জন করুন!\n\n📎 আপনার আমন্ত্রণ লিঙ্ক:\n<code>{link}</code>",
     withdraw_btn: "💰 অর্থ উত্তোলন",
     back_btn: "🔙 ফিরে যান",
     balance_header: "<b>💰 আপনার বর্তমান ব্যালেন্স</b>\n\n• <b>সহজলভ্য ব্যালেন্স:</b> {balance}$\n• <b>মোট ক্রয়:</b> {purchases}$\n\n<b>💎 ডিপোজিট পদ্ধতি নির্বাচন করুন:</b>",
@@ -117,15 +118,16 @@ const texts = {
     buy_number_header: "<b>🌍 প্রয়োজনীয় দেশ নির্বাচন করুন</b>\n\n• সব আপডেট সবার আগে পান\n• যে দেশ থেকে নম্বর কিনতে চান তা নির্বাচন করুন:",
     refresh_btn: "🔄 তালিকা রিফ্রেশ",
     main_menu_btn: "🔙 প্রধান মেনু",
-    purchase_success: "🎉 <b>ক্রয় সফল হয়েছে!</b>",
+    purchase_success: "🎉 <b>ক্রয় সফল!</b>",
+    purchase_success_plain: "🎉 ক্রয় সফল",
     number_label: "নম্বর",
     country_label: "দেশ",
     code_label: "কোড",
-    request_code_btn: "🔄 কোড অনুরোধ করুন",
+    request_code_btn: "🔄 কোড অনুরোধ",
     requesting_code_msg: "🔄 কোড অনুরোধ করা হচ্ছে",
     retry_btn: "🔄 আবার চেষ্টা করুন",
-    buy_another_btn: "🛒 অন্য নম্বর কিনুন",
-    code_not_retrieved: "❌ কোড পাওয়া যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।",
+    buy_another_btn: "🛍️ অন্য নম্বর কিনুন",
+    code_not_retrieved: "❌ কোডটি উদ্ধার করা যায়نی। অনুগ্রহ করে আবার চেষ্টা করুন।",
     insufficient_balance: "❌ পর্যাপ্ত ব্যালেন্স নেই! আপনার দরকার {required}$ আপনার ব্যালেন্স {balance}$",
     refresh_cooldown_msg: "⏳ আবার রিফ্রেশ করার আগে {seconds} সেকেন্ড অপেক্ষা করুন",
     insufficient_ref_balance: "❌ আপনার রেফারেল ব্যালেন্স পর্যাপ্ত নয়।\n• বর্তমান ব্যালেন্স: {balance}$\n• প্রয়োজনীয় ন্যূনতম: {min}$",
@@ -133,7 +135,7 @@ const texts = {
     purchase_cooldown: "⌛ অপেক্ষা করুন {seconds} সেকেন্ড পরবর্তী ক্রয়ের আগে",
     no_numbers_error: "❌ বর্তমানে কোনো নম্বর পাওয়া যাচ্ছে না\n\n🔄 আবার চেষ্টা করুন",
     use_code_now_hint: "আপনি এখন কোডটি ব্যবহার করতে পারেন"
-  },
+  }
 };
 
 const buttons = {
@@ -159,7 +161,7 @@ const buttons = {
     deposit: "💳 شارژ حساب",
     my_stats: "📊 آمار من",
     notifications: "⚙️ تنظیمات هشدارها",
-    invite: "🗽 ادعُ أصدقاءك"
+    invite: "🗽 دعوت دوست"
   },
   bn: {
     buy_number: "🛒 নম্বর কিনুন",
@@ -167,7 +169,7 @@ const buttons = {
     deposit: "💳 ডিপোজিট",
     my_stats: "📊 আমার পরিসংখ্যান ",
     notifications: "⚙️ নোটিফিকেশন সেটিংস",
-    invite: "🗽 তোমার বন্ধুকে আমন্ত্রণ জানান"
+    invite: "🗽 বন্ধুকে আমন্ত্রণ জানান"
   }
 };
 

@@ -156,7 +156,7 @@ const COUNTRY_MAP = {
   "ma": { "name": "Morocco", "flag": "🇲🇦" },
   "mz": { "name": "Mozambique", "name_ar": "موزمبيق", "flag": "🇲🇿" },
   "mm": { "name": "Myanmar", "name_ar": "ميانمار", "flag": "🇲🇲" },
-  "na": { "name": "Namibia", "name_ar": "ناميبيا", "flag": "🇳🇦" },
+  "na": { name: "Namibia", flag: "🇳🇦", name_ar: "ناميبيا", name_fa: "نامیبیا", name_bn: "নামিবিয়া" },
   "nr": { "name": "Nauru", "flag": "🇳🇷" },
   "np": { "name": "Nepal", "flag": "🇳🇵" },
   "nl": { "name": "Netherlands", "flag": "🇳🇱" },
@@ -246,7 +246,7 @@ const COUNTRY_MAP = {
   "vi": { "name": "Virgin Islands, U.S.", flag: "🇻🇮" },
   "wf": { "name": "Wallis and Futuna", flag: "🇼🇫" },
   "eh": { "name": "Western Sahara", flag: "🇪🇭" },
-  "ye": { "name": "Yemen", "name_ar": "اليمن", flag: "🇾🇪" },
+  "ye": { name: "Yemen", flag: "🇾🇪", name_ar: "اليمن", name_fa: "یمن", name_bn: "ইয়েমেন" },
   "zm": { "name": "Zambia", flag: "🇿🇲" },
   "zw": { "name": "Zimbabwe", flag: "🇿🇼" }
 };

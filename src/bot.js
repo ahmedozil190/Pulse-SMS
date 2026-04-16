@@ -633,8 +633,11 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
       // Start cooldown only on successful purchase
       ctx.session.lastPurchase = Date.now();
 
-      const isAr = user.language === 'ar';
-      const countryName = (isAr && countryInfo.name_ar) ? countryInfo.name_ar : countryInfo.name;
+      const lang = user.language || 'en';
+      let countryName = countryInfo.name;
+      if (lang === 'ar' && countryInfo.name_ar) countryName = countryInfo.name_ar;
+      else if (lang === 'fa' && countryInfo.name_fa) countryName = countryInfo.name_fa;
+      else if (lang === 'bn' && countryInfo.name_bn) countryName = countryInfo.name_bn;
 
       const msg = `${ctx.t('purchase_success')}\n\n• <b>${ctx.t('number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${ctx.t('country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryName)}\n• <b>${ctx.t('code_label')}</b>: <code>XXXXX</code>\n\n<b>${ctx.t('request_code_btn')}</b>`;
 
