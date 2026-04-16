@@ -597,7 +597,18 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
   }
 
 
-  // 2. DO NOT answer query yet. Check stock first to ensure alert visibility!
+  // Start the UX animation immediately (DON'T answer query yet)
+  const percentages = ['10%', '30%', '70%', '100%'];
+  for (let percent of percentages) {
+    await ctx.editMessageText(ctx.t('purchase_process'), {
+      reply_markup: {
+        inline_keyboard: [[{ text: percent, callback_data: 'ignore' }]]
+      }
+    }).catch(() => { });
+    await new Promise(r => setTimeout(r, 600));
+  }
+
+  // Now check stock
   try {
     const response = await durianApi.getMobile('0257', countryCode);
 
@@ -605,18 +616,8 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
       const phoneNumber = response.data;
       const cleanPhone = phoneNumber.startsWith('+') ? phoneNumber.substring(1) : phoneNumber;
 
-      // Number secured! Now we can answer and show progress
+      // Finish query successfully
       await ctx.answerCbQuery().catch(() => { });
-
-      const percentages = ['10%', '30%', '70%', '100%'];
-      for (let percent of percentages) {
-        await ctx.editMessageText(ctx.t('purchase_process'), {
-          reply_markup: {
-            inline_keyboard: [[{ text: percent, callback_data: 'ignore' }]]
-          }
-        }).catch(() => { });
-        await new Promise(r => setTimeout(r, 600));
-      }
 
       await prisma.order.create({
         data: {
@@ -646,11 +647,16 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
       startPolling(ctx, phoneNumber, countryCode);
 
     } else {
-      // Failed to get number. Show popup IMMEDIATELY while still on country list
+      // 1. Restore the country selection menu FIRST
+      await showCountrySelection(ctx, true);
+      
+      // 2. NOW show the popup alert (this will work because we haven't answered the query yet)
       await ctx.answerCbQuery(ctx.t('no_numbers_error'), { show_alert: true }).catch(() => { });
     }
   } catch (error) {
     console.error("Purchase error:", error);
+    // Restoration fallback
+    await showCountrySelection(ctx, true);
     await ctx.answerCbQuery(ctx.t('no_numbers_error'), { show_alert: true }).catch(() => { });
   }
 });
