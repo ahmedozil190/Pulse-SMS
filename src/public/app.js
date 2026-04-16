@@ -695,6 +695,7 @@ window.bulkToggleCountries = async (isEnabled) => {
 
 
 
+window.setUserFilter = (filter) => {
     currentUserFilter = filter;
     document.getElementById('tab-active').classList.toggle('active', filter === 'active');
     document.getElementById('tab-banned').classList.toggle('active', filter === 'banned');
