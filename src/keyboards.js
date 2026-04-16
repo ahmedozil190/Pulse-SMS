@@ -59,13 +59,13 @@ const keyboards = {
       .slice(0, 50);
 
     codes.forEach(code => {
-      const info = durianApi.getCountryInfo(code);
+      const info = durianApi.getCountryInfo(code, lang);
       const stock = distribution[code];
       const cfg = configMap[code];
       const price = cfg ? cfg.price : 0.15;
       
       // 3. Match Competitor Label: Flag Name (Stock) Price$
-      const label = `${info.flag} ${info.name} (${stock}) ${price}$`;
+      const label = `${info.flag} ${info.localizedName} (${stock}) ${price}$`;
       
       buttons.push(Markup.button.callback(label, `select_country_${code}`));
     });
@@ -100,9 +100,9 @@ const keyboards = {
     const pageSize = 20;
     const allCountries = durianApi.getAllCountries();
     const codes = Object.keys(allCountries).sort((a,b) => {
-      const nameA = i18n.t(lang, `country_${a}`) !== `country_${a}` ? i18n.t(lang, `country_${a}`) : allCountries[a].name;
-      const nameB = i18n.t(lang, `country_${b}`) !== `country_${b}` ? i18n.t(lang, `country_${b}`) : allCountries[b].name;
-      return nameA.localeCompare(nameB);
+      const infoA = durianApi.getCountryInfo(a, lang);
+      const infoB = durianApi.getCountryInfo(b, lang);
+      return infoA.localizedName.localeCompare(infoB.localizedName);
     });
     
     const start = page * pageSize;
@@ -110,7 +110,7 @@ const keyboards = {
     const totalPages = Math.ceil(codes.length / pageSize);
     
     const buttons = paginated.map(code => {
-      const info = allCountries[code];
+      const info = durianApi.getCountryInfo(code, lang);
       const cfg = configMap[code] || { price: 0.25 };
       const price = cfg.price;
       const isSubscribed = activeSubscriptions.includes(code);
@@ -118,7 +118,7 @@ const keyboards = {
       let statusIcon = isSubscribed ? '🔔' : '🔇';
       if (userBalance < price) statusIcon = '⛔';
       
-      const label = `${info.flag} ${info.name} ${statusIcon} ${price}$`;
+      const label = `${info.flag} ${info.localizedName} ${statusIcon} ${price}$`;
       return Markup.button.callback(label, `toggle_alert_${code}_${page}`);
     });
     

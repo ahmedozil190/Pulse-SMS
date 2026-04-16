@@ -1576,7 +1576,6 @@ process.once('SIGTERM', () => bot.stop('SIGTERM'));
 // --- LIVE HUNTER ALERTS & BOT STARTUP ---
 hunter.start(5000, async (code, stock) => {
   try {
-    const info = durianApi.getCountryInfo(code);
     const subs = await prisma.notificationSubscription.findMany({
       where: { countryCode: code },
       include: { user: true }
@@ -1590,9 +1589,10 @@ hunter.start(5000, async (code, stock) => {
       if (!s.user || s.user.isBanned) continue;
       
       const lang = s.user.language || 'en';
+      const info = durianApi.getCountryInfo(code, lang);
       const msg = i18n.t(lang, 'alert_notification', {
         flag: info.flag,
-        name: info.name,
+        name: info.localizedName,
         stock: stock
       });
 
