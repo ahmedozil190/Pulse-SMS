@@ -633,7 +633,7 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
       // Start cooldown only on successful purchase
       ctx.session.lastPurchase = Date.now();
 
-      const msg = `${ctx.t('purchase_success')}\n\n• <b>${ctx.t('number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${ctx.t('country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryInfo.name)}\n• <b>${ctx.t('code_label')}</b>: <code>XXXXX</code>\n\n<b>🔄 ${ctx.t('request_code_btn')}</b>`;
+      const msg = `${ctx.t('purchase_success')}\n\n• <b>${ctx.t('number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${ctx.t('country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryInfo.name)}\n• <b>${ctx.t('code_label')}</b>: <code>XXXXX</code>`;
 
       await ctx.editMessageText(msg, {
         parse_mode: 'HTML',
@@ -696,7 +696,7 @@ bot.action(/^check_code_(.+)_(.+)$/, async (ctx) => {
   // Random animation effect
   for (let i = 0; i < 3; i++) {
     const randomCode = Math.floor(10000 + Math.random() * 90000);
-    const animMsg = `${ctx.t('purchase_success')}\n\n• <b>${ctx.t('number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${ctx.t('country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryInfo.name)}\n• <b>${ctx.t('code_label')}</b>: <code>${randomCode}</code>\n\n<b>🔄 ${ctx.t('request_code_btn')}</b>`;
+    const animMsg = `${ctx.t('purchase_success')}\n\n• <b>${ctx.t('number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${ctx.t('country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryInfo.name)}\n• <b>${ctx.t('code_label')}</b>: <code>${randomCode}</code>\n\n${ctx.t('requesting_code_msg')}`;
     try {
       await ctx.editMessageText(animMsg, {
         parse_mode: 'HTML',
@@ -729,19 +729,19 @@ bot.action(/^check_code_(.+)_(.+)$/, async (ctx) => {
         reply_markup: {
           inline_keyboard: [
             [{ text: ctx.t('retry_btn'), callback_data: `check_code_${countryCode}_${phoneNumber}` }],
-            [{ text: ctx.t('back_btn'), callback_data: 'action_main_menu' }]
+            [{ text: ctx.t('main_menu_btn'), callback_data: 'action_main_menu' }]
           ]
         }
       });
     }
   } catch (err) {
-    const errorMsg = `🎉 <b>Purchase Successful</b>\n\n• <b>Number</b>: <code>+${cleanPhone}</code>\n• <b>Country</b>: ${countryInfo.flag} ${escapeHTML(countryInfo.name)}\n• <b>Code</b>:  <code>XXXXX</code>\n\n❌ <b>The code was not retrieved. Please try again.</b>`;
+    const errorMsg = `${ctx.t('purchase_success')}\n\n• <b>${ctx.t('number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${ctx.t('country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryInfo.name)}\n• <b>${ctx.t('code_label')}</b>:  <code>XXXXX</code>\n\n${ctx.t('code_not_retrieved')}`;
     await ctx.editMessageText(errorMsg, {
       parse_mode: 'HTML',
       reply_markup: {
         inline_keyboard: [
-          [{ text: '🔄 Retry', callback_data: `check_code_${countryCode}_${phoneNumber}` }],
-          [{ text: '🔙 Main Menu', callback_data: 'action_main_menu' }]
+          [{ text: ctx.t('retry_btn'), callback_data: `check_code_${countryCode}_${phoneNumber}` }],
+          [{ text: ctx.t('main_menu_btn'), callback_data: 'action_main_menu' }]
         ]
       }
     });
@@ -841,7 +841,7 @@ async function startPolling(ctx, phoneNumber, countryCode) {
             reply_markup: {
               inline_keyboard: [
                 [{ text: ctx.t('retry_btn'), callback_data: `check_code_${countryCode}_${phoneNumber}` }],
-                [{ text: ctx.t('back_btn'), callback_data: 'action_main_menu' }]
+                [{ text: ctx.t('main_menu_btn'), callback_data: 'action_main_menu' }]
               ]
             }
           }
