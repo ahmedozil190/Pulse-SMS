@@ -658,8 +658,9 @@ bot.action('action_refresh_countries', async (ctx) => {
 /**
  * Handle Country Selection
  */
-bot.action(/^select_country_(.+)$/, async (ctx) => {
+bot.action(/^select_country_([^_]+)(?:_(.+))?$/, async (ctx) => {
   const countryCode = ctx.match[1];
+  const source = ctx.match[2];
   const countryInfo = durianApi.getCountryInfo(countryCode);
   const { user } = await getOrCreateUser(ctx);
 
@@ -750,14 +751,18 @@ bot.action(/^select_country_(.+)$/, async (ctx) => {
       // 1. Show the popup alert FIRST (this must be first to secure the callback answer)
       await ctx.answerCbQuery(ctx.t('no_numbers_error'), { show_alert: true }).catch(() => { });
 
-      // 2. NOW restore the country selection menu
-      await showCountrySelection(ctx, true);
+      // 2. NOW restore the country selection menu ONLY if not from an alert
+      if (source !== 'alert') {
+        await showCountrySelection(ctx, true);
+      }
     }
   } catch (error) {
     console.error("Purchase error:", error);
     // Restoration fallback: alert first!
     await ctx.answerCbQuery(ctx.t('no_numbers_error'), { show_alert: true }).catch(() => { });
-    await showCountrySelection(ctx, true);
+    if (source !== 'alert') {
+      await showCountrySelection(ctx, true);
+    }
   }
 });
 
@@ -1609,7 +1614,7 @@ hunter.start(5000, async (code, stock) => {
         parse_mode: 'HTML',
         reply_markup: {
           inline_keyboard: [
-            [Markup.button.callback(btnText, `select_country_${code}`)]
+            [Markup.button.callback(btnText, `select_country_${code}_alert`)]
           ]
         }
       }).catch(err => {
