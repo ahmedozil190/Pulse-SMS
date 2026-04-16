@@ -127,7 +127,7 @@ const texts = {
     requesting_code_msg: "🔄 কোড অনুরোধ করা হচ্ছে",
     retry_btn: "🔄 আবার চেষ্টা করুন",
     buy_another_btn: "🛍️ অন্য নম্বর কিনুন",
-    code_not_retrieved: "❌ কোডটি উদ্ধার করা যায়نی। অনুগ্রহ করে আবার চেষ্টা করুন।",
+    code_not_retrieved: "❌ কোডটি উদ্ধার করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।",
     insufficient_balance: "❌ পর্যাপ্ত ব্যালেন্স নেই! আপনার দরকার {required}$ আপনার ব্যালেন্স {balance}$",
     refresh_cooldown_msg: "⏳ আবার রিফ্রেশ করার আগে {seconds} সেকেন্ড অপেক্ষা করুন",
     insufficient_ref_balance: "❌ আপনার রেফারেল ব্যালেন্স পর্যাপ্ত নয়।\n• বর্তমান ব্যালেন্স: {balance}$\n• প্রয়োজনীয় ন্যূনতম: {min}$",
