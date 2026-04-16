@@ -37,7 +37,7 @@ const texts = {
     alert_settings_note: "\n\n\n<i>💡 Note: Disabled countries ⛔️ cannot be activated due to insufficient balance</i>",
     next_page_btn: "Next ➡️",
     prev_page_btn: "⬅️ Previous",
-    main_menu_btn: "⬅️ Main Menu",
+    main_menu_btn: "🔙 Back to Main",
     alert_notification: "🔔 <b>Stock Update!</b>\n\nNumbers are now available for <b>{flag} {name}</b>!\n\n🚀 <b>Current Stock:</b> {stock}\n\n🛒 <i>Go to \"Buy Number\" to grab yours now!</i>"
   },
   ar: {
@@ -78,8 +78,8 @@ const texts = {
     alert_settings_header: "<b>🎯 إعدادات التنبيهات</b>\n\nاختر طريقة إشعاراتك للدول:\n\n📰 ما الذي يتم تنبيهك به؟\n• تغيّر الأسعار\n• توفر الدولة\n• نفاد الأرقام",
     alert_settings_note: "\n\n\n<i>💡 ملاحظة: الدول المعطلة ⛔️ لا يمكن تفعيلها بسبب نقص الرصيد</i>",
     next_page_btn: "التالي ➡️",
-    prev_page_btn: "السابق ⬅️",
-    main_menu_btn: "القائمة الرئيسية ⬅️",
+    prev_page_btn: "⬅️ السابق",
+    main_menu_btn: "🔙 العودة للرئيسية",
     alert_notification: "🔔 <b>تحديث المخزون!</b>\n\nالأرقام متوفرة الآن لدولة <b>{flag} {name}</b>!\n\n🚀 <b>المخزون الحالي:</b> {stock}\n\n🛒 <i>انتقل إلى \"شراء رقم\" للحصول على رقمك الآن!</i>",
     alert_item: "• {name}: {status}"
   },
@@ -114,7 +114,7 @@ const texts = {
     purchase_cooldown: "⌛ صبر کنید {seconds} ثانیه قبل از خرید بعدی",
     no_numbers_error: "❌ در حال حاضر شماره‌ای برای این کشور در دسترس نیست. لطفا دوباره امتحان کنید.",
     use_code_now_hint: "اکنون می‌توانید از کد استفاده کنید",
-    alert_settings_header: "<b>🎯 تنظیمات هشدارها</b>\n\nروش اطلاع‌رسانی خود را برای کشورها انتخاب کنید:\n\n📰 از چه چیزهایی مطلع خواهید شد؟\n• تغییرات قیمت\n• موجود بودن کشور\n• تمام شدن شمارهها",
+    alert_settings_header: "<b>🎯 تنظیمات هشدارها</b>\n\nروش اطلاع‌رسانی خود را برای کشورها انتخاب کنید:\n\n📰 از چه چیزهایی مطلع خواهید شد؟\n• تغییرات قیمت\n• موجود بودن کشور\n• تمام شدن شماره‌ها",
     alert_settings_note: "\n\n\n<i>💡 توجه: کشورهای غیرفعال ⛔️ به دلیل موجودی ناکافی قابل فعال‌سازی نیستند</i>",
     next_page_btn: "➡️ بعدی",
     prev_page_btn: "قبلی ⬅️",
