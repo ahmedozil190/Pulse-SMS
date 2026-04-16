@@ -670,6 +670,23 @@ bot.action(/^check_code_(.+)_(.+)$/, async (ctx) => {
   const countryInfo = durianApi.getCountryInfo(countryCode);
   const cleanPhone = phoneNumber.startsWith('+') ? phoneNumber.substring(1) : phoneNumber;
 
+  const { user } = await getOrCreateUser(ctx);
+  const order = await prisma.order.findFirst({
+    where: { phoneNumber, status: 'PENDING' },
+    orderBy: { id: 'desc' }
+  });
+
+  if (!order) return ctx.answerCbQuery("❌ Order not found.").catch(() => { });
+
+  // Safety check: ensure balance is still sufficient
+  if (user.balance < order.price) {
+    const msg = ctx.t('insufficient_balance', {
+      balance: user.balance.toFixed(2),
+      required: order.price.toFixed(2)
+    });
+    return ctx.answerCbQuery(msg, { show_alert: true });
+  }
+
   await ctx.answerCbQuery().catch(() => { });
 
   // Random animation effect
