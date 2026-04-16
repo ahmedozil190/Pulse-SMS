@@ -38,9 +38,9 @@ const texts = {
     next_page_btn: "Next ➡️",
     prev_page_btn: "⬅️ Previous",
     main_menu_btn: "🔙 Back to Main",
-    alert_notification: "🔔 <b>Stock Update!</b>\n\nNumbers are now available for <b>{flag} {name}</b>!\n\n🚀 <b>Current Stock:</b> {stock}\n\n🛒 <i>Go to \"Buy Number\" to grab yours now!</i>",
-    alert_enabled: "✅ {country}: Enable",
-    alert_disabled: "✅ {country}: Disable"
+    alert_disabled: "✅ {country}: Disable",
+    alert_notification: "<b>🥳 🎉 Country Available Now\n\n{flag} {name}\n✅ Now available for purchase\n💰 Purchase price: {price}$</b>\n\n🛒 Buy Now",
+    alert_buy_btn: "🛒 Buy Now"
   },
   ar: {
     welcome_user: "<b>🔰 مرحباً بك في متجر الأرقام الدولي 🔰</b>\n\n{name} 👋\n\n<b>اختر الخيار المناسب من القائمة:</b>",
@@ -82,10 +82,9 @@ const texts = {
     next_page_btn: "التالي ➡️",
     prev_page_btn: "⬅️ السابق",
     main_menu_btn: "🔙 العودة للرئيسية",
-    alert_notification: "🔔 <b>تحديث المخزون!</b>\n\nالأرقام متوفرة الآن لدولة <b>{flag} {name}</b>!\n\n🚀 <b>المخزون الحالي:</b> {stock}\n\n🛒 <i>انتقل إلى \"شراء رقم\" للحصول على رقمك الآن!</i>",
-    alert_item: "• {name}: {status}",
-    alert_enabled: "✅ {country}: تشغيل",
-    alert_disabled: "✅ {country}: إيقاف"
+    alert_disabled: "✅ {country}: إيقاف",
+    alert_notification: "<b>🥳 🎉 الدولة متاحة الآن\n\n{flag} {name}\n✅ أصبحت متاحة للشراء\n💰 سعر الشراء: {price}$</b>\n\n🛒 شراء الآن",
+    alert_buy_btn: "🛒 شراء الآن"
   },
   fa: {
     welcome_user: "<b>🔰 به فروشگاه اعداد بین المللی خوش آمدید 🔰</b>\n\n{name} 👋\n\n<b>گزینه مناسب را از منو انتخاب کنید:</b>",
@@ -123,10 +122,9 @@ const texts = {
     next_page_btn: "بعدی ➡️",
     prev_page_btn: "⬅️ قبلی",
     main_menu_btn: "🔙 بازگشت به منوى اصلى",
-    alert_notification: "🔔 <b>به‌روزرسانی موجودی!</b>\n\nشماره‌ها هم‌اکنون برای کشور <b>{flag} {name}</b> در دسترس هستند!\n\n🚀 <b>موجودی فعلی:</b> {stock}\n\n🛒 <i>برای خرید همین حالا به قسمت \"خرید شماره\" بروید!</i>",
-    alert_item: "• {name}: {status}",
-    alert_enabled: "{country}: فعال ✅",
-    alert_disabled: "{country}: غیرفعال ✅"
+    alert_disabled: "{country}: غیرفعال ✅",
+    alert_notification: "<b>🥳 🎉 کشور الآن موجود است\n\n{flag} {name}\n✅ اکنون برای خرید موجود است\n💰 قیمت خرید: {price}$</b>\n\n🛒 خرید الآن",
+    alert_buy_btn: "🛒 خرید الآن"
   },
   bn: {
     welcome_user: "<b>🔰 আন্তর্জাতিক নম্বর স্টোরে স্বাগতম 🔰</b>\n\n{name} 👋\n\n<b>মেনু থেকে উপযুক্ত বিকল্প নির্বাচন করুন:</b>",
@@ -164,9 +162,9 @@ const texts = {
     next_page_btn: "পরবর্তী ➡️",
     prev_page_btn: "⬅️ আগের",
     main_menu_btn: "🔙 মূল মেনুতে ফিরুন",
-    alert_item: "• {name}: {status}",
-    alert_enabled: "✅ {country}: চালু",
-    alert_disabled: "✅ {country}: বন্ধ"
+    alert_disabled: "✅ {country}: বন্ধ",
+    alert_notification: "<b>🥳 🎉 দেশ এখন উপলব্ধ\n\n{flag} {name}\n✅ এখন ক্রয়ের জন্য উপলব্ধ\n💰 ক্রয় মূল্য: {price}$</b>\n\n🛒 এখনই কিনুন",
+    alert_buy_btn: "🛒 এখনই কিনুন"
   }
 };
 

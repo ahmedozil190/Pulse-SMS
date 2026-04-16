@@ -524,7 +524,7 @@ bot.action(/^toggle_alert_(.+)_(.+)$/, async (ctx) => {
       const price = countryConfig ? countryConfig.price : 0.25;
       
       if (user.balance < price) {
-        return ctx.answerCbQuery(`❌ Low balance! You need $${price.toFixed(2)} to enable alerts for this country.`, { show_alert: true });
+        return ctx.answerCbQuery().catch(() => {});
       }
       
       await prisma.notificationSubscription.create({
@@ -1589,6 +1589,9 @@ hunter.start(5000, async (code, stock) => {
       console.log(`[HUNTER ALERT] Stock for ${code} is ${stock}. Notifying ${subs.length} users...`);
     }
 
+    const countryConfig = await prisma.countryConfig.findUnique({ where: { countryCode: code } });
+    const price = countryConfig ? countryConfig.price : 0.25;
+
     for (const s of subs) {
       if (!s.user || s.user.isBanned) continue;
       
@@ -1597,10 +1600,19 @@ hunter.start(5000, async (code, stock) => {
       const msg = i18n.t(lang, 'alert_notification', {
         flag: info.flag,
         name: info.localizedName,
-        stock: stock
+        price: price.toFixed(2)
       });
+      
+      const btnText = i18n.t(lang, 'alert_buy_btn');
 
-      bot.telegram.sendMessage(s.user.telegramId, msg, { parse_mode: 'HTML' }).catch(err => {
+      bot.telegram.sendMessage(s.user.telegramId, msg, { 
+        parse_mode: 'HTML',
+        reply_markup: {
+          inline_keyboard: [
+            [Markup.button.callback(btnText, `select_country_${code}`)]
+          ]
+        }
+      }).catch(err => {
         if (!err.message.includes('blocked by the user') && !err.message.includes('chat not found')) {
            console.error(`[HUNTER MSG ERROR] User ${s.user.telegramId}:`, err.message);
         }
