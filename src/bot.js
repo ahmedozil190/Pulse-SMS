@@ -692,17 +692,15 @@ bot.action(/^select_country_([^_]+)(?:_(.+))?$/, async (ctx) => {
   }
 
 
-  // Start the UX animation immediately (DON'T answer query yet) ONLY if not alert
-  if (source !== 'alert') {
-    const percentages = ['10%', '30%', '70%', '100%'];
-    for (let percent of percentages) {
-      await ctx.editMessageText(ctx.t('purchase_process'), {
-        reply_markup: {
-          inline_keyboard: [[{ text: percent, callback_data: 'ignore' }]]
-        }
-      }).catch(() => { });
-      await new Promise(r => setTimeout(r, 600));
-    }
+  // Start the UX animation immediately (DON'T answer query yet)
+  const percentages = ['10%', '30%', '70%', '100%'];
+  for (let percent of percentages) {
+    await ctx.editMessageText(ctx.t('purchase_process'), {
+      reply_markup: {
+        inline_keyboard: [[{ text: percent, callback_data: 'ignore' }]]
+      }
+    }).catch(() => { });
+    await new Promise(r => setTimeout(r, 600));
   }
 
   // Now check stock
@@ -750,20 +748,46 @@ bot.action(/^select_country_([^_]+)(?:_(.+))?$/, async (ctx) => {
       startPolling(ctx, phoneNumber, countryCode);
 
     } else {
-      // 1. Show the popup alert FIRST (this must be first to secure the callback answer)
+      // 1. Show the popup alert FIRST
       await ctx.answerCbQuery(ctx.t('no_numbers_error'), { show_alert: true }).catch(() => { });
 
-      // 2. NOW restore the country selection menu ONLY if not from an alert
+      // 2. NOW restore appropriately
       if (source !== 'alert') {
         await showCountrySelection(ctx, true);
+      } else {
+        const info = durianApi.getCountryInfo(countryCode, ctx.state.lang);
+        const originalAlertMsg = ctx.t('alert_notification', {
+          flag: info.flag,
+          name: info.localizedName,
+          price: currentPrice.toFixed(2)
+        });
+        await ctx.editMessageText(originalAlertMsg, {
+          parse_mode: 'HTML',
+          reply_markup: {
+            inline_keyboard: [[Markup.button.callback(ctx.t('alert_buy_btn'), `select_country_${countryCode}_alert`)]]
+          }
+        }).catch(() => {});
       }
     }
   } catch (error) {
     console.error("Purchase error:", error);
-    // Restoration fallback: alert first!
     await ctx.answerCbQuery(ctx.t('no_numbers_error'), { show_alert: true }).catch(() => { });
+    
     if (source !== 'alert') {
       await showCountrySelection(ctx, true);
+    } else {
+      const info = durianApi.getCountryInfo(countryCode, ctx.state.lang);
+      const originalAlertMsg = ctx.t('alert_notification', {
+        flag: info.flag,
+        name: info.localizedName,
+        price: currentPrice.toFixed(2)
+      });
+      await ctx.editMessageText(originalAlertMsg, {
+        parse_mode: 'HTML',
+        reply_markup: {
+          inline_keyboard: [[Markup.button.callback(ctx.t('alert_buy_btn'), `select_country_${countryCode}_alert`)]]
+        }
+      }).catch(() => {});
     }
   }
 });
