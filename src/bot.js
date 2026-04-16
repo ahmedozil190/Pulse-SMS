@@ -729,7 +729,7 @@ bot.action(/^check_code_(.+)_(.+)$/, async (ctx) => {
         }
       });
     } else {
-      const msg = `${ctx.t('purchase_success')}\n\n• <b>${ctx.t('number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${ctx.t('country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryName)}\n• <b>${ctx.t('code_label')}</b>:  <code>XXXXX</code>\n\n<b>${ctx.t('code_not_retrieved')}</b>`;
+      const msg = `${ctx.t('purchase_success_plain')}\n\n• <b>${ctx.t('number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${ctx.t('country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryName)}\n• <b>${ctx.t('code_label')}</b>:  <code>XXXXX</code>\n\n<b>${ctx.t('code_not_retrieved')}</b>`;
       await ctx.editMessageText(msg, {
         parse_mode: 'HTML',
         reply_markup: {
@@ -741,7 +741,7 @@ bot.action(/^check_code_(.+)_(.+)$/, async (ctx) => {
       });
     }
   } catch (err) {
-    const errorMsg = `${ctx.t('purchase_success')}\n\n• <b>${ctx.t('number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${ctx.t('country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryName)}\n• <b>${ctx.t('code_label')}</b>:  <code>XXXXX</code>\n\n<b>${ctx.t('code_not_retrieved')}</b>`;
+    const errorMsg = `${ctx.t('purchase_success_plain')}\n\n• <b>${ctx.t('number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${ctx.t('country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryName)}\n• <b>${ctx.t('code_label')}</b>:  <code>XXXXX</code>\n\n<b>${ctx.t('code_not_retrieved')}</b>`;
     await ctx.editMessageText(errorMsg, {
       parse_mode: 'HTML',
       reply_markup: {
@@ -849,7 +849,7 @@ async function startPolling(ctx, phoneNumber, countryCode) {
           ctx.chat.id,
           ctx.callbackQuery.message.message_id,
           null,
-          `${ctx.t('purchase_success')}\n\n• <b>${ctx.t('number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${ctx.t('country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryName)}\n• <b>${ctx.t('code_label')}</b>:  <code>XXXXX</code>\n\n<b>${ctx.t('code_not_retrieved')}</b>`,
+          `${ctx.t('purchase_success_plain')}\n\n• <b>${ctx.t('number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${ctx.t('country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryName)}\n• <b>${ctx.t('code_label')}</b>:  <code>XXXXX</code>\n\n<b>${ctx.t('code_not_retrieved')}</b>`,
           {
             parse_mode: 'HTML',
             reply_markup: {
