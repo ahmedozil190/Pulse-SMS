@@ -670,13 +670,15 @@ bot.action(/^check_code_(.+)_(.+)$/, async (ctx) => {
   const countryInfo = durianApi.getCountryInfo(countryCode);
   const cleanPhone = phoneNumber.startsWith('+') ? phoneNumber.substring(1) : phoneNumber;
 
-  const { user } = await getOrCreateUser(ctx);
+  // Force a fresh fetch of the user to get the latest balance
+  const user = await prisma.user.findUnique({ where: { telegramId: ctx.from.id.toString() } });
+  
   const order = await prisma.order.findFirst({
     where: { phoneNumber, status: 'PENDING' },
     orderBy: { id: 'desc' }
   });
 
-  if (!order) {
+  if (!user || !order) {
     return ctx.answerCbQuery().catch(() => { });
   }
 
