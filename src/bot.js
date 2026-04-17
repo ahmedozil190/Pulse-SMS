@@ -1519,9 +1519,10 @@ app.post('/api/admin/settings/test-daily-summary', isAdminMiddleware, async (req
     const botInfo = await bot.telegram.getMe();
     
     const now = new Date();
+    const yesterday = new Date(now.setDate(now.getDate() - 1));
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    const dayName = days[now.getDay()];
-    const dateFormatted = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
+    const dayName = days[yesterday.getDay()];
+    const dateFormatted = `${yesterday.getDate().toString().padStart(2, '0')}/${(yesterday.getMonth() + 1).toString().padStart(2, '0')}/${yesterday.getFullYear()}`;
 
     let msg = `📊 <b>Countries that were purchased today</b>\n`;
     msg += `<b>${dayName} ${dateFormatted}</b>\n\n`;
@@ -1867,7 +1868,7 @@ const scheduleDailySummary = () => {
       });
       msg += `<blockquote>${listMsg.trim()}</blockquote>\n`;
 
-      msg += `\n<b>Thank you for using our bot ❤️</b>`;
+      msg += `\n\n<b>Thank you for using our bot ❤️</b>`;
 
       const sentMsg = await bot.telegram.sendMessage(channelUsername, msg, {
         parse_mode: 'HTML',
