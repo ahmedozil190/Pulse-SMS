@@ -1545,7 +1545,7 @@ app.post('/api/admin/settings/test-daily-summary', isAdminMiddleware, async (req
     
     msg += `<blockquote>${fakeList}</blockquote>\n`;
 
-    msg += `\n<b>Thank you for using our bot ❤️</b>`;
+    msg += `\n\n<b>Thank you for using our bot ❤️</b>`;
 
     await bot.telegram.sendMessage(channelUsername, msg, {
       parse_mode: 'HTML',
