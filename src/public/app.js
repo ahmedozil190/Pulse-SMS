@@ -297,6 +297,25 @@ window.saveActivationChannelSettings = async () => {
     }
 };
 
+window.testDailySummaryChannel = async () => {
+    try {
+        const res = await fetch('/api/admin/settings/test-daily-summary', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...getHeaders() }
+        });
+
+        if (res.ok) {
+            showOzAlert('Test Message Sent', 'A sample Daily Summary report has been sent to the channel. 🚀');
+        } else {
+            const data = await res.json();
+            showOzAlert('Test Failed', data.msg || 'Could not send test message. Check if bot is admin in the channel.', 'error');
+        }
+    } catch (err) {
+        console.error('Test daily summary error:', err);
+        showOzToast('error', 'Error', 'Connection failed.');
+    }
+};
+
 
 window.openSettingsEditor = (key, label, type) => {
     // Legacy function, no longer used with sub-pages

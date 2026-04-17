@@ -1506,6 +1506,52 @@ app.post('/api/admin/settings/update', isAdminMiddleware, async (req, res) => {
   }
 });
 
+app.post('/api/admin/settings/test-daily-summary', isAdminMiddleware, async (req, res) => {
+  try {
+    const settings = await prisma.globalSetting.findMany();
+    const settingsMap = settings.reduce((acc, s) => ({ ...acc, [s.key]: s.value }), {});
+    const channelUsername = settingsMap.activation_channel;
+    
+    if (!channelUsername) {
+      return res.status(400).json({ msg: 'Please configure an activation channel first.' });
+    }
+
+    const botInfo = await bot.telegram.getMe();
+    
+    const now = new Date();
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const dayName = days[now.getDay()];
+    const dateFormatted = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
+
+    let msg = `<b>Pulse SMS</b> 🩸                                     <code>#admin</code>\n`;
+    msg += `📊 <b>Countries that were purchased today</b>\n`;
+    msg += `<b>${dayName} ${dateFormatted}</b>\n\n`;
+
+    // Fake data matching screenshot
+    msg += `1 - Mauritania 🇲🇷 : 126 : ( $0.25 )\n`;
+    msg += `2 - Botswana 🇧🇼 : 65 : ( $0.25 )\n`;
+    msg += `3 - Afghanistan 🇦🇫 : 37 : ( $0.25 )\n`;
+    msg += `4 - Cuba 🇨🇺 : 34 : ( $0.25 )\n`;
+    msg += `5 - Namibia 🇳🇦 : 27 : ( $0.25 )\n`;
+
+    msg += `\nThank you for using our bot ❤️`;
+
+    await bot.telegram.sendMessage(channelUsername, msg, {
+      parse_mode: 'HTML',
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: '🛒 Buy Now ↗️', url: settingsMap.activation_channel_link || `https://t.me/${botInfo.username}` }]
+        ]
+      }
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[TEST SUMMARY ERROR]', err.message);
+    res.status(500).json({ msg: 'Failed to send test message. Ensure bot is admin in the target channel.' });
+  }
+});
+
 // --- MANDATORY CHANNELS APIs ---
 
 // --- MANDATORY CHANNELS APIs ---

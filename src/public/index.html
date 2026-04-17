@@ -458,9 +458,12 @@
                         <input type="text" id="input-activation-channel-link" class="settings-text-input" placeholder="https://t.me/YourChannel">
                     </div>
 
-                    <div class="modal-group" style="margin-top: 30px;">
-                        <button class="gradient-btn" onclick="saveActivationChannelSettings()">
+                    <div class="modal-group" style="margin-top: 30px; display: flex; gap: 10px;">
+                        <button class="gradient-btn" onclick="saveActivationChannelSettings()" style="flex: 2;">
                             <i class="fas fa-save"></i> Save Configuration
+                        </button>
+                        <button class="gradient-btn" onclick="testDailySummaryChannel()" style="flex: 1; background: #8b5cf6;">
+                            <i class="fas fa-calendar-check"></i> Test Summary
                         </button>
                     </div>
                 </div>
