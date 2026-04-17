@@ -317,6 +317,17 @@
                         </div>
                         <i class="fas fa-chevron-right settings-chevron"></i>
                     </div>
+
+                    <!-- Binance Pay -->
+                    <div class="settings-row" onclick="switchPage('settings-binance')">
+                        <div class="settings-icon-box" style="background: #f3ba2f;">
+                            <i class="fas fa-credit-card"></i>
+                        </div>
+                        <div class="settings-info">
+                            <span class="settings-label">Binance Pay</span>
+                        </div>
+                        <i class="fas fa-chevron-right settings-chevron"></i>
+                    </div>
                 </div>
             </main>
 
@@ -445,6 +456,34 @@
                     <span>Back</span>
                 </div>
 
+                <div class="glass-card" style="margin-top: 20px;">
+                    <div class="section-title" style="margin-top: 0; margin-bottom: 20px;">Activation Channel</div>
+
+                    <div class="modal-group">
+                        <label class="info-label" style="display: block; margin-bottom: 10px; color: #94a3b8; font-size: 0.85rem;">Channel Username</label>
+                        <input type="text" id="input-activation-channel" class="settings-text-input" placeholder="@YourChannel">
+                    </div>
+
+                    <div class="modal-group" style="margin-top: 20px;">
+                        <label class="info-label" style="display: block; margin-bottom: 10px; color: #94a3b8; font-size: 0.85rem;">Channel Link</label>
+                        <input type="text" id="input-activation-channel-link" class="settings-text-input" placeholder="https://t.me/YourChannel">
+                    </div>
+
+                    <div class="modal-group" style="margin-top: 30px;">
+                        <button class="gradient-btn" onclick="saveActivationChannelSettings()">
+                            <i class="fas fa-save"></i> Save Configuration
+                        </button>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Settings Sub-Page: Binance Pay -->
+            <main id="page-settings-binance" class="page">
+                <div class="sub-header" onclick="switchPage('settings')">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Back</span>
+                </div>
+
                 <!-- Binance Pay Configuration -->
                 <div class="glass-card" style="margin-top: 20px;">
                     <div class="section-title" style="margin-top: 0; margin-bottom: 20px;"><i class="fas fa-credit-card"></i> Binance Pay Configuration</div>
@@ -467,26 +506,6 @@
                     <div class="modal-group" style="margin-top: 30px;">
                         <button class="gradient-btn" onclick="saveBinanceSettings()">
                             <i class="fas fa-save"></i> Save Binance Config
-                        </button>
-                    </div>
-                </div>
-
-                <div class="glass-card" style="margin-top: 20px;">
-                    <div class="section-title" style="margin-top: 0; margin-bottom: 20px;">Activation Channel</div>
-
-                    <div class="modal-group">
-                        <label class="info-label" style="display: block; margin-bottom: 10px; color: #94a3b8; font-size: 0.85rem;">Channel Username</label>
-                        <input type="text" id="input-activation-channel" class="settings-text-input" placeholder="@YourChannel">
-                    </div>
-
-                    <div class="modal-group" style="margin-top: 20px;">
-                        <label class="info-label" style="display: block; margin-bottom: 10px; color: #94a3b8; font-size: 0.85rem;">Channel Link</label>
-                        <input type="text" id="input-activation-channel-link" class="settings-text-input" placeholder="https://t.me/YourChannel">
-                    </div>
-
-                    <div class="modal-group" style="margin-top: 30px;">
-                        <button class="gradient-btn" onclick="saveActivationChannelSettings()">
-                            <i class="fas fa-save"></i> Save Configuration
                         </button>
                     </div>
                 </div>
