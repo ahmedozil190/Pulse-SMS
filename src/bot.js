@@ -1856,9 +1856,9 @@ const scanLowBalanceSubscriptions = async () => {
             data: { lowBalanceSince: new Date() }
           });
         } else {
-          // Check if 1 hour has passed
-          const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-          if (user.lowBalanceSince < oneHourAgo) {
+          // Check if 1 minute has passed (Testing mode)
+          const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
+          if (user.lowBalanceSince < oneMinuteAgo) {
             // Cancel all subscriptions
             await prisma.notificationSubscription.deleteMany({
               where: { userId: user.id }
@@ -1903,8 +1903,8 @@ const scanLowBalanceSubscriptions = async () => {
   }
 };
 
-// Run scanner every 5 minutes
-setInterval(scanLowBalanceSubscriptions, 5 * 60 * 1000);
+// Run scanner every 30 seconds (Testing mode)
+setInterval(scanLowBalanceSubscriptions, 30 * 1000);
 
 // Start the hunter service
 hunter.start(5000, async (code, stock) => {
