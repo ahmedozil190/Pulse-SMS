@@ -753,7 +753,7 @@ bot.action(/^select_country_([^_]+)(?:_(.+))?$/, async (ctx) => {
       else if (lang === 'fa' && countryInfo.name_fa) countryName = countryInfo.name_fa;
       else if (lang === 'bn' && countryInfo.name_bn) countryName = countryInfo.name_bn;
 
-      const msg = `${ctx.t('purchase_success')}\n\n• ${ctx.t('number_label')}: <b><code>+${cleanPhone}</code></b>\n• ${ctx.t('country_label')}: <b>${countryInfo.flag} ${escapeHTML(countryName)}</b>\n• ${ctx.t('code_label')}: <b><code>XXXXX</code></b>\n\n${ctx.t('request_code_btn')}`;
+      const msg = `<b>${ctx.t('purchase_success')}</b>\n\n• <b>${ctx.t('number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${ctx.t('country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryName)}\n• <b>${ctx.t('code_label')}</b>: <code>XXXXX</code>\n\n<b>${ctx.t('request_code_btn')}</b>`;
 
       await ctx.editMessageText(msg, {
         parse_mode: 'HTML',
