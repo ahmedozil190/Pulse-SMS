@@ -169,7 +169,7 @@ async function refreshData() {
 
         const inputRefMin = document.getElementById('input-referral-min');
         if (inputRefMin) inputRefMin.value = allSettings.min_withdrawal || '1';
-        
+
         const inputActivationChannel = document.getElementById('input-activation-channel');
         if (inputActivationChannel) inputActivationChannel.value = allSettings.activation_channel || '';
 
@@ -306,6 +306,26 @@ window.saveBinanceSettings = async () => {
         refreshData();
     } catch (e) {
         showOzToast('error', 'Update Failed', 'Binance settings could not be saved.');
+    }
+};
+
+window.testBinanceConnection = async () => {
+    try {
+        showOzToast('info', 'Testing...', 'Trying to reach Binance API...');
+        const res = await fetch('/api/admin/binance/test-connection', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...getHeaders() }
+        });
+
+        const data = await res.json();
+        if (data.success) {
+            showOzAlert('Connection Successful!', data.msg, 'success');
+        } else {
+            showOzAlert('Connection Failed', data.msg, 'info');
+        }
+    } catch (err) {
+        console.error('Test connection error:', err);
+        showOzAlert('System Error', 'Could not connect to the backend server.', 'info');
     }
 };
 

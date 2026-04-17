@@ -50,9 +50,11 @@ const texts = {
     binance_how_btn: "• How To Deposit ⁉️",
     cancel_btn: "❌ Cancel",
     binance_txid_prompt: "👇 <b>Please send the Transaction ID now:</b>",
-    deposit_verified: "✅ <b>Transaction verified!</b>\n\n💰 {amount}$ has been added to your balance.",
+    deposit_verified: "✅ <b>Balance added successfully</b>\n\n💰 <b>Amount added:</b> {amount}$\n📊 <b>New balance:</b> {newBalance}$\n\n🎉 <b>You can now use your new balance</b>",
     deposit_not_found: "❌ <b>Transaction not found or already used</b>\n\nPlease check the ID and try again, or contact support if you believe this is an error.",
-    deposit_error: "⚠️ <b>An error occurred</b> while verifying. Please try again later or contact support."
+    deposit_error: "⚠️ <b>An error occurred</b> while verifying. Please try again later or contact support.",
+    shop_btn: "🛒 Buy Number",
+    back_to_main_btn: "🔙 Back"
   },
   ar: {
     welcome_user: "<b>🔰 مرحباً بك في متجر الأرقام الدولي 🔰</b>\n\n{name} 👋\n\n<b>اختر الخيار المناسب من القائمة:</b>",
@@ -105,9 +107,11 @@ const texts = {
     binance_how_btn: "• كيف تودع ⁉️",
     cancel_btn: "❌ إلغاء",
     binance_txid_prompt: "👇 <b>أرسل معرف المعاملة (Transaction ID) الآن:</b>",
-    deposit_verified: "✅ <b>تم التحقق من المعاملة بنجاح!</b>\n\n💰 تم إضافة {amount}$ إلى رصيدك.",
+    deposit_verified: "✅ <b>تم إضافة الرصيد بنجاح</b>\n\n💰 <b>المبلغ المضاف:</b> {amount}$\n📊 <b>الرصيد الجديد:</b> {newBalance}$\n\n🎉 <b>يمكنك الآن استخدام رصيدك الجديد</b>",
     deposit_not_found: "❌ <b>المعاملة غير موجودة أو تم استخدامها مسبقاً</b>\n\nيرجى التأكد من المعرف والمحاولة مرة أخرى، أو تواصل مع الدعم الفني.",
-    deposit_error: "⚠️ <b>حدث خطأ</b> أثناء التحقق من المعاملة. يرجى المحاولة لاحقاً أو التواصل مع الدعم."
+    deposit_error: "⚠️ <b>حدث خطأ</b> أثناء التحقق من المعاملة. يرجى المحاولة لاحقاً أو التواصل مع الدعم.",
+    shop_btn: "🛒 شراء رقم",
+    back_to_main_btn: "🔙 رجوع"
   },
   fa: {
     welcome_user: "<b>🔰 به فروشگاه اعداد بین المللی خوش آمدید 🔰</b>\n\n{name} 👋\n\n<b>گزینه مناسب را از منو انتخاب کنید:</b>",
@@ -157,9 +161,11 @@ const texts = {
     binance_how_btn: "• چگونه واریز کنیم ⁉️",
     cancel_btn: "❌ لغو",
     binance_txid_prompt: "👇 <b>لطفاً شناسه تراکنش را همین الآن ارسال کنید:</b>",
-    deposit_verified: "✅ <b>تراکنش تأیید شد!</b>\n\n💰 مبلغ {amount}$ به موجودی شما اضافه شد.",
+    deposit_verified: "✅ <b>موجودی با موفقیت افزوده شد</b>\n\n💰 <b>مبلغ افزوده شده:</b> {amount}$\n📊 <b>موجودی جدید:</b> {newBalance}$\n\n🎉 <b>اکنون میتوانید از موجودی جدید خود استفاده کنید</b>",
     deposit_not_found: "❌ <b>تراکنش یافت نشد یا قبلاً استفاده شده است</b>\n\nلطفاً شناسه را بررسی کرده و دوباره امتحان کنید، یا اگر فکر میکنید خطایی رخ داده با پشتیبانی تماس بگیرید.",
-    deposit_error: "⚠️ <b>خطایی رخ داد</b> هنگام بررسی تراکنش. لطفاً بعداً دوباره امتحان کنید یا با پشتیبانی تماس بگیرید."
+    deposit_error: "⚠️ <b>خطایی رخ داد</b> هنگام بررسی تراکنش. لطفاً بعداً دوباره امتحان کنید یا با پشتیبانی تماس بگیرید.",
+    shop_btn: "🛒 خرید شماره",
+    back_to_main_btn: "🔙 بازگشت"
   },
   bn: {
     welcome_user: "<b>🔰 আন্তর্জাতিক নম্বর স্টোরে স্বাগতম 🔰</b>\n\n{name} 👋\n\n<b>মেনু থেকে উপযুক্ত বিকল্প নির্বাচন করুন:</b>",
@@ -209,7 +215,9 @@ const texts = {
     binance_how_btn: "• কিভাবে ডিপোজিট করবেন ⁉️",
     cancel_btn: "❌ বাতিল",
     binance_txid_prompt: "👇 <b>অনুগ্রহ করে এখন লেনদেন আইডি (Transaction ID) পাঠান:</b>",
-    deposit_verified: "✅ <b>লেনদেন যাচাই করা হয়েছে!</b>\n\n💰 {amount}$ আপনার ব্যালেন্সে যোগ করা হয়েছে।",
+    deposit_verified: "✅ <b>ব্যালেন্স সফলভাবে যোগ করা হয়েছে</b>\n\n💰 <b>যোগ করা পরিমাণ:</b> {amount}$\n📊 <b>নতুন ব্যালেন্স:</b> {newBalance}$\n\n🎉 <b>আপনি এখন আপনার নতুন ব্যালেন্স ব্যবহার করতে পারেন</b>",
+    shop_btn: "🛒 নম্বর কিনুন",
+    back_to_main_btn: "🔙 ফিরে যান",
     deposit_not_found: "❌ <b>লেনদেন পাওয়া যায়নি বা ইতিমধ্যে ব্যবহার করা হয়েছে</b>\n\nঅনুগ্রহ করে আইডি চেক করুন এবং আবার চেষ্টা করুন, অথবা কোনো সমস্যা হলে সাপোর্টে যোগাযোগ করুন।",
     deposit_error: "⚠️ যাচাই করার সময় <b>একটি ত্রুটি ঘটেছে</b>। অনুগ্রহ করে পরে আবার চেষ্টা করুন বা সাপোর্টে যোগাযোগ করুন।"
   }

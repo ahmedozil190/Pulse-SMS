@@ -1170,12 +1170,23 @@ bot.on('text', async (ctx, next) => {
       });
 
       // Update User Balance
-      await prisma.user.update({
+      const updatedUser = await prisma.user.update({
         where: { id: user.id },
         data: { balance: { increment: amount } }
       });
 
-      await ctx.reply(ctx.t('deposit_verified', { amount: amount.toFixed(2) }), { parse_mode: 'HTML' });
+      await ctx.reply(ctx.t('deposit_verified', { 
+        amount: amount.toFixed(8).replace(/\.?0+$/, ''), // Clean decimal
+        newBalance: updatedUser.balance.toFixed(8).replace(/\.?0+$/, '') 
+      }), { 
+        parse_mode: 'HTML',
+        reply_markup: {
+          inline_keyboard: [
+            [Markup.button.callback(ctx.t('shop_btn'), 'buy_number')],
+            [Markup.button.callback(ctx.t('back_to_main_btn'), 'start')]
+          ]
+        }
+      });
       ctx.session.awaitingBinanceTxid = false;
     } else {
       await ctx.reply(ctx.t('deposit_not_found'), { parse_mode: 'HTML' });
@@ -1583,30 +1594,6 @@ app.post('/api/admin/settings/update', isAdminMiddleware, async (req, res) => {
   } catch (err) {
     console.error('Update setting error:', err);
     res.status(500).json({ msg: 'Failed to update setting' });
-  }
-});
-
-app.post('/api/admin/binance/test-connection', isAdminMiddleware, async (req, res) => {
-  try {
-    const settings = await prisma.globalSetting.findMany();
-    const settingsMap = settings.reduce((acc, s) => ({ ...acc, [s.key]: s.value }), {});
-
-    const apiKey = settingsMap.binance_api_key || process.env.BINANCE_API_KEY;
-    const apiSecret = settingsMap.binance_api_secret || process.env.BINANCE_API_SECRET;
-
-    if (!apiKey || !apiSecret) {
-      return res.status(400).json({ success: false, msg: 'API credentials not found. Please save them first.' });
-    }
-
-    const binanceService = new BinancePayService(apiKey, apiSecret);
-    // Try to fetch last 1 minute of transactions as a "ping"
-    await binanceService.getPayTransactions(Date.now() - 60000);
-    
-    res.json({ success: true, msg: 'Connection successful! Binance API responded correctly.' });
-  } catch (err) {
-    const errorMsg = err.response ? JSON.stringify(err.response.data) : err.message;
-    console.error('[BINANCE TEST ERROR]', errorMsg);
-    res.status(500).json({ success: false, msg: `Connection failed: ${errorMsg}` });
   }
 });
 
