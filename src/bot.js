@@ -1505,9 +1505,6 @@ app.post('/api/admin/settings/update', isAdminMiddleware, async (req, res) => {
   }
 });
 
-  }
-});
-
 // --- MANDATORY CHANNELS APIs ---
 
 // --- MANDATORY CHANNELS APIs ---
