@@ -51,7 +51,7 @@ const texts = {
     cancel_btn: "❌ Cancel",
     binance_txid_prompt: "👇 <b>Please send the Transaction ID now:</b>",
     deposit_verified: "✅ <b>Balance added successfully</b>\n\n💰 <b>Amount added:</b> {amount}$\n📊 <b>New balance:</b> {newBalance}$\n\n🎉 <b>You can now use your new balance</b>",
-    deposit_not_found: "❌ <b>Transaction not found or already used</b>\n\nPlease check the ID and try again, or contact support if you believe this is an error.",
+    deposit_not_found: "❌ <b>Transaction verification failed</b>\n\nReason: OrderID Wrong\nPlease try again.",
     deposit_error: "⚠️ <b>An error occurred</b> while verifying. Please try again later or contact support.",
     shop_btn: "🛒 Buy Number",
     back_to_main_btn: "🔙 Back"
@@ -108,7 +108,7 @@ const texts = {
     cancel_btn: "❌ إلغاء",
     binance_txid_prompt: "👇 <b>أرسل معرف المعاملة (Transaction ID) الآن:</b>",
     deposit_verified: "✅ <b>تم إضافة الرصيد بنجاح</b>\n\n💰 <b>المبلغ المضاف:</b> {amount}$\n📊 <b>الرصيد الجديد:</b> {newBalance}$\n\n🎉 <b>يمكنك الآن استخدام رصيدك الجديد</b>",
-    deposit_not_found: "❌ <b>المعاملة غير موجودة أو تم استخدامها مسبقاً</b>\n\nيرجى التأكد من المعرف والمحاولة مرة أخرى، أو تواصل مع الدعم الفني.",
+    deposit_not_found: "❌ <b>فشل التحقق من المعاملة</b>\n\nالسبب: معرف الطلب خاطئ\nيرجى المحاولة مرة أخرى.",
     deposit_error: "⚠️ <b>حدث خطأ</b> أثناء التحقق من المعاملة. يرجى المحاولة لاحقاً أو التواصل مع الدعم.",
     shop_btn: "🛒 شراء رقم",
     back_to_main_btn: "🔙 رجوع"
@@ -162,7 +162,7 @@ const texts = {
     cancel_btn: "❌ لغو",
     binance_txid_prompt: "👇 <b>لطفاً شناسه تراکنش را همین الآن ارسال کنید:</b>",
     deposit_verified: "✅ <b>موجودی با موفقیت افزوده شد</b>\n\n💰 <b>مبلغ افزوده شده:</b> {amount}$\n📊 <b>موجودی جدید:</b> {newBalance}$\n\n🎉 <b>اکنون میتوانید از موجودی جدید خود استفاده کنید</b>",
-    deposit_not_found: "❌ <b>تراکنش یافت نشد یا قبلاً استفاده شده است</b>\n\nلطفاً شناسه را بررسی کرده و دوباره امتحان کنید، یا اگر فکر میکنید خطایی رخ داده با پشتیبانی تماس بگیرید.",
+    deposit_not_found: "❌ <b>تأیید تراکنش ناموفق بود</b>\n\ndلیل: شناسه سفارش نادرست\nلطفاً دوباره تلاش کنید.",
     deposit_error: "⚠️ <b>خطایی رخ داد</b> هنگام بررسی تراکنش. لطفاً بعداً دوباره امتحان کنید یا با پشتیبانی تماس بگیرید.",
     shop_btn: "🛒 خرید شماره",
     back_to_main_btn: "🔙 بازگشت"
@@ -218,7 +218,7 @@ const texts = {
     deposit_verified: "✅ <b>ব্যালেন্স সফলভাবে যোগ করা হয়েছে</b>\n\n💰 <b>যোগ করা পরিমাণ:</b> {amount}$\n📊 <b>নতুন ব্যালেন্স:</b> {newBalance}$\n\n🎉 <b>আপনি এখন আপনার নতুন ব্যালেন্স ব্যবহার করতে পারেন</b>",
     shop_btn: "🛒 নম্বর কিনুন",
     back_to_main_btn: "🔙 ফিরে যান",
-    deposit_not_found: "❌ <b>লেনদেন পাওয়া যায়নি বা ইতিমধ্যে ব্যবহার করা হয়েছে</b>\n\nঅনুগ্রহ করে আইডি চেক করুন এবং আবার চেষ্টা করুন, অথবা কোনো সমস্যা হলে সাপোর্টে যোগাযোগ করুন।",
+    deposit_not_found: "❌ <b>লেনদেন যাচাই ব্যর্থ হয়েছে</b>\n\nকারণ: অর্ডার আইডি ভুল\nঅনুগ্রহ করে আবার চেষ্টা করুন।",
     deposit_error: "⚠️ যাচাই করার সময় <b>একটি ত্রুটি ঘটেছে</b>। অনুগ্রহ করে পরে আবার চেষ্টা করুন বা সাপোর্টে যোগাযোগ করুন।"
   }
 };
