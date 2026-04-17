@@ -971,8 +971,8 @@ async function completeOrderAndCommission(phoneNumber, smsCode) {
         const maskedUserId = maskSensitive(user.telegramId, 3);
         
         const broadcastMsg = 
-`✅ <b>Purchase report</b> <b>#Successful</b> ( ${countryInfo.flag} #${countryInfo.name.replace(/\s+/g, '')} )
-⏰ <b>At time:</b> <b>${dateStr}</b> | ${timeStr}
+`✅ <b>Purchase report</b> <b>#Successful</b> ( ${countryInfo.flag} <b>#${countryInfo.name.replace(/\s+/g, '')}</b> )
+⏰ <b>At time:</b> <b>${dateStr}</b> | <b>${timeStr}</b>
 🔔 <b>Activation code:</b> <code>${smsCode}</code>
 🛍️ <b>Purchase details</b> 👇🏻
 🤖 <a href="https://t.me/${botInfo.username}">@${botInfo.username}</a>`;
@@ -1513,8 +1513,8 @@ app.post('/api/admin/settings/test-activation', isAdminMiddleware, async (req, r
     const timeStr = new Date().toTimeString().split(' ')[0];
 
     const testMsg = 
-`✅ <b>Purchase report</b> <b>#Successful</b> ( 🇨🇺 #Cuba )
-⏰ <b>At time:</b> <b>${dateStr}</b> | ${timeStr}
+`✅ <b>Purchase report</b> <b>#Successful</b> ( 🇨🇺 <b>#Cuba</b> )
+⏰ <b>At time:</b> <b>${dateStr}</b> | <b>${timeStr}</b>
 🔔 <b>Activation code:</b> <code>46037</code>
 🛍️ <b>Purchase details</b> 👇🏻
 🤖 <a href="https://t.me/${botInfo.username}">@${botInfo.username}</a>`;
