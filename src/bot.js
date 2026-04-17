@@ -1523,24 +1523,25 @@ app.post('/api/admin/settings/test-daily-summary', isAdminMiddleware, async (req
     const dayName = days[now.getDay()];
     const dateFormatted = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
 
-    let msg = `<b>Pulse SMS</b> 🩸                                     <code>#admin</code>\n`;
-    msg += `📊 <b>Countries that were purchased today</b>\n`;
+    let msg = `📊 <b>Countries that were purchased today</b>\n`;
     msg += `<b>${dayName} ${dateFormatted}</b>\n\n`;
 
     // Fake data matching screenshot
-    msg += `1 - Mauritania 🇲🇷 : 126 : ( $0.25 )\n`;
-    msg += `2 - Botswana 🇧🇼 : 65 : ( $0.25 )\n`;
-    msg += `3 - Afghanistan 🇦🇫 : 37 : ( $0.25 )\n`;
-    msg += `4 - Cuba 🇨🇺 : 34 : ( $0.25 )\n`;
-    msg += `5 - Namibia 🇳🇦 : 27 : ( $0.25 )\n`;
+    let fakeList = `1 - Mauritania 🇲🇷 : 126 : ( $0.25 )\n`;
+    fakeList += `2 - Botswana 🇧🇼 : 65 : ( $0.25 )\n`;
+    fakeList += `3 - Afghanistan 🇦🇫 : 37 : ( $0.25 )\n`;
+    fakeList += `4 - Cuba 🇨🇺 : 34 : ( $0.25 )\n`;
+    fakeList += `5 - Namibia 🇳🇦 : 27 : ( $0.25 )`;
+    
+    msg += `<blockquote>${fakeList}</blockquote>\n`;
 
-    msg += `\nThank you for using our bot ❤️`;
+    msg += `\n<b>Thank you for using our bot ❤️</b>`;
 
     await bot.telegram.sendMessage(channelUsername, msg, {
       parse_mode: 'HTML',
       reply_markup: {
         inline_keyboard: [
-          [{ text: '🛒 Buy Now ↗️', url: settingsMap.activation_channel_link || `https://t.me/${botInfo.username}` }]
+          [{ text: '🛒 Buy Now', url: settingsMap.activation_channel_link || `https://t.me/${botInfo.username}` }]
         ]
       }
     });
@@ -1846,22 +1847,23 @@ const scheduleDailySummary = () => {
       const dayName = days[startOfYesterday.getDay()];
       const dateFormatted = `${startOfYesterday.getDate().toString().padStart(2, '0')}/${(startOfYesterday.getMonth() + 1).toString().padStart(2, '0')}/${startOfYesterday.getFullYear()}`;
 
-      let msg = `<b>Pulse SMS</b> 🩸                                     <code>#admin</code>\n`;
-      msg += `📊 <b>Countries that were purchased today</b>\n`;
+      let msg = `📊 <b>Countries that were purchased today</b>\n`;
       msg += `<b>${dayName} ${dateFormatted}</b>\n\n`;
 
+      let listMsg = '';
       sortedStats.forEach(([countryId, data], index) => {
         const countryInfo = durianApi.getCountryInfo(countryId);
-        msg += `${index + 1} - ${countryInfo.name} ${countryInfo.flag} : ${data.count} : ( $${data.price} )\n`;
+        listMsg += `${index + 1} - ${countryInfo.name} ${countryInfo.flag} : ${data.count} : ( $${data.price} )\n`;
       });
+      msg += `<blockquote>${listMsg.trim()}</blockquote>\n`;
 
-      msg += `\nThank you for using our bot ❤️`;
+      msg += `\n<b>Thank you for using our bot ❤️</b>`;
 
       const sentMsg = await bot.telegram.sendMessage(channelUsername, msg, {
         parse_mode: 'HTML',
         reply_markup: {
           inline_keyboard: [
-            [{ text: '🛒 Buy Now ↗️', url: settingsMap.activation_channel_link || `https://t.me/${botInfo.username}` }]
+            [{ text: '🛒 Buy Now', url: settingsMap.activation_channel_link || `https://t.me/${botInfo.username}` }]
           ]
         }
       });
