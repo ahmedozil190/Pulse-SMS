@@ -971,12 +971,12 @@ async function completeOrderAndCommission(phoneNumber, smsCode) {
         const maskedUserId = maskSensitive(user.telegramId, 3);
         
         const broadcastMsg = 
-`Pulse SMS 🩸                                     <b>admin</b>
+`<b>Pulse SMS</b> 🩸                                     <code>#admin</code>
 ✅ <b>Purchase report</b> #Successful ( ${countryInfo.flag} #${countryInfo.name.replace(/\s+/g, '')} )
-⏰ <b>At time:</b> ${dateStr} | ${timeStr}
+⏰ <b>At time:</b> <b>${dateStr}</b> | ${timeStr}
 🔔 <b>Activation code:</b> <code>${smsCode}</code>
-🛍️ <b>Purchase details</b> 👇
-🤖 @${botInfo.username}`;
+🛍️ <b>Purchase details</b> 👇🏻
+🤖 <a href="https://t.me/${botInfo.username}">@${botInfo.username}</a>`;
 
         const channelLink = settingsMap.activation_channel_link || `https://t.me/${botInfo.username}`;
         
@@ -1514,12 +1514,12 @@ app.post('/api/admin/settings/test-activation', isAdminMiddleware, async (req, r
     const timeStr = new Date().toTimeString().split(' ')[0];
 
     const testMsg = 
-`Pulse SMS 🩸                                     <b>admin</b>
+`<b>Pulse SMS</b> 🩸                                     <code>#admin</code>
 ✅ <b>Purchase report</b> #Successful ( 🇨🇺 #Cuba )
-⏰ <b>At time:</b> ${dateStr} | ${timeStr}
+⏰ <b>At time:</b> <b>${dateStr}</b> | ${timeStr}
 🔔 <b>Activation code:</b> <code>46037</code>
-🛍️ <b>Purchase details</b> 👇
-🤖 @${botInfo.username}`;
+🛍️ <b>Purchase details</b> 👇🏻
+🤖 <a href="https://t.me/${botInfo.username}">@${botInfo.username}</a>`;
 
     await bot.telegram.sendMessage(channel, testMsg, {
       parse_mode: 'HTML',
