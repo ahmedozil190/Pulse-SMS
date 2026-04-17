@@ -297,7 +297,6 @@ window.saveActivationChannelSettings = async () => {
     }
 };
 
-        showOzToast('error', 'Error', 'Failed to save activation channel settings.');
 
 window.openSettingsEditor = (key, label, type) => {
     // Legacy function, no longer used with sub-pages
