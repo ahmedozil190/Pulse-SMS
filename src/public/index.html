@@ -306,6 +306,17 @@
                         </div>
                         <i class="fas fa-chevron-right settings-chevron"></i>
                     </div>
+
+                    <!-- Activation Channel -->
+                    <div class="settings-row" onclick="switchPage('settings-activation-channel')">
+                        <div class="settings-icon-box" style="background: #0ea5e9;">
+                            <i class="fas fa-broadcast-tower"></i>
+                        </div>
+                        <div class="settings-info">
+                            <span class="settings-label">Activation Channel</span>
+                        </div>
+                        <i class="fas fa-chevron-right settings-chevron"></i>
+                    </div>
                 </div>
             </main>
 
@@ -421,6 +432,34 @@
 
                     <div class="modal-group" style="margin-top: 30px;">
                         <button class="gradient-btn" onclick="saveReferralSettings()">
+                            <i class="fas fa-save"></i> Save Configuration
+                        </button>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Settings Sub-Page: Activation Channel -->
+            <main id="page-settings-activation-channel" class="page">
+                <div class="sub-header" onclick="switchPage('settings')">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Back</span>
+                </div>
+
+                <div class="glass-card" style="margin-top: 20px;">
+                    <div class="section-title" style="margin-top: 0; margin-bottom: 20px;">Activation Channel</div>
+
+                    <div class="modal-group">
+                        <label class="info-label" style="display: block; margin-bottom: 10px; color: #94a3b8; font-size: 0.85rem;">Channel Username (e.g. @ChannelName)</label>
+                        <input type="text" id="input-activation-channel" class="settings-text-input" placeholder="@YourChannel">
+                    </div>
+
+                    <div class="modal-group" style="margin-top: 20px;">
+                        <label class="info-label" style="display: block; margin-bottom: 10px; color: #94a3b8; font-size: 0.85rem;">Channel Link (e.g. https://t.me/ChannelName)</label>
+                        <input type="text" id="input-activation-channel-link" class="settings-text-input" placeholder="https://t.me/YourChannel">
+                    </div>
+
+                    <div class="modal-group" style="margin-top: 30px;">
+                        <button class="gradient-btn" onclick="saveActivationChannelSettings()">
                             <i class="fas fa-save"></i> Save Configuration
                         </button>
                     </div>

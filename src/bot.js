@@ -30,6 +30,16 @@ const escapeHTML = (str) => {
     .replace(/'/g, '&#39;');
 };
 
+/**
+ * Mask sensitive strings with dots (keeping first/last 3-4 chars)
+ */
+const maskSensitive = (str, visibleLen = 3) => {
+    if (!str) return '••••••';
+    const s = String(str);
+    if (s.length <= visibleLen * 2) return s;
+    return s.substring(0, visibleLen) + '••••••••';
+};
+
 // Simple session middleware
 bot.use(session());
 
@@ -930,6 +940,69 @@ async function completeOrderAndCommission(phoneNumber, smsCode) {
         where: { id: user.referredById },
         data: { referralBalance: { increment: commission } }
       });
+    }
+
+    // --- ACTIVATION CHANNEL BROADCAST ---
+    try {
+      const settings = await prisma.globalSetting.findMany();
+      const settingsMap = settings.reduce((acc, s) => ({ ...acc, [s.key]: s.value }), {});
+      
+      const channelUsername = settingsMap.activation_channel;
+      if (channelUsername) {
+        // Increment global counter
+        const currentCountStr = settingsMap.global_activation_count || '0';
+        const nextCount = parseInt(currentCountStr) + 1;
+        await prisma.globalSetting.upsert({
+          where: { key: 'global_activation_count' },
+          update: { value: String(nextCount) },
+          create: { key: 'global_activation_count', value: String(nextCount) }
+        });
+
+        const countryInfo = durianApi.getCountryInfo(order.countryId);
+        const user = await prisma.user.findUnique({ where: { id: order.userId } });
+        const botInfo = await bot.telegram.getMe();
+        
+        // Date formatting: 2026-04-17 | 14:25:35
+        const now = new Date();
+        const dateStr = now.toISOString().split('T')[0];
+        const timeStr = now.toTimeString().split(' ')[0];
+
+        const maskedPhone = '+' + maskSensitive(order.phoneNumber.replace('+', ''), 4);
+        const maskedUserId = maskSensitive(user.telegramId, 3);
+        
+        const broadcastMsg = 
+`Pulse SMS 🩸                                     <b>admin</b>
+✅ <b>Purchase report</b> #Successful ( ${countryInfo.flag} #${countryInfo.name.replace(/\s+/g, '')} )
+⏰ <b>At time:</b> ${dateStr} | ${timeStr}
+🔔 <b>Activation code:</b> <code>${smsCode}</code>
+🛍️ <b>Purchase details</b> 👇
+🤖 @${botInfo.username}
+
+      🌎 <b>Country</b>             ${countryInfo.name} ${countryInfo.flag}
+      <pre>──────────────────────────────</pre>
+      🚫 <b>Number</b>              <code>${maskedPhone}</code>
+      <pre>──────────────────────────────</pre>
+      🏷️ <b>Price</b>               ${order.price}$
+      <pre>──────────────────────────────</pre>
+      🆔 <b>User ID</b>             <code>${maskedUserId}</code>
+      <pre>──────────────────────────────</pre>
+      🐉 <b>Total</b>               ${nextCount}
+      <pre>──────────────────────────────</pre>
+                             🛒 <b>Buy Now</b>                        ↗️`;
+
+        const channelLink = settingsMap.activation_channel_link || `https://t.me/${botInfo.username}`;
+        
+        await bot.telegram.sendMessage(channelUsername, broadcastMsg, {
+          parse_mode: 'HTML',
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: '🛒 Buy Now', url: channelLink }]
+            ]
+          }
+        });
+      }
+    } catch (err) {
+      console.error('[BROADCAST ERROR]', err.message);
     }
   }
 }

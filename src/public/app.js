@@ -169,6 +169,12 @@ async function refreshData() {
 
         const inputRefMin = document.getElementById('input-referral-min');
         if (inputRefMin) inputRefMin.value = allSettings.min_withdrawal || '1';
+        
+        const inputActivationChannel = document.getElementById('input-activation-channel');
+        if (inputActivationChannel) inputActivationChannel.value = allSettings.activation_channel || '';
+
+        const inputActivationChannelLink = document.getElementById('input-activation-channel-link');
+        if (inputActivationChannelLink) inputActivationChannelLink.value = allSettings.activation_channel_link || '';
 
         // Update User page stats
         const uStatTotal = document.getElementById('user-stat-total');
@@ -262,6 +268,32 @@ window.saveReferralSettings = async () => {
     } catch (err) {
         console.error('Save referral settings error:', err);
         showOzToast('error', 'Error', 'Failed to save referral settings.');
+    }
+};
+
+window.saveActivationChannelSettings = async () => {
+    const channel = document.getElementById('input-activation-channel').value.trim();
+    const link = document.getElementById('input-activation-channel-link').value.trim();
+
+    try {
+        await Promise.all([
+            fetch('/api/admin/settings/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...getHeaders() },
+                body: JSON.stringify({ key: 'activation_channel', value: channel })
+            }),
+            fetch('/api/admin/settings/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...getHeaders() },
+                body: JSON.stringify({ key: 'activation_channel_link', value: link })
+            })
+        ]);
+
+        showOzAlert('Config Saved', 'Activation channel settings have been updated successfully.');
+        refreshData();
+    } catch (err) {
+        console.error('Save activation settings error:', err);
+        showOzToast('error', 'Error', 'Failed to save activation channel settings.');
     }
 };
 
