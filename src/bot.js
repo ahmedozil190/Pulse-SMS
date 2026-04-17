@@ -1505,40 +1505,10 @@ app.post('/api/admin/settings/update', isAdminMiddleware, async (req, res) => {
   }
 });
 
-app.post('/api/admin/settings/test-activation', isAdminMiddleware, async (req, res) => {
-  const { channel } = req.body;
-  try {
-    const botInfo = await bot.telegram.getMe();
-    const dateStr = new Date().toISOString().split('T')[0];
-    const timeStr = new Date().toTimeString().split(' ')[0];
-
-    const testMsg = 
-`✅ <b>Purchase report</b> <b>#Successful</b> ( 🇨🇺 <b>#Cuba</b> )
-⏰ <b>At time:</b> <b>${dateStr}</b> | <b>${timeStr}</b>
-🔔 <b>Activation code:</b> <code>46037</code>
-🛍️ <b>Purchase details</b> 👇🏻
-🤖 <a href="https://t.me/${botInfo.username}">@${botInfo.username}</a>`;
-
-    await bot.telegram.sendMessage(channel, testMsg, {
-      parse_mode: 'HTML',
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: '🌍 Country', callback_data: 'none' }, { text: 'Cuba 🇨🇺', callback_data: 'none' }],
-          [{ text: '📵 Number', callback_data: 'none' }, { text: '+53••••••••', callback_data: 'none' }],
-          [{ text: '🏷️ Price', callback_data: 'none' }, { text: '0.25$', callback_data: 'none' }],
-          [{ text: '🆔 User ID', callback_data: 'none' }, { text: '726••••••••', callback_data: 'none' }],
-          [{ text: '🐊 Total', callback_data: 'none' }, { text: '3', callback_data: 'none' }],
-          [{ text: '🛒 Buy Now ↗️', url: `https://t.me/${botInfo.username}` }]
-        ]
-      }
-    });
-
-    res.json({ success: true });
-  } catch (err) {
-    console.error('[TEST BROADCAST ERROR]', err.message);
-    res.status(500).json({ msg: 'Failed to send test message. Ensure bot is admin in the target channel.' });
   }
 });
+
+// --- MANDATORY CHANNELS APIs ---
 
 // --- MANDATORY CHANNELS APIs ---
 
