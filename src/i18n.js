@@ -45,7 +45,12 @@ const texts = {
     alert_buy_btn: "🛒 Buy Now",
     alert_cancel_msg: "⚠️<b> Alerts deactivated for some countries </b>\n\n❌ Due to insufficient balance\n\nDeactivated countries:\n{countries}\n\n💡 To reactivate, deposit first",
     alert_cancel_deposit_btn: "💳 Deposit",
-    alert_cancel_back_btn: "🔙 Back"
+    alert_cancel_back_btn: "🔙 Back",
+    binance_deposit_instructions: "💳 <b>Deposit via Binance</b>\n\n✅ <b>Minimum deposit:</b> 0.01$\n📝 <i>You can deposit any amount from 0.01$ and above</i>\n\n1. Copy the transfer ID below\n2. Go to Binance app\n3. Send any amount you want (from 0.01$)\n4. Send the Transaction ID\n\n📋 <b>Transfer ID:</b> <code>{binanceId}</code>\n\n⚠️ <b>Important notes:</b>\n• Transfer must be from today\n• Cannot use same ID twice\n• Amount will be added exactly as you sent",
+    binance_txid_prompt: "👇 <b>Please send the Transaction ID now:</b>",
+    deposit_verified: "✅ <b>Transaction verified!</b>\n\n💰 {amount}$ has been added to your balance.",
+    deposit_not_found: "❌ <b>Transaction not found or already used</b>\n\nPlease check the ID and try again, or contact support if you believe this is an error.",
+    deposit_error: "⚠️ <b>An error occurred</b> while verifying. Please try again later or contact support."
   },
   ar: {
     welcome_user: "<b>🔰 مرحباً بك في متجر الأرقام الدولي 🔰</b>\n\n{name} 👋\n\n<b>اختر الخيار المناسب من القائمة:</b>",
@@ -93,7 +98,12 @@ const texts = {
     alert_buy_btn: "🛒 شراء الآن",
     alert_cancel_msg: "⚠️ <b>تم إيقاف الإشعارات لبعض الدول </b>\n\n❌ بسبب عدم كفاية الرصيد\n\nالدول التي تم إيقافها:\n{countries}\n\n💡 لإعادة التفعيل، يرجى شحن رصيدك أولاً",
     alert_cancel_deposit_btn: "💳 شحن الرصيد",
-    alert_cancel_back_btn: "🔙 رجوع"
+    alert_cancel_back_btn: "🔙 رجوع",
+    binance_deposit_instructions: "💳 <b>طريقة الإيداع عبر بينانس</b>\n\n✅ <b>الحد الأدنى للإيداع:</b> 0.01$\n📝 <i>يمكنك إيداع أي مبلغ من 0.01$ فما فوق</i>\n\n1. قم بنسخ معرف التحويل أدناه\n2. اذهب إلى تطبيق Binance\n3. أرسل أي مبلغ تريده (من 0.01$)\n4. أرسل معرف المعاملة (Transaction ID)\n\n📋 <b>ايدي التحويل:</b> <code>{binanceId}</code>\n\n⚠️ <b>ملاحظات هامة:</b>\n• يجب أن يكون التحويل من نفس اليوم\n• لا يمكن استخدام نفس المعرف مرتين\n• سيتم إضافة المبلغ بالضبط كما أرسلته",
+    binance_txid_prompt: "👇 <b>أرسل معرف المعاملة (Transaction ID) الآن:</b>",
+    deposit_verified: "✅ <b>تم التحقق من المعاملة بنجاح!</b>\n\n💰 تم إضافة {amount}$ إلى رصيدك.",
+    deposit_not_found: "❌ <b>المعاملة غير موجودة أو تم استخدامها مسبقاً</b>\n\nيرجى التأكد من المعرف والمحاولة مرة أخرى، أو تواصل مع الدعم الفني.",
+    deposit_error: "⚠️ <b>حدث خطأ</b> أثناء التحقق من المعاملة. يرجى المحاولة لاحقاً أو التواصل مع الدعم."
   },
   fa: {
     welcome_user: "<b>🔰 به فروشگاه اعداد بین المللی خوش آمدید 🔰</b>\n\n{name} 👋\n\n<b>گزینه مناسب را از منو انتخاب کنید:</b>",
@@ -138,7 +148,12 @@ const texts = {
     alert_buy_btn: "🛒 خرید الآن",
     alert_cancel_msg: "⚠️ <b>هشدارهای برخی کشورها غیرفعال شد </b>\n\n❌ به دلیل کمبود موجودی\n\nکشورهای غیرفعال شده:\n{countries}\n\n💡 برای فعال‌سازی مجدد، ابتدا حساب خود را شارژ کنید",
     alert_cancel_deposit_btn: "💳 شارژ حساب",
-    alert_cancel_back_btn: "🔙 بازگشت"
+    alert_cancel_back_btn: "🔙 بازگشت",
+    binance_deposit_instructions: "💳 <b>واریز از طریق بایننس</b>\n\n✅ <b>حداقل واریز:</b> 0.01$\n📝 <i>میتوانید هر مبلغی از 0.01$ به بالا واریز کنید</i>\n\n1. شناسه انتقال زیر را کپی کنید\n2. به برنامه Binance بروید\n3. هر مبلغی که میخواهید بفرستید (از 0.01$)\n4. شناسه تراکنش (Transaction ID) را ارسال کنید\n\n📋 <b>شناسه انتقال:</b> <code>{binanceId}</code>\n\n⚠️ <b>نکات مهم:</b>\n• انتقال باید از امروز باشد\n• نمیتوان از همان شناسه دو بار استفاده کرد\n• مبلغ دقیقاً همانطور که ارسال شده اضافه میشود",
+    binance_txid_prompt: "👇 <b>لطفاً شناسه تراکنش را همین الآن ارسال کنید:</b>",
+    deposit_verified: "✅ <b>تراکنش تأیید شد!</b>\n\n💰 مبلغ {amount}$ به موجودی شما اضافه شد.",
+    deposit_not_found: "❌ <b>تراکنش یافت نشد یا قبلاً استفاده شده است</b>\n\nلطفاً شناسه را بررسی کرده و دوباره امتحان کنید، یا اگر فکر میکنید خطایی رخ داده با پشتیبانی تماس بگیرید.",
+    deposit_error: "⚠️ <b>خطایی رخ داد</b> هنگام بررسی تراکنش. لطفاً بعداً دوباره امتحان کنید یا با پشتیبانی تماس بگیرید."
   },
   bn: {
     welcome_user: "<b>🔰 আন্তর্জাতিক নম্বর স্টোরে স্বাগতম 🔰</b>\n\n{name} 👋\n\n<b>মেনু থেকে উপযুক্ত বিকল্প নির্বাচন করুন:</b>",
@@ -183,7 +198,12 @@ const texts = {
     alert_buy_btn: "🛒 এখনই কিনুন",
     alert_cancel_msg: "⚠️ <b>কিছু দেশের জন্য সতর্কতা নিষ্ক্রিয় করা হয়েছে </b>\n\n❌ অপর্যাপ্ত ব্যালেন্সের কারণে\n\nনিষ্ক্রিয় করা দেশগুলি:\n{countries}\n\n💡 পুনরায় সক্রিয় করতে, প্রথমে ডিপোজিট করুন",
     alert_cancel_deposit_btn: "💳 জমা দিন",
-    alert_cancel_back_btn: "🔙 ফিরে যান"
+    alert_cancel_back_btn: "🔙 ফিরে যান",
+    binance_deposit_instructions: "💳 <b>বাইন্যান্সের মাধ্যমে ডিপোজিট</b>\n\n✅ <b>ন্যূনতম ডিপোজিট:</b> 0.01$\n📝 <i>আপনি 0.01$ এবং তার উপরে যেকোনো পরিমাণ ডিপোজিট করতে পারেন</i>\n\n1. নিচের ট্রান্সফার আইডি কপি করুন\n2. Binance অ্যাপে যান\n3. আপনি যেকোনো পরিমাণ পাঠান (0.01$ থেকে)\n4. লেনদেন আইডি (Transaction ID) পাঠান\n\n📋 <b>স্থানান্তর আইডি:</b> <code>{binanceId}</code>\n\n⚠️ <b>গুরুত্বপূর্ণ নোট:</b>\n• স্থানান্তর আজকের হতে হবে\n• একই আইডি দুবার ব্যবহার করা যাবে না\n• পরিমাণ ঠিক যেভাবে পাঠিয়েছেন সেভাবে যোগ করা হবে",
+    binance_txid_prompt: "👇 <b>অনুগ্রহ করে এখন লেনদেন আইডি (Transaction ID) পাঠান:</b>",
+    deposit_verified: "✅ <b>লেনদেন যাচাই করা হয়েছে!</b>\n\n💰 {amount}$ আপনার ব্যালেন্সে যোগ করা হয়েছে।",
+    deposit_not_found: "❌ <b>লেনদেন পাওয়া যায়নি বা ইতিমধ্যে ব্যবহার করা হয়েছে</b>\n\nঅনুগ্রহ করে আইডি চেক করুন এবং আবার চেষ্টা করুন, অথবা কোনো সমস্যা হলে সাপোর্টে যোগাযোগ করুন।",
+    deposit_error: "⚠️ যাচাই করার সময় <b>একটি ত্রুটি ঘটেছে</b>। অনুগ্রহ করে পরে আবার চেষ্টা করুন বা সাপোর্টে যোগাযোগ করুন।"
   }
 };
 

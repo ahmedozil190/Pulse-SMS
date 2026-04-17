@@ -50,6 +50,7 @@ model Deposit {
   amount      Float
   method      String   // e.g. 'MANUAL', 'CRYPTO'
   status      String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  transactionId String?  @unique
   createdAt   DateTime @default(now())
 }
 

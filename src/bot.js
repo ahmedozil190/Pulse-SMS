@@ -10,6 +10,7 @@ const path = require('path');
 const crypto = require('crypto');
 const hunter = require('./services/hunter');
 const cron = require('node-cron');
+const BinancePayService = require('./services/binance');
 
 dotenv.config();
 
@@ -362,6 +363,29 @@ bot.action('action_deposit', async (ctx) => {
     parse_mode: 'HTML',
     reply_markup: keyboards.depositMethods(ctx.state.lang).reply_markup
   });
+});
+
+bot.action('deposit_binance', async (ctx) => {
+  try {
+    const settings = await prisma.globalSetting.findMany();
+    const settingsMap = settings.reduce((acc, s) => ({ ...acc, [s.key]: s.value }), {});
+    const binanceId = settingsMap.binance_pay_id || '1050123485';
+
+    await ctx.editMessageText(ctx.t('binance_deposit_instructions', { binanceId }), {
+      parse_mode: 'HTML',
+      reply_markup: {
+        inline_keyboard: [
+          [Markup.button.callback(ctx.t('back_btn'), 'action_deposit')]
+        ]
+      }
+    });
+
+    await ctx.reply(ctx.t('binance_txid_prompt'), { parse_mode: 'HTML' });
+    ctx.session.awaitingBinanceTxid = true;
+  } catch (err) {
+    console.error('[BINANCE ACTION ERROR]', err);
+    await ctx.answerCbQuery('Error loading settings.');
+  }
 });
 
 /**
@@ -1097,6 +1121,70 @@ bot.action(/action_main_menu|action_cancel/, async (ctx) => {
  * Catch all text for simple testing (Removed to ignore unknown text)
  */
 // bot.on('text', async (ctx) => {
+// --- TEXT MESSAGE HANDLER FOR BINANCE TXID ---
+bot.on('text', async (ctx, next) => {
+  if (!ctx.session || !ctx.session.awaitingBinanceTxid) return next();
+
+  const txid = ctx.message.text.trim();
+  if (!txid) return next();
+
+  try {
+    // 1. Check if TXID already used
+    const existing = await prisma.deposit.findUnique({ where: { transactionId: txid } });
+    if (existing) {
+      await ctx.reply(ctx.t('deposit_not_found'), { parse_mode: 'HTML' });
+      return;
+    }
+
+    // 2. Load Credentials
+    const settings = await prisma.globalSetting.findMany();
+    const settingsMap = settings.reduce((acc, s) => ({ ...acc, [s.key]: s.value }), {});
+
+    const apiKey = settingsMap.binance_api_key || process.env.BINANCE_API_KEY;
+    const apiSecret = settingsMap.binance_api_secret || process.env.BINANCE_API_SECRET;
+
+    if (!apiKey || !apiSecret) {
+      console.error('[BINANCE ERROR] API Credentials missing in database and .env');
+      await ctx.reply(ctx.t('deposit_error'), { parse_mode: 'HTML' });
+      return;
+    }
+
+    // 3. Verify with Binance
+    const binanceService = new BinancePayService(apiKey, apiSecret);
+    const verification = await binanceService.verifyTransaction(txid);
+
+    if (verification) {
+      const { amount } = verification;
+      const { user } = await getOrCreateUser(ctx);
+
+      // Create Deposit record
+      await prisma.deposit.create({
+        data: {
+          userId: user.id,
+          amount: amount,
+          method: 'BINANCE_PAY',
+          status: 'APPROVED',
+          transactionId: txid
+        }
+      });
+
+      // Update User Balance
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { balance: { increment: amount } }
+      });
+
+      await ctx.reply(ctx.t('deposit_verified', { amount: amount.toFixed(2) }), { parse_mode: 'HTML' });
+      ctx.session.awaitingBinanceTxid = false;
+    } else {
+      await ctx.reply(ctx.t('deposit_not_found'), { parse_mode: 'HTML' });
+    }
+  } catch (err) {
+    console.error('[BINANCE VERIFICATION ERROR]', err.message);
+    await ctx.reply(ctx.t('deposit_error'), { parse_mode: 'HTML' });
+  }
+});
+
 //   await ctx.reply(ctx.t('welcome', { name: escapeHTML(ctx.from.first_name || 'User') }), { parse_mode: 'HTML' });
 // });
 

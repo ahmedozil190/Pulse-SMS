@@ -176,6 +176,15 @@ async function refreshData() {
         const inputActivationChannelLink = document.getElementById('input-activation-channel-link');
         if (inputActivationChannelLink) inputActivationChannelLink.value = allSettings.activation_channel_link || '';
 
+        const inputBinanceId = document.getElementById('input-binance-id');
+        if (inputBinanceId) inputBinanceId.value = allSettings.binance_pay_id || '';
+
+        const inputBinanceApiKey = document.getElementById('input-binance-api-key');
+        if (inputBinanceApiKey) inputBinanceApiKey.value = allSettings.binance_api_key || '';
+
+        const inputBinanceApiSecret = document.getElementById('input-binance-api-secret');
+        if (inputBinanceApiSecret) inputBinanceApiSecret.value = allSettings.binance_api_secret || '';
+
         // Update User page stats
         const uStatTotal = document.getElementById('user-stat-total');
         const uStatBanned = document.getElementById('user-stat-banned');
@@ -265,9 +274,38 @@ window.saveReferralSettings = async () => {
 
         showOzAlert('Config Saved', 'Referral settings have been updated successfully.');
         refreshData();
-    } catch (err) {
-        console.error('Save referral settings error:', err);
-        showOzToast('error', 'Error', 'Failed to save referral settings.');
+    } catch (e) {
+        showOzToast('error', 'Update Failed', 'Referral settings could not be saved.');
+    }
+};
+
+window.saveBinanceSettings = async () => {
+    const binanceId = document.getElementById('input-binance-id').value;
+    const apiKey = document.getElementById('input-binance-api-key').value;
+    const apiSecret = document.getElementById('input-binance-api-secret').value;
+
+    try {
+        await Promise.all([
+            fetch('/api/admin/settings/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...getHeaders() },
+                body: JSON.stringify({ key: 'binance_pay_id', value: binanceId })
+            }),
+            fetch('/api/admin/settings/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...getHeaders() },
+                body: JSON.stringify({ key: 'binance_api_key', value: apiKey })
+            }),
+            fetch('/api/admin/settings/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...getHeaders() },
+                body: JSON.stringify({ key: 'binance_api_secret', value: apiSecret })
+            })
+        ]);
+        showOzAlert('Config Saved', 'Binance Pay settings have been updated successfully.');
+        refreshData();
+    } catch (e) {
+        showOzToast('error', 'Update Failed', 'Binance settings could not be saved.');
     }
 };
 
