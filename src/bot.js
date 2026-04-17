@@ -9,6 +9,7 @@ const cors = require('cors');
 const path = require('path');
 const crypto = require('crypto');
 const hunter = require('./services/hunter');
+const cron = require('node-cron');
 
 dotenv.config();
 
@@ -1748,6 +1749,89 @@ hunter.start(5000, async (code, stock) => {
     console.error('[HUNTER BROADCAST ERROR]', err);
   }
 });
+
+/**
+ * Schedule Daily Summary at 00:00 AM
+ */
+const scheduleDailySummary = () => {
+  cron.schedule('0 0 * * *', async () => {
+    console.log('[CRON] Running daily summary...');
+    try {
+      const settings = await prisma.globalSetting.findMany();
+      const settingsMap = settings.reduce((acc, s) => ({ ...acc, [s.key]: s.value }), {});
+      const channelUsername = settingsMap.activation_channel;
+      
+      if (!channelUsername) return;
+
+      // Time range: Yesterday (the day that just ended)
+      const now = new Date();
+      const endOfYesterday = new Date(now.setHours(0, 0, 0, 0));
+      const startOfYesterday = new Date(new Date(endOfYesterday).setDate(endOfYesterday.getDate() - 1));
+
+      const orders = await prisma.order.findMany({
+        where: {
+          status: 'SUCCESS',
+          createdAt: {
+            gte: startOfYesterday,
+            lt: endOfYesterday
+          }
+        }
+      });
+
+      if (orders.length === 0) return;
+
+      // Group by country
+      const stats = {};
+      for (const order of orders) {
+        if (!stats[order.countryId]) {
+          stats[order.countryId] = { count: 0, price: order.price };
+        }
+        stats[order.countryId].count++;
+      }
+
+      // Sort by count descending
+      const sortedStats = Object.entries(stats)
+        .sort((a, b) => b[1].count - a[1].count);
+
+      const botInfo = await bot.telegram.getMe();
+      
+      // Date formatting for header (Yesterday)
+      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const dayName = days[startOfYesterday.getDay()];
+      const dateFormatted = `${startOfYesterday.getDate().toString().padStart(2, '0')}/${(startOfYesterday.getMonth() + 1).toString().padStart(2, '0')}/${startOfYesterday.getFullYear()}`;
+
+      let msg = `<b>Pulse SMS</b> 🩸                                     <code>#admin</code>\n`;
+      msg += `📊 <b>Countries that were purchased today</b>\n`;
+      msg += `<b>${dayName} ${dateFormatted}</b>\n\n`;
+
+      sortedStats.forEach(([countryId, data], index) => {
+        const countryInfo = durianApi.getCountryInfo(countryId);
+        msg += `${index + 1} - ${countryInfo.name} ${countryInfo.flag} : ${data.count} : ( $${data.price} )\n`;
+      });
+
+      msg += `\nThank you for using our bot ❤️`;
+
+      const sentMsg = await bot.telegram.sendMessage(channelUsername, msg, {
+        parse_mode: 'HTML',
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: '🛒 Buy Now ↗️', url: settingsMap.activation_channel_link || `https://t.me/${botInfo.username}` }]
+          ]
+        }
+      });
+
+      await bot.telegram.pinChatMessage(channelUsername, sentMsg.message_id);
+    } catch (err) {
+      console.error('[CRON ERROR]', err.message);
+    }
+  });
+};
+
+// Start the CRON job
+scheduleDailySummary();
+
+// Start the hunter service
+hunter.start(5000);
 
 // Launch the bot
 bot.launch().then(() => {
