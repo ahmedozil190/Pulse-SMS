@@ -297,6 +297,32 @@ window.saveActivationChannelSettings = async () => {
     }
 };
 
+window.testActivationChannel = async () => {
+    const channel = document.getElementById('input-activation-channel').value.trim();
+    if (!channel) {
+        showOzToast('error', 'Missing Data', 'Please enter a channel username first.');
+        return;
+    }
+
+    try {
+        const res = await fetch('/api/admin/settings/test-activation', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...getHeaders() },
+            body: JSON.stringify({ channel })
+        });
+
+        if (res.ok) {
+            showOzAlert('Test Message Sent', 'A sample activation report has been sent to the channel. 🚀');
+        } else {
+            const data = await res.json();
+            showOzAlert('Test Failed', data.msg || 'Could not send test message. Check if bot is admin in the channel.', 'error');
+        }
+    } catch (err) {
+        console.error('Test activation error:', err);
+        showOzToast('error', 'Error', 'Connection failed.');
+    }
+};
+
 window.openSettingsEditor = (key, label, type) => {
     // Legacy function, no longer used with sub-pages
 };

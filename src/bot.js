@@ -1513,6 +1513,49 @@ app.post('/api/admin/settings/update', isAdminMiddleware, async (req, res) => {
   }
 });
 
+app.post('/api/admin/settings/test-activation', isAdminMiddleware, async (req, res) => {
+  const { channel } = req.body;
+  try {
+    const botInfo = await bot.telegram.getMe();
+    const dateStr = new Date().toISOString().split('T')[0];
+    const timeStr = new Date().toTimeString().split(' ')[0];
+
+    const testMsg = 
+`Pulse SMS 🩸                                     <b>admin</b>
+✅ <b>Purchase report</b> #Successful ( 🇭🇳 #Honduras )
+⏰ <b>At time:</b> ${dateStr} | ${timeStr}
+🔔 <b>Activation code:</b> <code>12345</code>
+🛍️ <b>Purchase details</b> 👇
+🤖 @${botInfo.username}
+
+      🌎 <b>Country</b>             Honduras 🇭🇳
+      <pre>──────────────────────────────</pre>
+      🚫 <b>Number</b>              <code>+5041234••••••••</code>
+      <pre>──────────────────────────────</pre>
+      🏷️ <b>Price</b>               0.25$
+      <pre>──────────────────────────────</pre>
+      🆔 <b>User ID</b>             <code>604••••••••</code>
+      <pre>──────────────────────────────</pre>
+      🐉 <b>Total</b>               999
+      <pre>──────────────────────────────</pre>
+                             🛒 <b>Buy Now</b>                        ↗️`;
+
+    await bot.telegram.sendMessage(channel, testMsg, {
+      parse_mode: 'HTML',
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: '🛒 Buy Now', url: `https://t.me/${botInfo.username}` }]
+        ]
+      }
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[TEST BROADCAST ERROR]', err.message);
+    res.status(500).json({ msg: 'Failed to send test message. Ensure bot is admin in the target channel.' });
+  }
+});
+
 // --- MANDATORY CHANNELS APIs ---
 
 app.get('/api/admin/channels', isAdminMiddleware, async (req, res) => {
