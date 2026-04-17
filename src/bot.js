@@ -35,10 +35,10 @@ const escapeHTML = (str) => {
  * Mask sensitive strings with dots (keeping first/last 3-4 chars)
  */
 const maskSensitive = (str, visibleLen = 3) => {
-    if (!str) return '••••••';
-    const s = String(str);
-    if (s.length <= visibleLen * 2) return s;
-    return s.substring(0, visibleLen) + '••••••••';
+  if (!str) return '••••••';
+  const s = String(str);
+  if (s.length <= visibleLen * 2) return s;
+  return s.substring(0, visibleLen) + '••••••••';
 };
 
 // Simple session middleware
@@ -480,18 +480,18 @@ bot.action(/^(action_settings|alert_page_(\d+))$/, async (ctx) => {
   try {
     const page = ctx.match[2] ? parseInt(ctx.match[2]) : 0;
     const { user } = await getOrCreateUser(ctx);
-    
+
     // Get all active subscriptions for this user
     const subs = await prisma.notificationSubscription.findMany({
       where: { userId: user.id },
       select: { countryCode: true }
     });
     const subCodes = subs.map(s => s.countryCode);
-    
+
     // Get country configs for prices
     const configs = await prisma.countryConfig.findMany();
     const configMap = configs.reduce((acc, c) => ({ ...acc, [c.countryCode]: c }), {});
-    
+
     // Auto-clean any subscriptions that this user can no longer afford
     const subsToClean = [];
     const validSubs = [];
@@ -504,21 +504,21 @@ bot.action(/^(action_settings|alert_page_(\d+))$/, async (ctx) => {
         validSubs.push(subCode);
       }
     }
-    
+
     if (subsToClean.length > 0) {
       await prisma.notificationSubscription.deleteMany({
         where: { userId: user.id, countryCode: { in: subsToClean } }
       });
     }
-    
+
     const msg = ctx.t('alert_settings_header') + ctx.t('alert_settings_note');
-    
+
     await ctx.editMessageText(msg, {
       parse_mode: 'HTML',
       reply_markup: keyboards.buildAlertKeyboard(user.balance, validSubs, ctx.state.lang, page, configMap).reply_markup
     });
-    
-    await ctx.answerCbQuery().catch(() => {});
+
+    await ctx.answerCbQuery().catch(() => { });
   } catch (err) {
     console.error('[ALERT SETTINGS ERROR]', err);
     await ctx.answerCbQuery('❌ Error opening alert settings', { show_alert: true });
@@ -531,15 +531,15 @@ bot.action(/^(action_settings|alert_page_(\d+))$/, async (ctx) => {
 bot.action(/^toggle_alert_(.+)_(.+)$/, async (ctx) => {
   const countryCode = ctx.match[1];
   const page = parseInt(ctx.match[2]);
-  
+
   try {
     const { user } = await getOrCreateUser(ctx);
-    
+
     // Check if subscription already exists
     const existing = await prisma.notificationSubscription.findUnique({
       where: { userId_countryCode: { userId: user.id, countryCode } }
     });
-    
+
     if (existing) {
       // Toggle OFF: Remove subscription
       await prisma.notificationSubscription.delete({
@@ -547,24 +547,24 @@ bot.action(/^toggle_alert_(.+)_(.+)$/, async (ctx) => {
       });
       const countryInfo = durianApi.getCountryInfo(countryCode, ctx.state.lang);
       const msg = ctx.t('alert_disabled', { country: countryInfo.localizedName });
-      await ctx.answerCbQuery(msg).catch(() => {});
+      await ctx.answerCbQuery(msg).catch(() => { });
     } else {
       // Toggle ON: Check balance first
       const countryConfig = await prisma.countryConfig.findUnique({ where: { countryCode } });
       const price = countryConfig ? countryConfig.price : 0.25;
-      
+
       if (user.balance < price) {
-        return ctx.answerCbQuery().catch(() => {});
+        return ctx.answerCbQuery().catch(() => { });
       }
-      
+
       await prisma.notificationSubscription.create({
         data: { userId: user.id, countryCode }
       });
       const countryInfo = durianApi.getCountryInfo(countryCode, ctx.state.lang);
       const msg = ctx.t('alert_enabled', { country: countryInfo.localizedName });
-      await ctx.answerCbQuery(msg).catch(() => {});
+      await ctx.answerCbQuery(msg).catch(() => { });
     }
-    
+
     // Refresh the current page
     const subs = await prisma.notificationSubscription.findMany({
       where: { userId: user.id },
@@ -573,13 +573,13 @@ bot.action(/^toggle_alert_(.+)_(.+)$/, async (ctx) => {
     const subCodes = subs.map(s => s.countryCode);
     const configs = await prisma.countryConfig.findMany();
     const configMap = configs.reduce((acc, c) => ({ ...acc, [c.countryCode]: c }), {});
-    
+
     const msg = ctx.t('alert_settings_header') + ctx.t('alert_settings_note');
     await ctx.editMessageText(msg, {
       parse_mode: 'HTML',
       reply_markup: keyboards.buildAlertKeyboard(user.balance, subCodes, ctx.state.lang, page, configMap).reply_markup
     });
-    
+
   } catch (err) {
     console.error('[TOGGLE ALERT ERROR]', err);
     await ctx.answerCbQuery('❌ Error toggling alert', { show_alert: true });
@@ -796,13 +796,13 @@ bot.action(/^select_country_([^_]+)(?:_(.+))?$/, async (ctx) => {
           reply_markup: {
             inline_keyboard: [[Markup.button.callback(ctx.t('alert_buy_btn'), `select_country_${countryCode}_alert`)]]
           }
-        }).catch(() => {});
+        }).catch(() => { });
       }
     }
   } catch (error) {
     console.error("Purchase error:", error);
     await ctx.answerCbQuery(ctx.t('no_numbers_error'), { show_alert: true }).catch(() => { });
-    
+
     if (source !== 'alert') {
       await showCountrySelection(ctx, true);
     } else {
@@ -817,7 +817,7 @@ bot.action(/^select_country_([^_]+)(?:_(.+))?$/, async (ctx) => {
         reply_markup: {
           inline_keyboard: [[Markup.button.callback(ctx.t('alert_buy_btn'), `select_country_${countryCode}_alert`)]]
         }
-      }).catch(() => {});
+      }).catch(() => { });
     }
   }
 });
@@ -947,7 +947,7 @@ async function completeOrderAndCommission(phoneNumber, smsCode) {
     try {
       const settings = await prisma.globalSetting.findMany();
       const settingsMap = settings.reduce((acc, s) => ({ ...acc, [s.key]: s.value }), {});
-      
+
       const channelUsername = settingsMap.activation_channel;
       if (channelUsername) {
         // Increment global counter
@@ -962,7 +962,7 @@ async function completeOrderAndCommission(phoneNumber, smsCode) {
         const countryInfo = durianApi.getCountryInfo(order.countryId);
         const user = await prisma.user.findUnique({ where: { id: order.userId } });
         const botInfo = await bot.telegram.getMe();
-        
+
         // Date formatting: 2026-04-17 | 14:25:35
         const now = new Date();
         const dateStr = now.toISOString().split('T')[0];
@@ -970,16 +970,16 @@ async function completeOrderAndCommission(phoneNumber, smsCode) {
 
         const maskedPhone = '+' + maskSensitive(order.phoneNumber.replace('+', ''), 4);
         const maskedUserId = maskSensitive(user.telegramId, 3);
-        
-        const broadcastMsg = 
-`✅ <b>Purchase report</b> <b>#Successful</b> ( ${countryInfo.flag} <b>#${countryInfo.name.replace(/\s+/g, '')}</b> )
+
+        const broadcastMsg =
+          `✅ <b>Purchase report</b> <b>#Successful</b> ( ${countryInfo.flag} <b>#${countryInfo.name.replace(/\s+/g, '')}</b> )
 ⏰ <b>At time:</b> <b>${dateStr}</b> | <b>${timeStr}</b>
 🔔 <b>Activation code:</b> <code>${smsCode}</code>
 🛍️ <b>Purchase details</b> 👇🏻
 🤖 <a href="https://t.me/${botInfo.username}">@${botInfo.username}</a>`;
 
         const channelLink = settingsMap.activation_channel_link || `https://t.me/${botInfo.username}`;
-        
+
         await bot.telegram.sendMessage(channelUsername, broadcastMsg, {
           parse_mode: 'HTML',
           reply_markup: {
@@ -1506,64 +1506,6 @@ app.post('/api/admin/settings/update', isAdminMiddleware, async (req, res) => {
   }
 });
 
-app.post('/api/admin/settings/test-daily-summary', isAdminMiddleware, async (req, res) => {
-  try {
-    const settings = await prisma.globalSetting.findMany();
-    const settingsMap = settings.reduce((acc, s) => ({ ...acc, [s.key]: s.value }), {});
-    const channelUsername = settingsMap.activation_channel;
-    
-    if (!channelUsername) {
-      return res.status(400).json({ msg: 'Please configure an activation channel first.' });
-    }
-
-    const botInfo = await bot.telegram.getMe();
-    
-    const now = new Date();
-    const yesterday = new Date(now.setDate(now.getDate() - 1));
-    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    const dayName = days[yesterday.getDay()];
-    const dateFormatted = `${yesterday.getDate().toString().padStart(2, '0')}/${(yesterday.getMonth() + 1).toString().padStart(2, '0')}/${yesterday.getFullYear()}`;
-
-    let msg = `📊 <b>Countries that were purchased today</b>\n`;
-    msg += `<b>${dayName} ${dateFormatted}</b>\n\n`;
-
-    // Fake data matching screenshot
-    let fakeList = `1 - Mauritania 🇲🇷 : 126 : ( $0.25 )\n`;
-    fakeList += `2 - Botswana 🇧🇼 : 65 : ( $0.25 )\n`;
-    fakeList += `3 - Afghanistan 🇦🇫 : 37 : ( $0.25 )\n`;
-    fakeList += `4 - Cuba 🇨🇺 : 34 : ( $0.25 )\n`;
-    fakeList += `5 - Namibia 🇳🇦 : 27 : ( $0.25 )\n`;
-    fakeList += `36 - South Korea 🇰🇷 : 2 : ( $0.7 )\n`;
-    fakeList += `37 - Réunion 🇷🇪 : 2 : ( $0.5 )\n`;
-    fakeList += `38 - Slovakia 🇸🇰 : 2 : ( $0.4 )\n`;
-    fakeList += `39 - Suriname 🇸🇷 : 2 : ( $0.3 )\n`;
-    fakeList += `40 - Sao Tome & Principe 🇸🇹 : 2 : ( $0.35 )\n`;
-    fakeList += `41 - Turks & Caicos Islands 🇹🇨 : 2 : ( $0.5 )\n`;
-    fakeList += `42 - Austria 🇦🇹 : 1 : ( $0.5 )\n`;
-    fakeList += `43 - Bosnia & Herzegovina 🇧🇦 : 1 : ( $0.25 )\n`;
-    fakeList += `44 - Belgium 🇧🇪 : 1 : ( $0.7 )\n`;
-    fakeList += `45 - Bahrain 🇧🇭 : 1 : ( $0.5 )`;
-    
-    msg += `<blockquote>${fakeList}</blockquote>\n`;
-
-    msg += `\n\n<b>Thank you for using our bot ❤️</b>`;
-
-    await bot.telegram.sendMessage(channelUsername, msg, {
-      parse_mode: 'HTML',
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: '🛒 Buy Now', url: settingsMap.activation_channel_link || `https://t.me/${botInfo.username}` }]
-        ]
-      }
-    });
-
-    res.json({ success: true });
-  } catch (err) {
-    console.error('[TEST SUMMARY ERROR]', err.message);
-    res.status(500).json({ msg: 'Failed to send test message. Ensure bot is admin in the target channel.' });
-  }
-});
-
 // --- MANDATORY CHANNELS APIs ---
 
 // --- MANDATORY CHANNELS APIs ---
@@ -1770,13 +1712,13 @@ hunter.start(5000, async (code, stock) => {
 
     for (const s of subs) {
       if (!s.user || s.user.isBanned) continue;
-      
+
       // Auto-disable if balance drops below required price
       if (s.user.balance < price) {
-        prisma.notificationSubscription.delete({ where: { id: s.id } }).catch(() => {});
+        prisma.notificationSubscription.delete({ where: { id: s.id } }).catch(() => { });
         continue;
       }
-      
+
       const lang = s.user.language || 'en';
       const info = durianApi.getCountryInfo(code, lang);
       const msg = i18n.t(lang, 'alert_notification', {
@@ -1784,10 +1726,10 @@ hunter.start(5000, async (code, stock) => {
         name: info.localizedName,
         price: price.toFixed(2)
       });
-      
+
       const btnText = i18n.t(lang, 'alert_buy_btn');
 
-      bot.telegram.sendMessage(s.user.telegramId, msg, { 
+      bot.telegram.sendMessage(s.user.telegramId, msg, {
         parse_mode: 'HTML',
         reply_markup: {
           inline_keyboard: [
@@ -1796,10 +1738,10 @@ hunter.start(5000, async (code, stock) => {
         }
       }).catch(err => {
         if (!err.message.includes('blocked by the user') && !err.message.includes('chat not found')) {
-           console.error(`[HUNTER MSG ERROR] User ${s.user.telegramId}:`, err.message);
+          console.error(`[HUNTER MSG ERROR] User ${s.user.telegramId}:`, err.message);
         }
       });
-      
+
       // Small sleep to prevent flood
       await new Promise(resolve => setTimeout(resolve, 50));
     }
@@ -1818,7 +1760,7 @@ const scheduleDailySummary = () => {
       const settings = await prisma.globalSetting.findMany();
       const settingsMap = settings.reduce((acc, s) => ({ ...acc, [s.key]: s.value }), {});
       const channelUsername = settingsMap.activation_channel;
-      
+
       if (!channelUsername) return;
 
       // Time range: Yesterday (the day that just ended)
@@ -1852,7 +1794,7 @@ const scheduleDailySummary = () => {
         .sort((a, b) => b[1].count - a[1].count);
 
       const botInfo = await bot.telegram.getMe();
-      
+
       // Date formatting for header (Yesterday)
       const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
       const dayName = days[startOfYesterday.getDay()];
