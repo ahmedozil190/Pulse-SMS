@@ -971,7 +971,7 @@ async function completeOrderAndCommission(phoneNumber, smsCode) {
         const maskedUserId = maskSensitive(user.telegramId, 3);
         
         const broadcastMsg = 
-`✅ <b>Purchase report</b> #Successful ( ${countryInfo.flag} #${countryInfo.name.replace(/\s+/g, '')} )
+`✅ <b>Purchase report</b> <b>#Successful</b> ( ${countryInfo.flag} #${countryInfo.name.replace(/\s+/g, '')} )
 ⏰ <b>At time:</b> <b>${dateStr}</b> | ${timeStr}
 🔔 <b>Activation code:</b> <code>${smsCode}</code>
 🛍️ <b>Purchase details</b> 👇🏻
@@ -983,12 +983,12 @@ async function completeOrderAndCommission(phoneNumber, smsCode) {
           parse_mode: 'HTML',
           reply_markup: {
             inline_keyboard: [
-              [{ text: '🌎 Country', callback_data: 'none' }, { text: `${countryInfo.name} ${countryInfo.flag}`, callback_data: 'none' }],
-              [{ text: '🚫 Number', callback_data: 'none' }, { text: maskedPhone, callback_data: 'none' }],
+              [{ text: '🌍 Country', callback_data: 'none' }, { text: `${countryInfo.name} ${countryInfo.flag}`, callback_data: 'none' }],
+              [{ text: '📵 Number', callback_data: 'none' }, { text: maskedPhone, callback_data: 'none' }],
               [{ text: '🏷️ Price', callback_data: 'none' }, { text: `${order.price}$`, callback_data: 'none' }],
               [{ text: '🆔 User ID', callback_data: 'none' }, { text: maskedUserId, callback_data: 'none' }],
-              [{ text: '🐉 Total', callback_data: 'none' }, { text: String(nextCount), callback_data: 'none' }],
-              [{ text: '🛒 Buy Now ↗️', url: channelLink }]
+              [{ text: '🐊 Total', callback_data: 'none' }, { text: String(nextCount), callback_data: 'none' }],
+              [{ text: '🛒 Buy Now', url: channelLink }]
             ]
           }
         });
@@ -1513,7 +1513,7 @@ app.post('/api/admin/settings/test-activation', isAdminMiddleware, async (req, r
     const timeStr = new Date().toTimeString().split(' ')[0];
 
     const testMsg = 
-`✅ <b>Purchase report</b> #Successful ( 🇨🇺 #Cuba )
+`✅ <b>Purchase report</b> <b>#Successful</b> ( 🇨🇺 #Cuba )
 ⏰ <b>At time:</b> <b>${dateStr}</b> | ${timeStr}
 🔔 <b>Activation code:</b> <code>46037</code>
 🛍️ <b>Purchase details</b> 👇🏻
@@ -1523,11 +1523,11 @@ app.post('/api/admin/settings/test-activation', isAdminMiddleware, async (req, r
       parse_mode: 'HTML',
       reply_markup: {
         inline_keyboard: [
-          [{ text: '🌎 Country', callback_data: 'none' }, { text: 'Cuba 🇨🇺', callback_data: 'none' }],
-          [{ text: '🚫 Number', callback_data: 'none' }, { text: '+53••••••••', callback_data: 'none' }],
+          [{ text: '🌍 Country', callback_data: 'none' }, { text: 'Cuba 🇨🇺', callback_data: 'none' }],
+          [{ text: '📵 Number', callback_data: 'none' }, { text: '+53••••••••', callback_data: 'none' }],
           [{ text: '🏷️ Price', callback_data: 'none' }, { text: '0.25$', callback_data: 'none' }],
           [{ text: '🆔 User ID', callback_data: 'none' }, { text: '726••••••••', callback_data: 'none' }],
-          [{ text: '🐉 Total', callback_data: 'none' }, { text: '3', callback_data: 'none' }],
+          [{ text: '🐊 Total', callback_data: 'none' }, { text: '3', callback_data: 'none' }],
           [{ text: '🛒 Buy Now ↗️', url: `https://t.me/${botInfo.username}` }]
         ]
       }
