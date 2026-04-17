@@ -976,19 +976,7 @@ async function completeOrderAndCommission(phoneNumber, smsCode) {
 ⏰ <b>At time:</b> ${dateStr} | ${timeStr}
 🔔 <b>Activation code:</b> <code>${smsCode}</code>
 🛍️ <b>Purchase details</b> 👇
-🤖 @${botInfo.username}
-
-      🌎 <b>Country</b>             ${countryInfo.name} ${countryInfo.flag}
-      <pre>──────────────────────────────</pre>
-      🚫 <b>Number</b>              <code>${maskedPhone}</code>
-      <pre>──────────────────────────────</pre>
-      🏷️ <b>Price</b>               ${order.price}$
-      <pre>──────────────────────────────</pre>
-      🆔 <b>User ID</b>             <code>${maskedUserId}</code>
-      <pre>──────────────────────────────</pre>
-      🐉 <b>Total</b>               ${nextCount}
-      <pre>──────────────────────────────</pre>
-                             🛒 <b>Buy Now</b>                        ↗️`;
+🤖 @${botInfo.username}`;
 
         const channelLink = settingsMap.activation_channel_link || `https://t.me/${botInfo.username}`;
         
@@ -996,7 +984,12 @@ async function completeOrderAndCommission(phoneNumber, smsCode) {
           parse_mode: 'HTML',
           reply_markup: {
             inline_keyboard: [
-              [{ text: '🛒 Buy Now', url: channelLink }]
+              [{ text: '🌎 Country', callback_data: 'none' }, { text: `${countryInfo.name} ${countryInfo.flag}`, callback_data: 'none' }],
+              [{ text: '🚫 Number', callback_data: 'none' }, { text: maskedPhone, callback_data: 'none' }],
+              [{ text: '🏷️ Price', callback_data: 'none' }, { text: `${order.price}$`, callback_data: 'none' }],
+              [{ text: '🆔 User ID', callback_data: 'none' }, { text: maskedUserId, callback_data: 'none' }],
+              [{ text: '🐉 Total', callback_data: 'none' }, { text: String(nextCount), callback_data: 'none' }],
+              [{ text: '🛒 Buy Now ↗️', url: channelLink }]
             ]
           }
         });
@@ -1522,29 +1515,22 @@ app.post('/api/admin/settings/test-activation', isAdminMiddleware, async (req, r
 
     const testMsg = 
 `Pulse SMS 🩸                                     <b>admin</b>
-✅ <b>Purchase report</b> #Successful ( 🇭🇳 #Honduras )
+✅ <b>Purchase report</b> #Successful ( 🇨🇺 #Cuba )
 ⏰ <b>At time:</b> ${dateStr} | ${timeStr}
-🔔 <b>Activation code:</b> <code>12345</code>
+🔔 <b>Activation code:</b> <code>46037</code>
 🛍️ <b>Purchase details</b> 👇
-🤖 @${botInfo.username}
-
-      🌎 <b>Country</b>             Honduras 🇭🇳
-      <pre>──────────────────────────────</pre>
-      🚫 <b>Number</b>              <code>+5041234••••••••</code>
-      <pre>──────────────────────────────</pre>
-      🏷️ <b>Price</b>               0.25$
-      <pre>──────────────────────────────</pre>
-      🆔 <b>User ID</b>             <code>604••••••••</code>
-      <pre>──────────────────────────────</pre>
-      🐉 <b>Total</b>               999
-      <pre>──────────────────────────────</pre>
-                             🛒 <b>Buy Now</b>                        ↗️`;
+🤖 @${botInfo.username}`;
 
     await bot.telegram.sendMessage(channel, testMsg, {
       parse_mode: 'HTML',
       reply_markup: {
         inline_keyboard: [
-          [{ text: '🛒 Buy Now', url: `https://t.me/${botInfo.username}` }]
+          [{ text: '🌎 Country', callback_data: 'none' }, { text: 'Cuba 🇨🇺', callback_data: 'none' }],
+          [{ text: '🚫 Number', callback_data: 'none' }, { text: '+53••••••••', callback_data: 'none' }],
+          [{ text: '🏷️ Price', callback_data: 'none' }, { text: '0.25$', callback_data: 'none' }],
+          [{ text: '🆔 User ID', callback_data: 'none' }, { text: '726••••••••', callback_data: 'none' }],
+          [{ text: '🐉 Total', callback_data: 'none' }, { text: '3', callback_data: 'none' }],
+          [{ text: '🛒 Buy Now ↗️', url: `https://t.me/${botInfo.username}` }]
         ]
       }
     });
