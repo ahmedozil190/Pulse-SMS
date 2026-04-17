@@ -309,6 +309,26 @@ window.saveBinanceSettings = async () => {
     }
 };
 
+window.testBinanceConnection = async () => {
+    try {
+        showOzToast('info', 'Testing...', 'Trying to reach Binance API...');
+        const res = await fetch('/api/admin/binance/test-connection', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...getHeaders() }
+        });
+
+        const data = await res.json();
+        if (data.success) {
+            showOzAlert('Connection Successful!', data.msg, 'success');
+        } else {
+            showOzAlert('Connection Failed', data.msg, 'info');
+        }
+    } catch (err) {
+        console.error('Test connection error:', err);
+        showOzAlert('System Error', 'Could not connect to the backend server.', 'info');
+    }
+};
+
 window.saveActivationChannelSettings = async () => {
     const channel = document.getElementById('input-activation-channel').value.trim();
     const link = document.getElementById('input-activation-channel-link').value.trim();

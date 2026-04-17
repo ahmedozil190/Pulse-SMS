@@ -1586,6 +1586,30 @@ app.post('/api/admin/settings/update', isAdminMiddleware, async (req, res) => {
   }
 });
 
+app.post('/api/admin/binance/test-connection', isAdminMiddleware, async (req, res) => {
+  try {
+    const settings = await prisma.globalSetting.findMany();
+    const settingsMap = settings.reduce((acc, s) => ({ ...acc, [s.key]: s.value }), {});
+
+    const apiKey = settingsMap.binance_api_key || process.env.BINANCE_API_KEY;
+    const apiSecret = settingsMap.binance_api_secret || process.env.BINANCE_API_SECRET;
+
+    if (!apiKey || !apiSecret) {
+      return res.status(400).json({ success: false, msg: 'API credentials not found. Please save them first.' });
+    }
+
+    const binanceService = new BinancePayService(apiKey, apiSecret);
+    // Try to fetch last 1 minute of transactions as a "ping"
+    await binanceService.getPayTransactions(Date.now() - 60000);
+    
+    res.json({ success: true, msg: 'Connection successful! Binance API responded correctly.' });
+  } catch (err) {
+    const errorMsg = err.response ? JSON.stringify(err.response.data) : err.message;
+    console.error('[BINANCE TEST ERROR]', errorMsg);
+    res.status(500).json({ success: false, msg: `Connection failed: ${errorMsg}` });
+  }
+});
+
 // --- MANDATORY CHANNELS APIs ---
 
 // --- MANDATORY CHANNELS APIs ---

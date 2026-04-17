@@ -60,17 +60,6 @@ class BinancePayService {
      * Verifies if a transaction ID exists and meets criteria
      */
     async verifyTransaction(txid) {
-        // --- TEST MOCK LOGIC ---
-        // You can use this to test without two accounts
-        if (txid === 'BINANCE_TEST_MOCK_10') {
-            console.log('[BINANCE TEST] Mock transaction detected');
-            return {
-                amount: 10.00,
-                currency: 'USDT',
-                time: Date.now()
-            };
-        }
-
         // Fetch last 24 hours of transactions
         const yesterday = Date.now() - 24 * 60 * 60 * 1000;
         const transactions = await this.getPayTransactions(yesterday);
@@ -98,10 +87,10 @@ class BinancePayService {
         // Usually amount is positive for receive.
         const amount = parseFloat(match.amount);
         if (amount <= 0) return null;
-        
+
         // We only support success transactions
         // Note: status check depends on exact API version response
-        
+
         return {
             amount: amount,
             currency: match.currency,
