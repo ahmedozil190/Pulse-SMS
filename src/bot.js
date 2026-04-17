@@ -492,23 +492,14 @@ bot.action(/^(action_settings|alert_page_(\d+))$/, async (ctx) => {
     const configs = await prisma.countryConfig.findMany();
     const configMap = configs.reduce((acc, c) => ({ ...acc, [c.countryCode]: c }), {});
 
-    // Auto-clean any subscriptions that this user can no longer afford
-    const subsToClean = [];
+    // Filter subscriptions for display based on current affordability (visual only in settings)
     const validSubs = [];
     for (const subCode of subCodes) {
       const cfg = configMap[subCode];
       const price = cfg ? cfg.price : 0.25;
-      if (user.balance < price) {
-        subsToClean.push(subCode);
-      } else {
+      if (user.balance >= price) {
         validSubs.push(subCode);
       }
-    }
-
-    if (subsToClean.length > 0) {
-      await prisma.notificationSubscription.deleteMany({
-        where: { userId: user.id, countryCode: { in: subsToClean } }
-      });
     }
 
     const msg = ctx.t('alert_settings_header') + ctx.t('alert_settings_note');
@@ -1713,9 +1704,8 @@ hunter.start(5000, async (code, stock) => {
     for (const s of subs) {
       if (!s.user || s.user.isBanned) continue;
 
-      // Auto-disable if balance drops below required price
+      // Skip notification if balance is low (wait for grace period cleanup)
       if (s.user.balance < price) {
-        prisma.notificationSubscription.delete({ where: { id: s.id } }).catch(() => { });
         continue;
       }
 
@@ -1831,8 +1821,144 @@ const scheduleDailySummary = () => {
 // Start the CRON job
 scheduleDailySummary();
 
+/**
+ * Background scanner for delayed subscription cancellation (1-hour grace period)
+ */
+const scanLowBalanceSubscriptions = async () => {
+  try {
+    const usersWithSubs = await prisma.user.findMany({
+      where: {
+        subscriptions: { some: {} }
+      },
+      include: {
+        subscriptions: true
+      }
+    });
+
+    const configs = await prisma.countryConfig.findMany();
+    const configMap = configs.reduce((acc, c) => ({ ...acc, [c.countryCode]: c }), {});
+
+    for (const user of usersWithSubs) {
+      const invalidSubs = [];
+      for (const sub of user.subscriptions) {
+        const cfg = configMap[sub.countryCode];
+        const price = cfg ? cfg.price : 0.25;
+        if (user.balance < price) {
+          invalidSubs.push({ ...sub, price });
+        }
+      }
+
+      if (invalidSubs.length > 0) {
+        if (!user.lowBalanceSince) {
+          // Mark starting time of low balance
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { lowBalanceSince: new Date() }
+          });
+        } else {
+          // Check if 1 hour has passed
+          const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+          if (user.lowBalanceSince < oneHourAgo) {
+            // Cancel all subscriptions
+            await prisma.notificationSubscription.deleteMany({
+              where: { userId: user.id }
+            });
+
+            // Reset lowBalanceSince and notify
+            await prisma.user.update({
+              where: { id: user.id },
+              data: { lowBalanceSince: null }
+            });
+
+            // Send localized notification
+            const lang = user.language || 'en';
+            let countriesList = '';
+            invalidSubs.forEach(s => {
+              const info = durianApi.getCountryInfo(s.countryCode, lang);
+              countriesList += `• ${info.localizedName} (${s.price}$)\n`;
+            });
+
+            const msg = i18n.t(lang, 'alert_cancel_msg', { countries: countriesList.trim() });
+            await bot.telegram.sendMessage(user.telegramId, msg, {
+              parse_mode: 'HTML',
+              reply_markup: {
+                inline_keyboard: [
+                  [{ text: i18n.t(lang, 'alert_cancel_deposit_btn'), callback_data: 'action_deposit' }],
+                  [{ text: i18n.t(lang, 'alert_cancel_back_btn'), callback_data: 'action_main_menu' }]
+                ]
+              }
+            }).catch(() => { });
+          }
+        }
+      } else if (user.lowBalanceSince) {
+        // Balance is sufficient now, reset timer
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { lowBalanceSince: null }
+        });
+      }
+    }
+  } catch (err) {
+    console.error('[SCANNER ERROR]', err.message);
+  }
+};
+
+// Run scanner every 5 minutes
+setInterval(scanLowBalanceSubscriptions, 5 * 60 * 1000);
+
 // Start the hunter service
-hunter.start(5000);
+hunter.start(5000, async (code, stock) => {
+  try {
+    const subs = await prisma.notificationSubscription.findMany({
+      where: { countryCode: code },
+      include: { user: true }
+    });
+
+    if (subs.length > 0) {
+      console.log(`[HUNTER ALERT] Stock for ${code} is ${stock}. Notifying ${subs.length} users...`);
+    }
+
+    const countryConfig = await prisma.countryConfig.findUnique({ where: { countryCode: code } });
+    const price = countryConfig ? countryConfig.price : 0.25;
+
+    for (const s of subs) {
+      if (!s.user || s.user.isBanned) continue;
+
+      // Skip notification if balance is low (wait for grace period cleanup)
+      if (s.user.balance < price) {
+        continue;
+      }
+
+      const lang = s.user.language || 'en';
+      const info = durianApi.getCountryInfo(code, lang);
+      const msg = i18n.t(lang, 'alert_notification', {
+        flag: info.flag,
+        name: info.localizedName,
+        price: price.toFixed(2)
+      });
+
+      const btnText = i18n.t(lang, 'alert_buy_btn');
+
+      bot.telegram.sendMessage(s.user.telegramId, msg, {
+        parse_mode: 'HTML',
+        reply_markup: {
+          inline_keyboard: [
+            [Markup.button.callback(btnText, `select_country_${code}_alert`)]
+          ]
+        }
+      }).catch(err => {
+        if (!err.message.includes('blocked by the user') && !err.message.includes('chat not found')) {
+          console.error(`[HUNTER MSG ERROR] User ${s.user.telegramId}:`, err.message);
+        }
+      });
+
+      // Small sleep to prevent flood
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+  } catch (err) {
+    console.error('[HUNTER BROADCAST ERROR]', err);
+  }
+});
 
 // Launch the bot
 bot.launch().then(() => {

@@ -42,7 +42,10 @@ const texts = {
     alert_enabled: "✅ {country}: Enable",
     alert_disabled: "✅ {country}: Disable",
     alert_notification: "<b>🥳 🎉 Country Available Now\n\n{flag} {name}\n✅ Now available for purchase\n💰 Purchase price: {price}$</b>\n\n🛒 Buy Now",
-    alert_buy_btn: "🛒 Buy Now"
+    alert_buy_btn: "🛒 Buy Now",
+    alert_cancel_msg: "⚠️<b> Alerts deactivated for some countries </b>\n\n❌ Due to insufficient balance\n\nDeactivated countries:\n{countries}\n\n💡 To reactivate, deposit first",
+    alert_cancel_deposit_btn: "💳 Deposit",
+    alert_cancel_back_btn: "🔙 Back"
   },
   ar: {
     welcome_user: "<b>🔰 مرحباً بك في متجر الأرقام الدولي 🔰</b>\n\n{name} 👋\n\n<b>اختر الخيار المناسب من القائمة:</b>",
@@ -87,7 +90,10 @@ const texts = {
     alert_enabled: "✅ {country}: تشغيل",
     alert_disabled: "✅ {country}: إيقاف",
     alert_notification: "<b>🥳 🎉 الدولة متاحة الآن\n\n{flag} {name}\n✅ أصبحت متاحة للشراء\n💰 سعر الشراء: {price}$</b>\n\n🛒 شراء الآن",
-    alert_buy_btn: "🛒 شراء الآن"
+    alert_buy_btn: "🛒 شراء الآن",
+    alert_cancel_msg: "⚠️ <b>تم إيقاف الإشعارات لبعض الدول </b>\n\n❌ بسبب عدم كفاية الرصيد\n\nالدول التي تم إيقافها:\n{countries}\n\n💡 لإعادة التفعيل، يرجى شحن رصيدك أولاً",
+    alert_cancel_deposit_btn: "💳 شحن الرصيد",
+    alert_cancel_back_btn: "🔙 رجوع"
   },
   fa: {
     welcome_user: "<b>🔰 به فروشگاه اعداد بین المللی خوش آمدید 🔰</b>\n\n{name} 👋\n\n<b>گزینه مناسب را از منو انتخاب کنید:</b>",
@@ -129,7 +135,10 @@ const texts = {
     alert_enabled: "{country}: فعال ✅",
     alert_disabled: "{country}: غیرفعال ✅",
     alert_notification: "<b>🥳 🎉 کشور الآن موجود است\n\n{flag} {name}\n✅ اکنون برای خرید موجود است\n💰 قیمت خرید: {price}$</b>\n\n🛒 خرید الآن",
-    alert_buy_btn: "🛒 خرید الآن"
+    alert_buy_btn: "🛒 خرید الآن",
+    alert_cancel_msg: "⚠️ <b>هشدارهای برخی کشورها غیرفعال شد </b>\n\n❌ به دلیل کمبود موجودی\n\nکشورهای غیرفعال شده:\n{countries}\n\n💡 برای فعال‌سازی مجدد، ابتدا حساب خود را شارژ کنید",
+    alert_cancel_deposit_btn: "💳 شارژ حساب",
+    alert_cancel_back_btn: "🔙 بازگشت"
   },
   bn: {
     welcome_user: "<b>🔰 আন্তর্জাতিক নম্বর স্টোরে স্বাগতম 🔰</b>\n\n{name} 👋\n\n<b>মেনু থেকে উপযুক্ত বিকল্প নির্বাচন করুন:</b>",
@@ -171,7 +180,10 @@ const texts = {
     alert_enabled: "✅ {country}: চালু",
     alert_disabled: "✅ {country}: বন্ধ",
     alert_notification: "🥳 🎉 দেশ এখন উপলব্ধ\n\n{flag} {name}\n✅ এখন ক্রয়ের জন্য উপলব্ধ\n💰 ক্রয় মূল্য: {price}$\n\n🛒 এখনই কিনুন",
-    alert_buy_btn: "🛒 এখনই কিনুন"
+    alert_buy_btn: "🛒 এখনই কিনুন",
+    alert_cancel_msg: "⚠️ <b>কিছু দেশের জন্য সতর্কতা নিষ্ক্রিয় করা হয়েছে </b>\n\n❌ অপর্যাপ্ত ব্যালেন্সের কারণে\n\nনিষ্ক্রিয় করা দেশগুলি:\n{countries}\n\n💡 পুনরায় সক্রিয় করতে, প্রথমে ডিপোজিট করুন",
+    alert_cancel_deposit_btn: "💳 জমা দিন",
+    alert_cancel_back_btn: "🔙 ফিরে যান"
   }
 };
 

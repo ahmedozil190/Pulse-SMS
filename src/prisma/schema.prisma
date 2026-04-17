@@ -20,6 +20,7 @@ model User {
   referrals       User[]    @relation("Referrals")
   isBanned    Boolean   @default(false)
   language    String    @default("en")
+  lowBalanceSince DateTime?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   orders          Order[]
