@@ -1531,7 +1531,17 @@ app.post('/api/admin/settings/test-daily-summary', isAdminMiddleware, async (req
     fakeList += `2 - Botswana 🇧🇼 : 65 : ( $0.25 )\n`;
     fakeList += `3 - Afghanistan 🇦🇫 : 37 : ( $0.25 )\n`;
     fakeList += `4 - Cuba 🇨🇺 : 34 : ( $0.25 )\n`;
-    fakeList += `5 - Namibia 🇳🇦 : 27 : ( $0.25 )`;
+    fakeList += `5 - Namibia 🇳🇦 : 27 : ( $0.25 )\n`;
+    fakeList += `36 - South Korea 🇰🇷 : 2 : ( $0.7 )\n`;
+    fakeList += `37 - Réunion 🇷🇪 : 2 : ( $0.5 )\n`;
+    fakeList += `38 - Slovakia 🇸🇰 : 2 : ( $0.4 )\n`;
+    fakeList += `39 - Suriname 🇸🇷 : 2 : ( $0.3 )\n`;
+    fakeList += `40 - Sao Tome & Principe 🇸🇹 : 2 : ( $0.35 )\n`;
+    fakeList += `41 - Turks & Caicos Islands 🇹🇨 : 2 : ( $0.5 )\n`;
+    fakeList += `42 - Austria 🇦🇹 : 1 : ( $0.5 )\n`;
+    fakeList += `43 - Bosnia & Herzegovina 🇧🇦 : 1 : ( $0.25 )\n`;
+    fakeList += `44 - Belgium 🇧🇪 : 1 : ( $0.7 )\n`;
+    fakeList += `45 - Bahrain 🇧🇭 : 1 : ( $0.5 )`;
     
     msg += `<blockquote>${fakeList}</blockquote>\n`;
 
