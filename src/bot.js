@@ -370,17 +370,18 @@ bot.action('deposit_binance', async (ctx) => {
     const settings = await prisma.globalSetting.findMany();
     const settingsMap = settings.reduce((acc, s) => ({ ...acc, [s.key]: s.value }), {});
     const binanceId = settingsMap.binance_pay_id || '1050123485';
+    const supportLink = settingsMap.activation_channel_link || 'https://t.me/Binance_Support'; // Placeholder
 
     await ctx.editMessageText(ctx.t('binance_deposit_instructions', { binanceId }), {
       parse_mode: 'HTML',
       reply_markup: {
         inline_keyboard: [
-          [Markup.button.callback(ctx.t('back_btn'), 'action_deposit')]
+          [{ text: ctx.t('binance_how_btn'), url: supportLink }],
+          [Markup.button.callback(ctx.t('cancel_btn'), 'action_deposit')]
         ]
       }
     });
 
-    await ctx.reply(ctx.t('binance_txid_prompt'), { parse_mode: 'HTML' });
     ctx.session.awaitingBinanceTxid = true;
   } catch (err) {
     console.error('[BINANCE ACTION ERROR]', err);
