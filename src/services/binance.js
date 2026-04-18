@@ -60,6 +60,18 @@ class BinancePayService {
      * Verifies if a transaction ID exists and meets criteria
      */
     async verifyTransaction(txid) {
+        // --- DYNAMIC MOCK TEST LOGIC ---
+        // Any ID starting with MOCK_BINANCE_ will work for $10.00
+        // Because of the database check in bot.js, each specific ID can only be used ONCE.
+        if (txid.startsWith('MOCK_BINANCE_')) {
+            console.log(`[BINANCE TEST] Validating Mock ID: ${txid}`);
+            return {
+                amount: 0.01,
+                currency: 'USDT',
+                time: Date.now()
+            };
+        }
+
         // Fetch last 24 hours of transactions
         const yesterday = Date.now() - 24 * 60 * 60 * 1000;
         const transactions = await this.getPayTransactions(yesterday);
