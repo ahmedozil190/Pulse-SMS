@@ -1131,6 +1131,7 @@ bot.on('text', async (ctx, next) => {
 
   // 1. Validation: Length <= 5
   if (txid.length <= 5) {
+    ctx.session.awaitingBinanceTxid = false;
     await ctx.reply(ctx.t('deposit_id_error'), { parse_mode: 'HTML' });
     return;
   }
@@ -1150,6 +1151,7 @@ bot.on('text', async (ctx, next) => {
     // 3. Check if TXID already used
     const existing = await prisma.deposit.findUnique({ where: { transactionId: txid } });
     if (existing) {
+      ctx.session.awaitingBinanceTxid = false;
       await ctx.reply(ctx.t('deposit_not_found'), { parse_mode: 'HTML' });
       return;
     }
@@ -1163,6 +1165,7 @@ bot.on('text', async (ctx, next) => {
 
     if (!apiKey || !apiSecret) {
       console.error('[BINANCE ERROR] API Credentials missing in database and .env');
+      ctx.session.awaitingBinanceTxid = false;
       await ctx.reply(ctx.t('deposit_error'), { parse_mode: 'HTML' });
       return;
     }
@@ -1206,10 +1209,12 @@ bot.on('text', async (ctx, next) => {
       });
       ctx.session.awaitingBinanceTxid = false;
     } else {
+      ctx.session.awaitingBinanceTxid = false;
       await ctx.reply(ctx.t('deposit_not_found'), { parse_mode: 'HTML' });
     }
   } catch (err) {
     console.error('[BINANCE VERIFICATION ERROR]', err.message);
+    ctx.session.awaitingBinanceTxid = false;
     await ctx.reply(ctx.t('deposit_error'), { parse_mode: 'HTML' });
   }
 });
