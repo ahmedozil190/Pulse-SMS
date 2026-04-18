@@ -1202,7 +1202,7 @@ bot.on('text', async (ctx, next) => {
         parse_mode: 'HTML',
         reply_markup: {
           inline_keyboard: [
-            [Markup.button.callback(ctx.t('shop_btn'), 'action_buy')],
+            [Markup.button.callback(ctx.t('shop_btn'), 'action_buy_number')],
             [Markup.button.callback(ctx.t('back_to_main_btn'), 'action_main_menu')]
           ]
         }
