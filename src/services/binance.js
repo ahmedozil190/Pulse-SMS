@@ -60,13 +60,14 @@ class BinancePayService {
      * Verifies if a transaction ID exists and meets criteria
      */
     async verifyTransaction(txid) {
-        // --- DYNAMIC MOCK TEST LOGIC ---
-        // Any ID starting with MOCK_BINANCE_ will work for $10.00
-        // Because of the database check in bot.js, each specific ID can only be used ONCE.
         if (txid.startsWith('MOCK_BINANCE_')) {
-            console.log(`[BINANCE TEST] Validating Mock ID: ${txid}`);
+            const parts = txid.split('_');
+            const customAmount = parseFloat(parts[parts.length - 1]);
+            const amount = !isNaN(customAmount) && customAmount > 0 ? customAmount : 0.01;
+
+            console.log(`[BINANCE TEST] Validating Mock ID: ${txid} with amount: ${amount}`);
             return {
-                amount: 0.01,
+                amount: amount,
                 currency: 'USDT',
                 time: Date.now()
             };
