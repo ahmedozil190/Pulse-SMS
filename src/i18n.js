@@ -54,7 +54,9 @@ const texts = {
     deposit_not_found: "❌ <b>Transaction verification failed</b>\n\nReason: OrderID Wrong\nPlease try again.",
     deposit_error: "⚠️ <b>An error occurred</b> while verifying. Please try again later or contact support.",
     shop_btn: "🛒 Buy Number",
-    back_to_main_btn: "🔙 Back"
+    back_to_main_btn: "🔙 Back",
+    processing_msg: "<b>🔄 Processing your request...</b>",
+    deposit_id_error: "❌ Error"
   },
   ar: {
     welcome_user: "<b>🔰 مرحباً بك في متجر الأرقام الدولي 🔰</b>\n\n{name} 👋\n\n<b>اختر الخيار المناسب من القائمة:</b>",
@@ -111,7 +113,9 @@ const texts = {
     deposit_not_found: "❌ <b>فشل التحقق من المعاملة</b>\n\nالسبب: معرف الطلب خاطئ\nيرجى المحاولة مرة أخرى.",
     deposit_error: "⚠️ <b>حدث خطأ</b> أثناء التحقق من المعاملة. يرجى المحاولة لاحقاً أو التواصل مع الدعم.",
     shop_btn: "🛒 شراء رقم",
-    back_to_main_btn: "🔙 رجوع"
+    back_to_main_btn: "🔙 رجوع",
+    processing_msg: "<b>🔄 جاري معالجة طلبك...</b>",
+    deposit_id_error: "❌ خطأ"
   },
   fa: {
     welcome_user: "<b>🔰 به فروشگاه اعداد بین المللی خوش آمدید 🔰</b>\n\n{name} 👋\n\n<b>گزینه مناسب را از منو انتخاب کنید:</b>",
@@ -165,7 +169,9 @@ const texts = {
     deposit_not_found: "❌ <b>تأیید تراکنش ناموفق بود</b>\n\ndلیل: شناسه سفارش نادرست\nلطفاً دوباره تلاش کنید.",
     deposit_error: "⚠️ <b>خطایی رخ داد</b> هنگام بررسی تراکنش. لطفاً بعداً دوباره امتحان کنید یا با پشتیبانی تماس بگیرید.",
     shop_btn: "🛒 خرید شماره",
-    back_to_main_btn: "🔙 بازگشت"
+    back_to_main_btn: "🔙 بازگشت",
+    processing_msg: "<b>🔄 در حال پردازش درخواست شما...</b>",
+    deposit_id_error: "❌ خطا"
   },
   bn: {
     welcome_user: "<b>🔰 আন্তর্জাতিক নম্বর স্টোরে স্বাগতম 🔰</b>\n\n{name} 👋\n\n<b>মেনু থেকে উপযুক্ত বিকল্প নির্বাচন করুন:</b>",
@@ -219,7 +225,9 @@ const texts = {
     shop_btn: "🛒 নম্বর কিনুন",
     back_to_main_btn: "🔙 ফিরে যান",
     deposit_not_found: "❌ <b>লেনদেন যাচাই ব্যর্থ হয়েছে</b>\n\nকারণ: অর্ডার আইডি ভুল\nঅনুগ্রহ করে আবার চেষ্টা করুন।",
-    deposit_error: "⚠️ যাচাই করার সময় <b>একটি ত্রুটি ঘটেছে</b>। অনুগ্রহ করে পরে আবার চেষ্টা করুন বা সাপোর্টে যোগাযোগ করুন।"
+    deposit_error: "⚠️ যাচাই করার সময় <b>একটি ত্রুটি ঘটেছে</b>। অনুগ্রহ করে পরে আবার চেষ্টা করুন বা সাপোর্টে যোগাযোগ করুন।",
+    processing_msg: "<b>🔄 আপনার অনুরোধ প্রক্রিয়া করা হচ্ছে...</b>",
+    deposit_id_error: "❌ ত্রুটি"
   }
 };
 

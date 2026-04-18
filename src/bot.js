@@ -1129,8 +1129,25 @@ bot.on('text', async (ctx, next) => {
   const txid = ctx.message.text.trim();
   if (!txid) return next();
 
+  // 1. Validation: Length <= 5
+  if (txid.length <= 5) {
+    await ctx.reply(ctx.t('deposit_id_error'), { parse_mode: 'HTML' });
+    return;
+  }
+
+  // 2. Processing Feedback loop
+  const processing = await ctx.reply(ctx.t('processing_msg'), { parse_mode: 'HTML' });
+  
+  // Artificial delay (e.g., 2 seconds) for UX
+  await new Promise(resolve => setTimeout(resolve, 2000));
+
   try {
-    // 1. Check if TXID already used
+    // Before proceeding, delete the processing message to keep chat clean (optional but professional)
+    try {
+      await ctx.deleteMessage(processing.message_id);
+    } catch (err) { /* ignore */ }
+
+    // 3. Check if TXID already used
     const existing = await prisma.deposit.findUnique({ where: { transactionId: txid } });
     if (existing) {
       await ctx.reply(ctx.t('deposit_not_found'), { parse_mode: 'HTML' });
