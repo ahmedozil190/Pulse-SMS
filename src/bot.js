@@ -19,6 +19,9 @@ dotenv.config();
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 
+// Track last notification alert sent per country to avoid spamming users
+const lastAlertSent = {};
+
 /**
  * Escapes characters for HTML parse mode
  */
@@ -674,6 +677,44 @@ bot.action(/^toggle_auto_reserve_(.+)_(.+)$/, async (ctx) => {
       const countryInfo = durianApi.getCountryInfo(countryCode, ctx.state.lang);
       const msg = ctx.t('auto_reserve_enabled', { country: countryInfo.localizedName });
       await ctx.answerCbQuery(msg).catch(() => { });
+
+      // Immediate Purchase Attempt if stock exists right now
+      const liveData = hunter.getLiveDistribution();
+      if (liveData[countryCode] > 0) {
+        try {
+          const buyRes = await durianApi.getMobile('0257', countryCode);
+          if (buyRes.code === 200 && buyRes.data) {
+            const phoneNumber = buyRes.data;
+            const cleanPhone = phoneNumber.startsWith('+') ? phoneNumber.substring(1) : phoneNumber;
+
+            const order = await prisma.order.create({
+              data: {
+                userId: user.id,
+                serviceId: '0257',
+                countryId: countryCode,
+                phoneNumber: phoneNumber,
+                price: price,
+                status: 'PENDING'
+              }
+            });
+
+            const lang = user.language || 'en';
+            const countryName = (lang === 'ar' && countryInfo.name_ar) ? countryInfo.name_ar : countryInfo.name;
+            const successMsg = `⚡ <b>${ctx.t('purchase_success')} (Auto-Reserve)</b>\n\n• <b>${ctx.t('number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${ctx.t('country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryName)}\n• <b>${ctx.t('code_label')}</b>: <code>XXXXX</code>\n\n<b>${ctx.t('request_code_btn')}</b>`;
+
+            const sentMsg = await ctx.reply(successMsg, {
+              parse_mode: 'HTML',
+              reply_markup: {
+                inline_keyboard: [[{ text: ctx.t('request_code_btn'), callback_data: `check_code_${countryCode}_${phoneNumber}` }]]
+              }
+            });
+
+            startAutoPolling(user.telegramId, sentMsg.message_id, phoneNumber, countryCode, lang);
+          }
+        } catch (e) {
+          console.error('[AUTO-RESERVE IMMEDIATE FAIL]', e.message);
+        }
+      }
     }
 
     // Refresh the current page
@@ -2261,38 +2302,46 @@ hunter.start(5000, async (code, stock) => {
     }
 
     // 2. Handle Notifications (Alerts)
-    // Filter out users who already have an auto-reserve subscription for this country
-    const autoReservedUserIds = autoSubs.map(s => s.userId);
+    const now = Date.now();
+    const lastSent = lastAlertSent[code] || 0;
     
-    const subs = await prisma.notificationSubscription.findMany({
-      where: { 
-        countryCode: code,
-        userId: { notIn: autoReservedUserIds }
-      },
-      include: { user: true }
-    });
+    // Only send alerts every 5 minutes per country
+    if (now - lastSent > 5 * 60 * 1000) {
+      lastAlertSent[code] = now;
+      
+      // Filter out users who already have an auto-reserve subscription for this country
+      const autoReservedUserIds = autoSubs.map(s => s.userId);
+      
+      const subs = await prisma.notificationSubscription.findMany({
+        where: { 
+          countryCode: code,
+          userId: { notIn: autoReservedUserIds }
+        },
+        include: { user: true }
+      });
 
-    if (subs.length > 0) {
-      console.log(`[HUNTER ALERT] Stock for ${code} is ${stock}. Notifying ${subs.length} users...`);
-      for (const s of subs) {
-        if (!s.user || s.user.isBanned || s.user.balance < price) continue;
+      if (subs.length > 0) {
+        console.log(`[HUNTER ALERT] Stock for ${code} is ${stock}. Notifying ${subs.length} users...`);
+        for (const s of subs) {
+          if (!s.user || s.user.isBanned || s.user.balance < price) continue;
 
-        const lang = s.user.language || 'en';
-        const info = durianApi.getCountryInfo(code, lang);
-        const msg = i18n.t(lang, 'alert_notification', {
-          flag: info.flag,
-          name: info.localizedName,
-          price: price.toFixed(2)
-        });
+          const lang = s.user.language || 'en';
+          const info = durianApi.getCountryInfo(code, lang);
+          const msg = i18n.t(lang, 'alert_notification', {
+            flag: info.flag,
+            name: info.localizedName,
+            price: price.toFixed(2)
+          });
 
-        bot.telegram.sendMessage(s.user.telegramId, msg, {
-          parse_mode: 'HTML',
-          reply_markup: {
-            inline_keyboard: [[Markup.button.callback(i18n.t(lang, 'alert_buy_btn'), `select_country_${code}_alert`)]]
-          }
-        }).catch(() => {});
-        
-        await new Promise(resolve => setTimeout(resolve, 50));
+          bot.telegram.sendMessage(s.user.telegramId, msg, {
+            parse_mode: 'HTML',
+            reply_markup: {
+              inline_keyboard: [[Markup.button.callback(i18n.t(lang, 'alert_buy_btn'), `select_country_${code}_alert`)]]
+            }
+          }).catch(() => {});
+          
+          await new Promise(resolve => setTimeout(resolve, 50));
+        }
       }
     }
   } catch (err) {

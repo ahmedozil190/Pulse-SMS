@@ -70,10 +70,8 @@ class HunterService {
           if (newStock > oldStock && Object.keys(oldData).length > 0) {
             this.freshArrivals[code] = now + (2 * 60 * 1000); // Mark as fresh for 2 minutes
 
-            // Trigger notification callback if cooldown passed (5 minutes)
-            const lastNotif = this.lastNotified[code] || 0;
-            if (this.onFreshArrival && (now - lastNotif > 5 * 60 * 1000)) {
-              this.lastNotified[code] = now;
+            // Trigger notification callback whenever stock increases
+            if (this.onFreshArrival) {
               this.onFreshArrival(code, newStock);
             }
           }
