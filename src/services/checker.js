@@ -1,6 +1,7 @@
 const { TelegramClient, Api } = require('telegram');
 const { StringSession } = require('telegram/sessions');
 const dotenv = require('dotenv');
+const prisma = require('../db/prisma');
 dotenv.config();
 
 class CheckerService {
