@@ -797,9 +797,12 @@ bot.action(/^select_country_([^_]+)(?:_(.+))?$/, async (ctx) => {
       // 1. Show the popup alert FIRST
       await ctx.answerCbQuery(ctx.t('no_numbers_error'), { show_alert: true }).catch(() => { });
 
+      // Mark the country as out of stock to make it disappear
+      hunter.markOutOfStock(countryCode);
+
       // 2. NOW restore appropriately
       if (source !== 'alert') {
-        await showCountrySelection(ctx, true);
+        await showCountrySelection(ctx, false);
       } else {
         const info = durianApi.getCountryInfo(countryCode, ctx.state.lang);
         const originalAlertMsg = ctx.t('alert_notification', {
@@ -819,8 +822,10 @@ bot.action(/^select_country_([^_]+)(?:_(.+))?$/, async (ctx) => {
     console.error("Purchase error:", error);
     await ctx.answerCbQuery(ctx.t('no_numbers_error'), { show_alert: true }).catch(() => { });
 
+    hunter.markOutOfStock(countryCode);
+
     if (source !== 'alert') {
-      await showCountrySelection(ctx, true);
+      await showCountrySelection(ctx, false);
     } else {
       const info = durianApi.getCountryInfo(countryCode, ctx.state.lang);
       const originalAlertMsg = ctx.t('alert_notification', {

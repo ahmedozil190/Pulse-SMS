@@ -86,6 +86,18 @@ class HunterService {
   isFresh(code) {
     return !!this.freshArrivals[code];
   }
+
+  /**
+   * Manually mark a country as out of stock (e.g., when purchase fails)
+   */
+  markOutOfStock(code) {
+    if (this.liveDistribution && this.liveDistribution[code] !== undefined) {
+      this.liveDistribution[code] = 0;
+    }
+    if (this.freshArrivals && this.freshArrivals[code]) {
+      delete this.freshArrivals[code];
+    }
+  }
 }
 
 module.exports = new HunterService();
