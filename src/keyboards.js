@@ -56,7 +56,7 @@ const keyboards = {
         if (aFresh !== bFresh) return bFresh - aFresh;
         return distribution[b] - distribution[a];
       })
-      .slice(0, 50);
+      .slice(0, 15);
 
     codes.forEach(code => {
       const info = durianApi.getCountryInfo(code, lang);
