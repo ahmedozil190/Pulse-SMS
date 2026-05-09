@@ -21,15 +21,23 @@ class CheckerService {
 
       this.apiId = dbApiId ? parseInt(dbApiId.value) : parseInt(process.env.TELEGRAM_API_ID);
       this.apiHash = dbApiHash ? dbApiHash.value : process.env.TELEGRAM_API_HASH;
-      this.stringSession = new StringSession(dbSession ? dbSession.value : (process.env.TELEGRAM_STRING_SESSION || ""));
+      
+      const sessionValue = dbSession ? dbSession.value : (process.env.TELEGRAM_STRING_SESSION || "");
+      this.stringSession = new StringSession(sessionValue);
 
-      if (!this.apiId || !this.apiHash) {
-        console.warn('[Checker] API_ID or API_HASH missing in both DB and .env');
-        return false;
+      if (!this.apiId || isNaN(this.apiId)) {
+        return { success: false, message: 'Invalid or missing API_ID' };
+      }
+      if (!this.apiHash) {
+        return { success: false, message: 'Missing API_HASH' };
+      }
+      if (!sessionValue) {
+        return { success: false, message: 'Missing STRING_SESSION' };
       }
 
       this.client = new TelegramClient(this.stringSession, this.apiId, this.apiHash, {
-        connectionRetries: 5,
+        connectionRetries: 3,
+        timeout: 10000,
       });
 
       await this.client.connect();
@@ -37,13 +45,14 @@ class CheckerService {
       
       if (this.isReady) {
         console.log('[Checker] Telegram Checker Service is READY');
+        return { success: true, message: 'Service is ONLINE' };
       } else {
         console.warn('[Checker] Telegram Checker Service is NOT AUTHORIZED.');
+        return { success: false, message: 'Session is invalid or expired' };
       }
-      return this.isReady;
     } catch (err) {
       console.error('[Checker] Initialization Error:', err.message);
-      return false;
+      return { success: false, message: `Connection Error: ${err.message}` };
     }
   }
 

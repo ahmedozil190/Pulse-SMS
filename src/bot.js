@@ -178,10 +178,6 @@ bot.command('admin', async (ctx) => {
   });
 });
 
-bot.command('myid', (ctx) => {
-  ctx.reply(`Your Telegram ID is: <code>${ctx.from.id}</code>`, { parse_mode: 'HTML' });
-});
-
 /**
  * Admin Commands for Checker Service
  */
@@ -235,11 +231,11 @@ bot.command('checker_restart', async (ctx) => {
   if (!adminIds.includes(ctx.from.id.toString())) return;
 
   await ctx.reply('⏳ Restarting Checker Service...');
-  const success = await checker.init();
-  if (success) {
-    ctx.reply('✅ Checker Service is now ONLINE and ready.');
+  const result = await checker.init();
+  if (result.success) {
+    ctx.reply(`✅ <b>Checker Service</b>: ${result.message}`, { parse_mode: 'HTML' });
   } else {
-    ctx.reply('❌ Checker Service failed to start. Check your settings.');
+    ctx.reply(`❌ <b>Checker Service Failed</b>:\n<code>${result.message}</code>`, { parse_mode: 'HTML' });
   }
 });
 
