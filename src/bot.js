@@ -240,6 +240,50 @@ bot.command('checker_restart', async (ctx) => {
 });
 
 /**
+ * Provider Account Management
+ */
+bot.command('add_acc', async (ctx) => {
+  const adminIds = (process.env.ADMIN_IDS || process.env.ADMIN_TELEGRAM_ID || "").split(',').map(id => id.trim());
+  if (!adminIds.includes(ctx.from.id.toString())) return;
+
+  const args = ctx.message.text.split(' ');
+  if (args.length < 3) return ctx.reply('Usage: /add_acc <username> <apiKey>');
+
+  const username = args[1];
+  const apiKey = args[2];
+
+  await prisma.providerAccount.create({
+    data: { username, apiKey }
+  });
+  ctx.reply(`✅ Account for <code>${username}</code> added to pool.`, { parse_mode: 'HTML' });
+});
+
+bot.command('list_accs', async (ctx) => {
+  const adminIds = (process.env.ADMIN_IDS || process.env.ADMIN_TELEGRAM_ID || "").split(',').map(id => id.trim());
+  if (!adminIds.includes(ctx.from.id.toString())) return;
+
+  const accs = await prisma.providerAccount.findMany();
+  if (accs.length === 0) return ctx.reply('No extra provider accounts found in DB.');
+
+  let msg = '📋 <b>Provider Accounts:</b>\n\n';
+  accs.forEach(a => {
+    msg += `ID: <code>${a.id}</code> | User: <code>${a.username}</code> | Active: ${a.isActive ? '✅' : '❌'}\n`;
+  });
+  ctx.reply(msg, { parse_mode: 'HTML' });
+});
+
+bot.command('del_acc', async (ctx) => {
+  const adminIds = (process.env.ADMIN_IDS || process.env.ADMIN_TELEGRAM_ID || "").split(',').map(id => id.trim());
+  if (!adminIds.includes(ctx.from.id.toString())) return;
+
+  const id = parseInt(ctx.message.text.split(' ')[1]);
+  if (isNaN(id)) return ctx.reply('Usage: /del_acc <id>');
+
+  await prisma.providerAccount.delete({ where: { id } });
+  ctx.reply('✅ Account deleted.');
+});
+
+/**
  * Helper to ensure user exists in Database
  */
 async function getOrCreateUser(ctx, referrerTelegramId = null) {
@@ -759,7 +803,8 @@ bot.action(/^toggle_auto_reserve_(.+)_(.+)$/, async (ctx) => {
                 countryId: countryCode,
                 phoneNumber: phoneNumber,
                 price: price,
-                status: 'PENDING'
+                status: 'PENDING',
+                providerAccountId: buyRes.account?.id || null
               }
             });
 
@@ -774,7 +819,7 @@ bot.action(/^toggle_auto_reserve_(.+)_(.+)$/, async (ctx) => {
               }
             });
 
-            startAutoPolling(user.telegramId, sentMsg.message_id, phoneNumber, countryCode, lang);
+            startAutoPolling(user.telegramId, sentMsg.message_id, phoneNumber, countryCode, lang, buyRes.account);
           }
         } catch (e) {
           console.error('[AUTO-RESERVE IMMEDIATE FAIL]', e.message);
@@ -968,7 +1013,8 @@ bot.action(/^select_country_([^_]+)(?:_(.+))?$/, async (ctx) => {
           countryId: countryCode,
           phoneNumber: phoneNumber,
           price: currentPrice,
-          status: 'PENDING'
+          status: 'PENDING',
+          providerAccountId: response.account?.id || null
         }
       });
 
@@ -992,7 +1038,7 @@ bot.action(/^select_country_([^_]+)(?:_(.+))?$/, async (ctx) => {
         }
       });
 
-      startPolling(ctx, phoneNumber, countryCode);
+      startPolling(ctx, phoneNumber, countryCode, response.account);
 
     } else {
       // 1. Show the popup alert FIRST
@@ -1145,39 +1191,52 @@ bot.action(/^check_code_(.+)_(.+)$/, async (ctx) => {
  */
 async function getCleanMobile(countryCode, maxRetries = 3) {
   let lastRes = null;
+  
+  // Fetch all active provider accounts
+  let accounts = await prisma.providerAccount.findMany({ where: { isActive: true } });
+  
+  // If no DB accounts, use the one from .env (represented as null in our API)
+  if (accounts.length === 0) {
+    accounts = [null]; 
+  }
 
   for (let i = 0; i < maxRetries; i++) {
-    const response = await durianApi.getMobile('0257', countryCode);
+    // Pick an account (round robin by attempt index)
+    const acc = accounts[i % accounts.length];
+    
+    const response = await durianApi.getMobile('0257', countryCode, acc);
     if (response.code !== 200 || !response.data) {
       lastRes = response;
-      break; // No stock or API error
+      // If this account failed, we might want to try the next one immediately? 
+      // But we'll just let the loop continue to the next attempt/account.
+      continue; 
     }
 
     const phoneNumber = response.data;
 
     // If checker is not ready, just return the number (fallback)
     if (!checker.isReady) {
-      return { phoneNumber };
+      return { phoneNumber, account: acc };
     }
 
-    console.log(`[Checker] Verifying ${phoneNumber} (Attempt ${i + 1}/${maxRetries})...`);
+    console.log(`[Checker] Verifying ${phoneNumber} via ${acc ? acc.username : 'Default'} (Attempt ${i + 1}/${maxRetries})...`);
     const check = await checker.checkNumber(phoneNumber);
 
     if (check.status === 'CLEAN') {
       console.log(`[Checker] SUCCESS: ${phoneNumber} is CLEAN`);
-      return { phoneNumber };
+      return { phoneNumber, account: acc };
     } else {
-      console.warn(`[Checker] REJECTED: ${phoneNumber} is ${check.status}. Blacklisting and retrying...`);
-      // Blacklist it at the provider so we don't get it again
-      await durianApi.blacklistNumber('0257', phoneNumber);
+      console.warn(`[Checker] REJECTED: ${phoneNumber} is ${check.status}. Blacklisting on provider and retrying...`);
+      // Blacklist it on the specific account that gave it to us
+      await durianApi.blacklistNumber('0257', phoneNumber, acc);
       lastRes = { code: 403, msg: `Rejected: ${check.status}` };
 
-      // Wait a bit before next attempt to avoid hammering
+      // Wait a bit before next attempt
       await new Promise(r => setTimeout(r, 1000));
     }
   }
 
-  return lastRes; // Return the last error if all retries failed
+  return lastRes;
 }
 
 async function completeOrderAndCommission(phoneNumber, smsCode) {
@@ -1284,14 +1343,14 @@ async function cancelOrder(phoneNumber) {
 /**
  * Polling Logic Helper
  */
-async function startPolling(ctx, phoneNumber, countryCode) {
+async function startPolling(ctx, phoneNumber, countryCode, account = null) {
   let attempts = 0;
   const maxAttempts = 20; // 5 minutes at 15s per check
 
   const pollInterval = setInterval(async () => {
     attempts++;
     try {
-      const smsRes = await durianApi.getMsg('0257', phoneNumber);
+      const smsRes = await durianApi.getMsg('0257', phoneNumber, account);
       if (smsRes.code === 200 && smsRes.data && smsRes.data.length > 0) {
         clearInterval(pollInterval);
         await completeOrderAndCommission(phoneNumber, smsRes.data);
@@ -1319,7 +1378,7 @@ async function startPolling(ctx, phoneNumber, countryCode) {
         ).catch(() => { });
       } else if (attempts >= maxAttempts) {
         clearInterval(pollInterval);
-        await durianApi.releaseNumber('0257', phoneNumber);
+        await durianApi.releaseNumber('0257', phoneNumber, account);
         await cancelOrder(phoneNumber);
 
         const countryInfo = durianApi.getCountryInfo(countryCode);
@@ -1352,14 +1411,14 @@ async function startPolling(ctx, phoneNumber, countryCode) {
 /**
  * Background Polling Logic for Auto-Reserve (No ctx available)
  */
-async function startAutoPolling(telegramId, messageId, phoneNumber, countryCode, lang) {
+async function startAutoPolling(telegramId, messageId, phoneNumber, countryCode, lang, account = null) {
   let attempts = 0;
   const maxAttempts = 20;
 
   const pollInterval = setInterval(async () => {
     attempts++;
     try {
-      const smsRes = await durianApi.getMsg('0257', phoneNumber);
+      const smsRes = await durianApi.getMsg('0257', phoneNumber, account);
       if (smsRes.code === 200 && smsRes.data && smsRes.data.length > 0) {
         clearInterval(pollInterval);
         await completeOrderAndCommission(phoneNumber, smsRes.data);
@@ -1385,7 +1444,7 @@ async function startAutoPolling(telegramId, messageId, phoneNumber, countryCode,
         ).catch(() => { });
       } else if (attempts >= maxAttempts) {
         clearInterval(pollInterval);
-        await durianApi.releaseNumber('0257', phoneNumber);
+        await durianApi.releaseNumber('0257', phoneNumber, account);
         await cancelOrder(phoneNumber);
 
         const countryInfo = durianApi.getCountryInfo(countryCode);
@@ -2377,7 +2436,8 @@ hunter.start(3000, async (code, stock) => {
                 countryId: code,
                 phoneNumber: phoneNumber,
                 price: price,
-                status: 'PENDING'
+                status: 'PENDING',
+                providerAccountId: buyRes.account?.id || null
               }
             });
 
@@ -2397,7 +2457,7 @@ hunter.start(3000, async (code, stock) => {
             });
 
             // Start polling for this specific auto-reserved number
-            startAutoPolling(sub.user.telegramId, sentMsg.message_id, phoneNumber, code, lang);
+            startAutoPolling(sub.user.telegramId, sentMsg.message_id, phoneNumber, code, lang, buyRes.account);
 
             console.log(`[AUTO-RESERVE] SUCCESS for User ${sub.user.telegramId} | Country: ${code}`);
           }

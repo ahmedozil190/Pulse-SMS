@@ -5,7 +5,6 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const BASE_URL = 'https://api.durianrcs.com/out/ext_api/';
-const credentialParams = `name=${process.env.DURIAN_USERNAME}&ApiKey=${process.env.DURIAN_API_KEY}`;
 
 const COUNTRY_MAP = {
   "af": { "name": "Afghanistan", "name_ar": "أفغانستان", "name_fa": "افغانستان", "name_bn": "আফগানিস্তান", "flag": "🇦🇫" },
@@ -260,8 +259,12 @@ class DurianAPI {
   /**
    * Internal helper for GET requests
    */
-  async _get(endpoint, params = '') {
+  async _get(endpoint, params = '', credentials = null) {
     try {
+      const name = credentials?.username || process.env.DURIAN_USERNAME;
+      const apiKey = credentials?.apiKey || process.env.DURIAN_API_KEY;
+      const credentialParams = `name=${name}&ApiKey=${apiKey}`;
+      
       const ts = Date.now();
       const url = `${BASE_URL}${endpoint}?${credentialParams}${params ? '&' + params : ''}&_ts=${ts}`;
       console.log(`[Durian API] GET ${endpoint}`);
@@ -279,53 +282,48 @@ class DurianAPI {
   /**
    * Get main account balance and info
    */
-  async getUserInfo() {
-    return this._get('getUserInfo');
+  async getUserInfo(credentials = null) {
+    return this._get('getUserInfo', '', credentials);
   }
 
   /**
    * Request a new phone number
-   * @param {string} pid - Project ID (e.g. '0257' for Telegram)
-   * @param {string} cuy - Country code (e.g. 'bo', optional)
    */
-  async getMobile(pid, cuy = '') {
-    // num=1, noblack=0, serial=2 (single)
+  async getMobile(pid, cuy = '', credentials = null) {
     const params = `pid=${pid}&num=1&noblack=0&serial=2${cuy ? `&cuy=${cuy}` : ''}`;
-    return this._get('getMobile', params);
+    return this._get('getMobile', params, credentials);
   }
 
   /**
    * Check for received SMS code
-   * @param {string} pid - Project ID
-   * @param {string} pn - Phone number returned from getMobile
    */
-  async getMsg(pid, pn) {
+  async getMsg(pid, pn, credentials = null) {
     const params = `pid=${pid}&pn=${pn}&serial=2`;
-    return this._get('getMsg', params);
+    return this._get('getMsg', params, credentials);
   }
 
   /**
    * Release/cancel a phone number
    */
-  async releaseNumber(pid, pn) {
+  async releaseNumber(pid, pn, credentials = null) {
     const params = `pid=${pid}&pn=${pn}&serial=2`;
-    return this._get('passMobile', params);
+    return this._get('passMobile', params, credentials);
   }
 
   /**
    * Add a phone number to blacklist (if SMS didn't arrive)
    */
-  async blacklistNumber(pid, pn) {
+  async blacklistNumber(pid, pn, credentials = null) {
     const params = `pid=${pid}&pn=${pn}`;
-    return this._get('addBlack', params);
+    return this._get('addBlack', params, credentials);
   }
 
   /**
    * Query available country distribution
    */
-  async getCountryDistribution(pid = null) {
+  async getCountryDistribution(pid = null, credentials = null) {
     const params = pid ? `pid=${pid}` : '';
-    return this._get('getCountryPhoneNum', params);
+    return this._get('getCountryPhoneNum', params, credentials);
   }
 
   /**
