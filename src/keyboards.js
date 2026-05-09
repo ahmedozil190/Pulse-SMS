@@ -41,9 +41,9 @@ const keyboards = {
   buildCountryKeyboard: (distribution, lang, configMap = {}) => {
     const buttons = [];
     
-    // 1. Filter for available stock and only show latest fresh arrivals
+    // 1. Filter for 'Real-time' Low Stock (1-25) to avoid fake large stocks
     const codes = Object.keys(distribution)
-      .filter(c => c !== "" && distribution[c] > 0 && hunter.isFresh(c))
+      .filter(c => c !== "" && distribution[c] > 0 && distribution[c] <= 25)
       .filter(c => {
         // If config exists, check if enabled. If no config, default to FALSE (hide unknown countries).
         const cfg = configMap[c];
