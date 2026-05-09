@@ -4,7 +4,7 @@ class HunterService {
   constructor() {
     this.liveDistribution = {};
     this.freshArrivals = {}; // { code: expiryTimestamp }
-    this.outOfStockCache = {}; // { code: expiryTimestamp }
+    this.stuckStock = {}; // { code: stuckAmount }
     this.lastNotified = {}; // { code: lastTimestamp } to prevent spam
     this.onFreshArrival = null;
     this.lastUpdated = null;
@@ -19,12 +19,12 @@ class HunterService {
   start(intervalMs = 5000, callback = null) {
     if (this.interval) return;
     this.onFreshArrival = callback;
-    
+
     console.log(`[Hunter] Starting Live Stock Monitor (Interval: ${intervalMs}ms)`);
-    
+
     // Initial fetch
     this.poll();
-    
+
     this.interval = setInterval(() => {
       this.poll();
     }, intervalMs);
@@ -41,24 +41,35 @@ class HunterService {
         const oldData = this.liveDistribution;
         const now = Date.now();
 
-        // Enforce out of stock cache to prevent buggy API from immediately restoring 0-stock countries
-        Object.keys(this.outOfStockCache).forEach(code => {
-          if (this.outOfStockCache[code] > now) {
-            newData[code] = 0;
-          } else {
-            delete this.outOfStockCache[code];
+        // Clean up stuck stock if the API natively reports 0 or omits the country
+        Object.keys(this.stuckStock).forEach(code => {
+          if (!newData[code] || newData[code] === 0) {
+            delete this.stuckStock[code];
           }
         });
 
-        // Detect stock increases (Fresh Arrivals)
+        // Detect stock increases (Fresh Arrivals) and handle stuck stock
         Object.keys(newData).forEach(code => {
+          const actualApiStock = newData[code];
+
+          // If this country has stuck stock, check if we got a new drop
+          if (this.stuckStock[code] !== undefined) {
+            if (actualApiStock > this.stuckStock[code]) {
+              // New stock dropped! Clear stuck cache.
+              delete this.stuckStock[code];
+            } else {
+              // Stock is still stuck (or decreased without a new drop). Hide it.
+              newData[code] = 0;
+            }
+          }
+
           const newStock = newData[code];
           const oldStock = oldData[code] || 0;
 
           // If stock increased and it's not a huge jump (avoid initial load noise)
           if (newStock > oldStock && Object.keys(oldData).length > 0) {
             this.freshArrivals[code] = now + (2 * 60 * 1000); // Mark as fresh for 2 minutes
-            
+
             // Trigger notification callback if cooldown passed (5 minutes)
             const lastNotif = this.lastNotified[code] || 0;
             if (this.onFreshArrival && (now - lastNotif > 5 * 60 * 1000)) {
@@ -100,15 +111,16 @@ class HunterService {
   /**
    * Manually mark a country as out of stock (e.g., when purchase fails)
    */
-  markOutOfStock(code) {
+  markOutOfStock(code, currentStock = 0) {
     if (this.liveDistribution && this.liveDistribution[code] !== undefined) {
       this.liveDistribution[code] = 0;
     }
     if (this.freshArrivals && this.freshArrivals[code]) {
       delete this.freshArrivals[code];
     }
-    // Cache the out-of-stock state for 3 minutes to ignore buggy API responses
-    this.outOfStockCache[code] = Date.now() + (3 * 60 * 1000);
+    if (currentStock > 0) {
+      this.stuckStock[code] = currentStock;
+    }
   }
 }
 

@@ -798,7 +798,10 @@ bot.action(/^select_country_([^_]+)(?:_(.+))?$/, async (ctx) => {
       await ctx.answerCbQuery(ctx.t('no_numbers_error'), { show_alert: true }).catch(() => { });
 
       // Mark the country as out of stock to make it disappear
-      hunter.markOutOfStock(countryCode);
+      // We pass the current stock so hunter knows this specific amount is stuck/bugged
+      const liveDist = hunter.getLiveDistribution();
+      const currentStock = liveDist[countryCode] || 0;
+      hunter.markOutOfStock(countryCode, currentStock);
 
       // 2. NOW restore appropriately
       if (source !== 'alert') {
@@ -822,7 +825,9 @@ bot.action(/^select_country_([^_]+)(?:_(.+))?$/, async (ctx) => {
     console.error("Purchase error:", error);
     await ctx.answerCbQuery(ctx.t('no_numbers_error'), { show_alert: true }).catch(() => { });
 
-    hunter.markOutOfStock(countryCode);
+    const liveDist = hunter.getLiveDistribution();
+    const currentStock = liveDist[countryCode] || 0;
+    hunter.markOutOfStock(countryCode, currentStock);
 
     if (source !== 'alert') {
       await showCountrySelection(ctx, false);
