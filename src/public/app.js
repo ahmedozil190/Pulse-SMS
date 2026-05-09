@@ -18,6 +18,7 @@ let countrySearchQuery = '';
 let currentCountryFilter = 'active'; // 'active' or 'inactive'
 let allSettings = {};
 let allChannels = [];
+let allProviderAccounts = [];
 let currentEditingSettingKey = null;
 let currentEditingSettingType = 'text';
 
@@ -124,6 +125,11 @@ async function refreshData() {
             if (channelsRes.ok) { allChannels = await channelsRes.json(); }
         } catch (e) { console.warn('[WARN] Channels API unavailable:', e.message); }
 
+        try {
+            const providerAccsRes = await fetch('/api/admin/provider-accounts', { headers: getHeaders() });
+            if (providerAccsRes.ok) { allProviderAccounts = await providerAccsRes.json(); }
+        } catch (e) { console.warn('[WARN] Provider Accounts API unavailable:', e.message); }
+
         // Update Bot Name in Sidebar
         const sidebarTitle = document.querySelector('.sidebar-title');
         if (sidebarTitle) sidebarTitle.textContent = allSettings.bot_name || 'Pulse Bot';
@@ -209,6 +215,7 @@ async function refreshData() {
         try { applyUserFilters(); } catch (e) { console.error('Users render error:', e); }
         try { renderCountries(); } catch (e) { console.error('Countries render error:', e); }
         try { renderMandatoryChannels(); } catch (e) { console.error('Channels render error:', e); }
+        try { renderProviderAccounts(); } catch (e) { console.error('Provider Accounts render error:', e); }
     } catch (err) {
         console.error('Data refresh error:', err);
         throw err;
@@ -407,7 +414,8 @@ window.switchPage = (pageName) => {
         settings: 'Settings',
         'settings-bot-name': 'Bot Identity',
         'settings-maintenance': 'System Control',
-        'settings-channels': 'Subscription Channels'
+        'settings-channels': 'Subscription Channels',
+        'provider-accounts': 'SMS Provider Pool'
     };
     document.getElementById('page-title').textContent = titles[pageName] || 'Overview';
     document.getElementById('sidebar').classList.remove('open');
@@ -1004,6 +1012,106 @@ window.deleteMandatoryChannel = async (id) => {
             showOzAlert('Deleted Successfully', 'The channel has been removed from the mandatory subscription list.');
         } else {
             showOzToast('error', 'Error', 'Failed to delete channel.');
+        }
+    } catch (err) {
+        console.error(err);
+    }
+};
+
+// --- PROVIDER ACCOUNTS LOGIC ---
+
+window.renderProviderAccounts = () => {
+    const list = document.getElementById('provider-accounts-list');
+    if (!list) return;
+
+    if (allProviderAccounts.length === 0) {
+        list.innerHTML = `<div class="empty-state"><i class="fas fa-key"></i><span>No provider accounts added</span></div>`;
+        return;
+    }
+
+    list.innerHTML = allProviderAccounts.map(acc => `
+        <div class="user-container">
+            <div class="user-row">
+                <span class="user-row-label">Account User</span>
+                <span class="user-row-value color-yellow">${escapeHtml(acc.username)}</span>
+            </div>
+            <div class="user-row">
+                <span class="user-row-label">Balance</span>
+                <span class="user-row-value color-green">$${typeof acc.liveBalance === 'number' ? acc.liveBalance.toFixed(2) : acc.liveBalance}</span>
+            </div>
+            <div class="user-row">
+                <span class="user-row-label">Status</span>
+                <div class="toggle-switch-v2" onclick="toggleProviderAccountStatus(${acc.id}, ${acc.isActive})">
+                    <div class="toggle-input ${acc.isActive ? 'active' : ''}"></div>
+                    <span style="font-size: 0.8rem; color: #94a3b8;">${acc.isActive ? 'Active' : 'Disabled'}</span>
+                </div>
+            </div>
+            <div style="margin-top: 15px; display: flex; gap: 10px;">
+                <button class="adjust-btn btn-minus" style="flex: 1; border-radius: 10px; height: 35px;" onclick="deleteProviderAccount(${acc.id})">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+    `).join('');
+};
+
+window.addProviderAccount = async () => {
+    const username = document.getElementById('input-provider-username').value.trim();
+    const apiKey = document.getElementById('input-provider-apikey').value.trim();
+
+    if (!username || !apiKey) {
+        showOzToast('error', 'Missing Data', 'Please enter username and API key.');
+        return;
+    }
+
+    try {
+        const res = await fetch('/api/admin/provider-accounts/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...getHeaders() },
+            body: JSON.stringify({ username, apiKey })
+        });
+
+        if (res.ok) {
+            document.getElementById('input-provider-username').value = '';
+            document.getElementById('input-provider-apikey').value = '';
+            showOzAlert('Success', 'Account added to the pool.');
+            await refreshData();
+        } else {
+            showOzToast('error', 'Failed', 'Could not add account.');
+        }
+    } catch (err) {
+        console.error(err);
+    }
+};
+
+window.toggleProviderAccountStatus = async (id, currentStatus) => {
+    try {
+        const res = await fetch('/api/admin/provider-accounts/toggle', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...getHeaders() },
+            body: JSON.stringify({ id, isActive: !currentStatus })
+        });
+
+        if (res.ok) {
+            await refreshData();
+        }
+    } catch (err) {
+        console.error(err);
+    }
+};
+
+window.deleteProviderAccount = async (id) => {
+    if (!await showOzConfirm('Delete Account', 'Are you sure you want to remove this account from the pool?')) return;
+
+    try {
+        const res = await fetch(`/api/admin/provider-accounts/${id}`, {
+            method: 'DELETE',
+            headers: getHeaders()
+        });
+
+        if (res.ok) {
+            showOzAlert('Deleted', 'Account removed.');
+            await refreshData();
         }
     } catch (err) {
         console.error(err);

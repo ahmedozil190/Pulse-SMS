@@ -1996,7 +1996,67 @@ app.post('/api/admin/settings/update', isAdminMiddleware, async (req, res) => {
   }
 });
 
-// --- MANDATORY CHANNELS APIs ---
+// --- PROVIDER ACCOUNTS APIs ---
+
+app.get('/api/admin/provider-accounts', isAdminMiddleware, async (req, res) => {
+  try {
+    const accs = await prisma.providerAccount.findMany({
+      orderBy: { createdAt: 'desc' }
+    });
+
+    // Fetch live balance for each account to show in UI
+    const formattedAccs = await Promise.all(accs.map(async (a) => {
+      const info = await durianApi.getUserInfo({ username: a.username, apiKey: a.apiKey });
+      return {
+        ...a,
+        liveBalance: info.code === 200 ? info.data.balance : 'Error'
+      };
+    }));
+
+    res.json(formattedAccs);
+  } catch (err) {
+    console.error('Fetch provider accounts error:', err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+app.post('/api/admin/provider-accounts/add', isAdminMiddleware, async (req, res) => {
+  const { username, apiKey } = req.body;
+  if (!username || !apiKey) return res.status(400).json({ msg: 'Missing fields' });
+
+  try {
+    const newAcc = await prisma.providerAccount.create({
+      data: { username, apiKey }
+    });
+    res.json(newAcc);
+  } catch (err) {
+    res.status(500).json({ msg: 'Failed to add account' });
+  }
+});
+
+app.post('/api/admin/provider-accounts/toggle', isAdminMiddleware, async (req, res) => {
+  const { id, isActive } = req.body;
+  try {
+    await prisma.providerAccount.update({
+      where: { id: parseInt(id) },
+      data: { isActive }
+    });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ msg: 'Failed to toggle account' });
+  }
+});
+
+app.delete('/api/admin/provider-accounts/:id', isAdminMiddleware, async (req, res) => {
+  try {
+    await prisma.providerAccount.delete({
+      where: { id: parseInt(req.params.id) }
+    });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ msg: 'Failed to delete account' });
+  }
+});
 
 // --- MANDATORY CHANNELS APIs ---
 

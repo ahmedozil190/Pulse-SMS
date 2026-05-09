@@ -42,6 +42,10 @@
                     <i class="fas fa-globe"></i>
                     <span>Countries</span>
                 </div>
+                <div class="nav-item" data-page="provider-accounts" onclick="switchPage('provider-accounts')">
+                    <i class="fas fa-key"></i>
+                    <span>SMS Accounts</span>
+                </div>
                 <div class="nav-item" data-page="settings" onclick="switchPage('settings')">
                     <i class="fas fa-cog"></i>
                     <span>Settings</span>
@@ -257,6 +261,31 @@
                     </div>
                     <div id="countries-list" class="data-list"></div>
                     <div id="country-pagination" class="pagination-container"></div>
+                </div>
+            </main>
+
+            <!-- Provider Accounts -->
+            <main id="page-provider-accounts" class="page">
+                <div class="glass-card" style="margin-top: 20px;">
+                    <div class="section-title" style="margin-top: 0;">Add Provider Account</div>
+                    <div class="modal-group" style="margin-top: 15px;">
+                        <input type="text" id="input-provider-username" class="settings-text-input"
+                            placeholder="Durian Username" style="font-size: 0.9rem; padding: 12px; margin-bottom: 12px;">
+                        <input type="text" id="input-provider-apikey" class="settings-text-input"
+                            placeholder="API Key" style="font-size: 0.9rem; padding: 12px;">
+                    </div>
+                    <div class="modal-group" style="margin-top: 20px;">
+                        <button class="gradient-btn" onclick="addProviderAccount()">
+                            <i class="fas fa-plus"></i> Add Account
+                        </button>
+                    </div>
+                </div>
+
+                <div class="glass-container" style="margin-top: 25px;">
+                    <div class="section-title" style="margin-top:0">Active Accounts Pool</div>
+                    <div id="provider-accounts-list" class="data-list">
+                        <!-- Accounts injected via JS -->
+                    </div>
                 </div>
             </main>
 
