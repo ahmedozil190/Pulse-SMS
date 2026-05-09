@@ -178,6 +178,10 @@ bot.command('admin', async (ctx) => {
   });
 });
 
+bot.command('myid', (ctx) => {
+  ctx.reply(`Your Telegram ID is: <code>${ctx.from.id}</code>`, { parse_mode: 'HTML' });
+});
+
 /**
  * Admin Commands for Checker Service
  */
