@@ -2241,7 +2241,7 @@ const scanLowBalanceSubscriptions = async () => {
 setInterval(scanLowBalanceSubscriptions, 5 * 60 * 1000);
 
 // Start the hunter service
-hunter.start(5000, async (code, stock) => {
+hunter.start(3000, async (code, stock) => {
   try {
     const countryConfig = await prisma.countryConfig.findUnique({ where: { countryCode: code } });
     const price = countryConfig ? countryConfig.price : 0.25;

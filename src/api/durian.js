@@ -1,4 +1,6 @@
 const axios = require('axios');
+const https = require('https');
+const http = require('http');
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -251,6 +253,9 @@ const COUNTRY_MAP = {
   "zw": { "name": "Zimbabwe", "name_ar": "زيمبابوي", "name_fa": "زیمبابوه", "name_bn": "জিম্বাবুয়ে", "flag": "🇿🇼" }
 };
 
+const httpsAgent = new https.Agent({ keepAlive: true });
+const httpAgent = new http.Agent({ keepAlive: true });
+
 class DurianAPI {
   /**
    * Internal helper for GET requests
@@ -260,7 +265,10 @@ class DurianAPI {
       const ts = Date.now();
       const url = `${BASE_URL}${endpoint}?${credentialParams}${params ? '&' + params : ''}&_ts=${ts}`;
       console.log(`[Durian API] GET ${endpoint}`);
-      const response = await axios.get(url);
+      const response = await axios.get(url, {
+        httpsAgent,
+        httpAgent
+      });
       return response.data;
     } catch (error) {
       console.error(`[Durian API] Error in ${endpoint}:`, error.message);
