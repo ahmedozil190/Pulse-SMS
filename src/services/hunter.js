@@ -4,6 +4,7 @@ class HunterService {
   constructor() {
     this.liveDistribution = {};
     this.freshArrivals = {}; // { code: expiryTimestamp }
+    this.outOfStockCache = {}; // { code: expiryTimestamp }
     this.lastNotified = {}; // { code: lastTimestamp } to prevent spam
     this.onFreshArrival = null;
     this.lastUpdated = null;
@@ -39,6 +40,15 @@ class HunterService {
         const newData = response.data;
         const oldData = this.liveDistribution;
         const now = Date.now();
+
+        // Enforce out of stock cache to prevent buggy API from immediately restoring 0-stock countries
+        Object.keys(this.outOfStockCache).forEach(code => {
+          if (this.outOfStockCache[code] > now) {
+            newData[code] = 0;
+          } else {
+            delete this.outOfStockCache[code];
+          }
+        });
 
         // Detect stock increases (Fresh Arrivals)
         Object.keys(newData).forEach(code => {
@@ -97,6 +107,8 @@ class HunterService {
     if (this.freshArrivals && this.freshArrivals[code]) {
       delete this.freshArrivals[code];
     }
+    // Cache the out-of-stock state for 3 minutes to ignore buggy API responses
+    this.outOfStockCache[code] = Date.now() + (3 * 60 * 1000);
   }
 }
 
