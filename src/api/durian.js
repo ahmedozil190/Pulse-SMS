@@ -261,8 +261,13 @@ class DurianAPI {
    */
   async _get(endpoint, params = '', credentials = null) {
     try {
-      const name = credentials?.username || process.env.DURIAN_USERNAME;
-      const apiKey = credentials?.apiKey || process.env.DURIAN_API_KEY;
+      const name = credentials?.username;
+      const apiKey = credentials?.apiKey;
+
+      if (!name || !apiKey) {
+        return { code: 401, msg: "No credentials provided. Please add an SMS account in the Admin Dashboard." };
+      }
+
       const credentialParams = `name=${name}&ApiKey=${apiKey}`;
       
       const ts = Date.now();

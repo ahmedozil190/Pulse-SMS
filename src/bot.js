@@ -1195,9 +1195,9 @@ async function getCleanMobile(countryCode, maxRetries = 3) {
   // Fetch all active provider accounts
   let accounts = await prisma.providerAccount.findMany({ where: { isActive: true } });
   
-  // If no DB accounts, use the one from .env (represented as null in our API)
+  // If no DB accounts, return error
   if (accounts.length === 0) {
-    accounts = [null]; 
+    return { code: 500, msg: 'No active provider accounts configured in Admin Dashboard.' };
   }
 
   for (let i = 0; i < maxRetries; i++) {

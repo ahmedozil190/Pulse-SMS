@@ -1,4 +1,5 @@
 const durianApi = require('../api/durian');
+const prisma = require('../db/prisma');
 
 class HunterService {
   constructor() {
@@ -35,7 +36,14 @@ class HunterService {
    */
   async poll() {
     try {
-      const response = await durianApi.getCountryDistribution(this.pid);
+      // Pick any active account to poll for stock
+      const acc = await prisma.providerAccount.findFirst({ where: { isActive: true } });
+      if (!acc) {
+        console.warn('[Hunter] Skipping poll: No active provider accounts found.');
+        return;
+      }
+
+      const response = await durianApi.getCountryDistribution(this.pid, acc);
       if (response.code === 200 && response.data) {
         const newData = response.data;
         const oldData = this.liveDistribution;
