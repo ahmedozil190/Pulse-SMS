@@ -603,6 +603,101 @@ bot.action(/^toggle_alert_(.+)_(.+)$/, async (ctx) => {
 });
 
 /**
+ * Handle Auto-Reserve Settings
+ */
+bot.action(/^(action_auto_reserve|auto_reserve_page_(\d+))$/, async (ctx) => {
+  try {
+    const page = ctx.match[2] ? parseInt(ctx.match[2]) : 0;
+    const { user } = await getOrCreateUser(ctx);
+
+    // Get all active auto-reserve subscriptions for this user
+    const subs = await prisma.autoReserveSubscription.findMany({
+      where: { userId: user.id },
+      select: { countryCode: true }
+    });
+    const subCodes = subs.map(s => s.countryCode);
+
+    // Get country configs for prices
+    const configs = await prisma.countryConfig.findMany();
+    const configMap = configs.reduce((acc, c) => ({ ...acc, [c.countryCode]: c }), {});
+
+    const msg = ctx.t('auto_reserve_settings_header');
+
+    await ctx.editMessageText(msg, {
+      parse_mode: 'HTML',
+      reply_markup: keyboards.buildAutoReserveKeyboard(ctx.state.lang, subCodes, configMap, page, user.balance).reply_markup
+    });
+
+    await ctx.answerCbQuery().catch(() => { });
+  } catch (err) {
+    console.error('[AUTO RESERVE SETTINGS ERROR]', err);
+    await ctx.answerCbQuery('❌ Error opening auto-reserve settings', { show_alert: true });
+  }
+});
+
+/**
+ * Toggle Auto-Reserve Subscription
+ */
+bot.action(/^toggle_auto_reserve_(.+)_(.+)$/, async (ctx) => {
+  const countryCode = ctx.match[1];
+  const page = parseInt(ctx.match[2]);
+
+  try {
+    const { user } = await getOrCreateUser(ctx);
+
+    // Check if subscription already exists
+    const existing = await prisma.autoReserveSubscription.findUnique({
+      where: { userId_countryCode: { userId: user.id, countryCode } }
+    });
+
+    if (existing) {
+      // Toggle OFF: Remove subscription
+      await prisma.autoReserveSubscription.delete({
+        where: { id: existing.id }
+      });
+      const countryInfo = durianApi.getCountryInfo(countryCode, ctx.state.lang);
+      const msg = ctx.t('auto_reserve_disabled', { country: countryInfo.localizedName });
+      await ctx.answerCbQuery(msg).catch(() => { });
+    } else {
+      // Toggle ON: Check balance first
+      const countryConfig = await prisma.countryConfig.findUnique({ where: { countryCode } });
+      const price = countryConfig ? countryConfig.price : 0.15;
+
+      if (user.balance < price) {
+        const msg = ctx.t('insufficient_balance', { balance: user.balance.toFixed(2), required: price.toFixed(2) });
+        return ctx.answerCbQuery(msg, { show_alert: true });
+      }
+
+      await prisma.autoReserveSubscription.create({
+        data: { userId: user.id, countryCode }
+      });
+      const countryInfo = durianApi.getCountryInfo(countryCode, ctx.state.lang);
+      const msg = ctx.t('auto_reserve_enabled', { country: countryInfo.localizedName });
+      await ctx.answerCbQuery(msg).catch(() => { });
+    }
+
+    // Refresh the current page
+    const subs = await prisma.autoReserveSubscription.findMany({
+      where: { userId: user.id },
+      select: { countryCode: true }
+    });
+    const subCodes = subs.map(s => s.countryCode);
+    const configs = await prisma.countryConfig.findMany();
+    const configMap = configs.reduce((acc, c) => ({ ...acc, [c.countryCode]: c }), {});
+
+    const msg = ctx.t('auto_reserve_settings_header');
+    await ctx.editMessageText(msg, {
+      parse_mode: 'HTML',
+      reply_markup: keyboards.buildAutoReserveKeyboard(ctx.state.lang, subCodes, configMap, page, user.balance).reply_markup
+    });
+
+  } catch (err) {
+    console.error('[TOGGLE AUTO RESERVE ERROR]', err);
+    await ctx.answerCbQuery('❌ Error toggling auto-reserve', { show_alert: true });
+  }
+});
+
+/**
  * Handle Referral Withdrawal
  */
 bot.action('action_withdraw_referral', async (ctx) => {
@@ -1053,11 +1148,12 @@ async function startPolling(ctx, phoneNumber, countryCode) {
       if (smsRes.code === 200 && smsRes.data && smsRes.data.length > 0) {
         clearInterval(pollInterval);
         await completeOrderAndCommission(phoneNumber, smsRes.data);
+        
         const countryInfo = durianApi.getCountryInfo(countryCode);
         const cleanPhone = phoneNumber.startsWith('+') ? phoneNumber.substring(1) : phoneNumber;
-        const user = await prisma.user.findUnique({ where: { id: order.userId } });
-        const isAr = user && user.language === 'ar';
-        const countryName = (isAr && countryInfo.name_ar) ? countryInfo.name_ar : countryInfo.name;
+        
+        const lang = ctx.state.lang || 'en';
+        const countryName = (lang === 'ar' && countryInfo.name_ar) ? countryInfo.name_ar : countryInfo.name;
 
         await ctx.telegram.editMessageText(
           ctx.chat.id,
@@ -1073,16 +1169,16 @@ async function startPolling(ctx, phoneNumber, countryCode) {
               ]
             }
           }
-        );
+        ).catch(() => {});
       } else if (attempts >= maxAttempts) {
         clearInterval(pollInterval);
         await durianApi.releaseNumber('0257', phoneNumber);
         await cancelOrder(phoneNumber);
+        
         const countryInfo = durianApi.getCountryInfo(countryCode);
         const cleanPhone = phoneNumber.startsWith('+') ? phoneNumber.substring(1) : phoneNumber;
-        const user = await prisma.user.findUnique({ where: { id: order.userId } });
-        const isAr = user && user.language === 'ar';
-        const countryName = (isAr && countryInfo.name_ar) ? countryInfo.name_ar : countryInfo.name;
+        const lang = ctx.state.lang || 'en';
+        const countryName = (lang === 'ar' && countryInfo.name_ar) ? countryInfo.name_ar : countryInfo.name;
 
         await ctx.telegram.editMessageText(
           ctx.chat.id,
@@ -1098,10 +1194,75 @@ async function startPolling(ctx, phoneNumber, countryCode) {
               ]
             }
           }
-        );
+        ).catch(() => {});
       }
     } catch (err) {
-      console.error("Polling error:", err);
+      console.error('[POLLING ERROR]', err);
+    }
+  }, 15000);
+}
+
+/**
+ * Background Polling Logic for Auto-Reserve (No ctx available)
+ */
+async function startAutoPolling(telegramId, messageId, phoneNumber, countryCode, lang) {
+  let attempts = 0;
+  const maxAttempts = 20;
+
+  const pollInterval = setInterval(async () => {
+    attempts++;
+    try {
+      const smsRes = await durianApi.getMsg('0257', phoneNumber);
+      if (smsRes.code === 200 && smsRes.data && smsRes.data.length > 0) {
+        clearInterval(pollInterval);
+        await completeOrderAndCommission(phoneNumber, smsRes.data);
+        
+        const countryInfo = durianApi.getCountryInfo(countryCode);
+        const cleanPhone = phoneNumber.startsWith('+') ? phoneNumber.substring(1) : phoneNumber;
+        const countryName = (lang === 'ar' && countryInfo.name_ar) ? countryInfo.name_ar : countryInfo.name;
+
+        await bot.telegram.editMessageText(
+          telegramId,
+          messageId,
+          null,
+          `${i18n.t(lang, 'purchase_success')}\n\n• ${i18n.t(lang, 'number_label')}: <b><code>+${cleanPhone}</code></b>\n• ${i18n.t(lang, 'country_label')}: <b>${countryInfo.flag} ${escapeHTML(countryName)}</b>\n• ${i18n.t(lang, 'code_label')}: <b><code>${escapeHTML(smsRes.data)}</code></b>\n\n✅ ${i18n.t(lang, 'use_code_now_hint') || 'You can use the code now'}`,
+          {
+            parse_mode: 'HTML',
+            reply_markup: {
+              inline_keyboard: [
+                [{ text: i18n.t(lang, 'buy_another_btn'), callback_data: 'action_buy_number' }],
+                [{ text: i18n.t(lang, 'activation_channel_btn'), url: 'https://t.me/your_activation_channel' }]
+              ]
+            }
+          }
+        ).catch(() => {});
+      } else if (attempts >= maxAttempts) {
+        clearInterval(pollInterval);
+        await durianApi.releaseNumber('0257', phoneNumber);
+        await cancelOrder(phoneNumber);
+        
+        const countryInfo = durianApi.getCountryInfo(countryCode);
+        const cleanPhone = phoneNumber.startsWith('+') ? phoneNumber.substring(1) : phoneNumber;
+        const countryName = (lang === 'ar' && countryInfo.name_ar) ? countryInfo.name_ar : countryInfo.name;
+
+        await bot.telegram.editMessageText(
+          telegramId,
+          messageId,
+          null,
+          `${i18n.t(lang, 'purchase_success_plain')}\n\n• <b>${i18n.t(lang, 'number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${i18n.t(lang, 'country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryName)}\n• <b>${i18n.t(lang, 'code_label')}</b>:  <code>XXXXX</code>\n\n<b>${i18n.t(lang, 'code_not_retrieved')}</b>`,
+          {
+            parse_mode: 'HTML',
+            reply_markup: {
+              inline_keyboard: [
+                [{ text: i18n.t(lang, 'retry_btn'), callback_data: `check_code_${countryCode}_${phoneNumber}` }],
+                [{ text: i18n.t(lang, 'main_menu_btn'), callback_data: 'action_main_menu' }]
+              ]
+            }
+          }
+        ).catch(() => {});
+      }
+    } catch (err) {
+      console.error('[AUTO POLLING ERROR]', err);
     }
   }, 15000);
 }
@@ -2041,51 +2202,98 @@ setInterval(scanLowBalanceSubscriptions, 5 * 60 * 1000);
 // Start the hunter service
 hunter.start(5000, async (code, stock) => {
   try {
-    const subs = await prisma.notificationSubscription.findMany({
+    const countryConfig = await prisma.countryConfig.findUnique({ where: { countryCode: code } });
+    const price = countryConfig ? countryConfig.price : 0.25;
+
+    // 1. Handle Auto-Reserves (Priority)
+    const autoSubs = await prisma.autoReserveSubscription.findMany({
       where: { countryCode: code },
+      include: { user: true }
+    });
+
+    if (autoSubs.length > 0) {
+      console.log(`[AUTO-RESERVE] Stock for ${code} is ${stock}. Trying to buy for ${autoSubs.length} users...`);
+      for (const sub of autoSubs) {
+        if (!sub.user || sub.user.isBanned || sub.user.balance < price) continue;
+
+        try {
+          const buyRes = await durianApi.getMobile('0257', code);
+          if (buyRes.code === 200 && buyRes.data) {
+            const phoneNumber = buyRes.data;
+            const cleanPhone = phoneNumber.startsWith('+') ? phoneNumber.substring(1) : phoneNumber;
+
+            // Create Order
+            const order = await prisma.order.create({
+              data: {
+                userId: sub.user.id,
+                serviceId: '0257',
+                countryId: code,
+                phoneNumber: phoneNumber,
+                price: price,
+                status: 'PENDING'
+              }
+            });
+
+            const lang = sub.user.language || 'en';
+            const countryInfo = durianApi.getCountryInfo(code, lang);
+            const countryName = (lang === 'ar' && countryInfo.name_ar) ? countryInfo.name_ar : countryInfo.name;
+
+            const msg = `⚡ <b>${i18n.t(lang, 'purchase_success')} (Auto-Reserve)</b>\n\n• <b>${i18n.t(lang, 'number_label')}</b>: <code>+${cleanPhone}</code>\n• <b>${i18n.t(lang, 'country_label')}</b>: ${countryInfo.flag} ${escapeHTML(countryName)}\n• <b>${i18n.t(lang, 'code_label')}</b>: <code>XXXXX</code>\n\n<b>${i18n.t(lang, 'request_code_btn')}</b>`;
+
+            const sentMsg = await bot.telegram.sendMessage(sub.user.telegramId, msg, {
+              parse_mode: 'HTML',
+              reply_markup: {
+                inline_keyboard: [
+                  [{ text: i18n.t(lang, 'request_code_btn'), callback_data: `check_code_${code}_${phoneNumber}` }]
+                ]
+              }
+            });
+
+            // Start polling for this specific auto-reserved number
+            startAutoPolling(sub.user.telegramId, sentMsg.message_id, phoneNumber, code, lang);
+            
+            console.log(`[AUTO-RESERVE] SUCCESS for User ${sub.user.telegramId} | Country: ${code}`);
+          }
+        } catch (buyErr) {
+          console.error(`[AUTO-RESERVE FAIL] User ${sub.user.telegramId}:`, buyErr.message);
+        }
+      }
+    }
+
+    // 2. Handle Notifications (Alerts)
+    // Filter out users who already have an auto-reserve subscription for this country
+    const autoReservedUserIds = autoSubs.map(s => s.userId);
+    
+    const subs = await prisma.notificationSubscription.findMany({
+      where: { 
+        countryCode: code,
+        userId: { notIn: autoReservedUserIds }
+      },
       include: { user: true }
     });
 
     if (subs.length > 0) {
       console.log(`[HUNTER ALERT] Stock for ${code} is ${stock}. Notifying ${subs.length} users...`);
-    }
+      for (const s of subs) {
+        if (!s.user || s.user.isBanned || s.user.balance < price) continue;
 
-    const countryConfig = await prisma.countryConfig.findUnique({ where: { countryCode: code } });
-    const price = countryConfig ? countryConfig.price : 0.25;
+        const lang = s.user.language || 'en';
+        const info = durianApi.getCountryInfo(code, lang);
+        const msg = i18n.t(lang, 'alert_notification', {
+          flag: info.flag,
+          name: info.localizedName,
+          price: price.toFixed(2)
+        });
 
-    for (const s of subs) {
-      if (!s.user || s.user.isBanned) continue;
-
-      // Skip notification if balance is low (wait for grace period cleanup)
-      if (s.user.balance < price) {
-        continue;
+        bot.telegram.sendMessage(s.user.telegramId, msg, {
+          parse_mode: 'HTML',
+          reply_markup: {
+            inline_keyboard: [[Markup.button.callback(i18n.t(lang, 'alert_buy_btn'), `select_country_${code}_alert`)]]
+          }
+        }).catch(() => {});
+        
+        await new Promise(resolve => setTimeout(resolve, 50));
       }
-
-      const lang = s.user.language || 'en';
-      const info = durianApi.getCountryInfo(code, lang);
-      const msg = i18n.t(lang, 'alert_notification', {
-        flag: info.flag,
-        name: info.localizedName,
-        price: price.toFixed(2)
-      });
-
-      const btnText = i18n.t(lang, 'alert_buy_btn');
-
-      bot.telegram.sendMessage(s.user.telegramId, msg, {
-        parse_mode: 'HTML',
-        reply_markup: {
-          inline_keyboard: [
-            [Markup.button.callback(btnText, `select_country_${code}_alert`)]
-          ]
-        }
-      }).catch(err => {
-        if (!err.message.includes('blocked by the user') && !err.message.includes('chat not found')) {
-          console.error(`[HUNTER MSG ERROR] User ${s.user.telegramId}:`, err.message);
-        }
-      });
-
-      // Small sleep to prevent flood
-      await new Promise(resolve => setTimeout(resolve, 50));
     }
   } catch (err) {
     console.error('[HUNTER BROADCAST ERROR]', err);

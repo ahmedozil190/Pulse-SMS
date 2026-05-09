@@ -26,6 +26,7 @@ model User {
   orders          Order[]
   deposits        Deposit[]
   subscriptions   NotificationSubscription[]
+  autoReserves    AutoReserveSubscription[]
 }
 
 model Order {
@@ -73,6 +74,16 @@ model MandatoryChannel {
 }
 
 model NotificationSubscription {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  countryCode String
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, countryCode])
+}
+
+model AutoReserveSubscription {
   id          Int      @id @default(autoincrement())
   userId      Int
   user        User     @relation(fields: [userId], references: [id])
