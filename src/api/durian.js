@@ -257,7 +257,8 @@ class DurianAPI {
    */
   async _get(endpoint, params = '') {
     try {
-      const url = `${BASE_URL}${endpoint}?${credentialParams}${params ? '&' + params : ''}`;
+      const ts = Date.now();
+      const url = `${BASE_URL}${endpoint}?${credentialParams}${params ? '&' + params : ''}&_ts=${ts}`;
       console.log(`[Durian API] GET ${endpoint}`);
       const response = await axios.get(url);
       return response.data;
