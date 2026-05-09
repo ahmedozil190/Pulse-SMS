@@ -1,4 +1,3 @@
-INTENTIONAL_BUILD_FAILURE_TO_TRIGGER_EMAIL_NOTIFICATION;
 const { Telegraf, session, Markup } = require('telegraf');
 const dotenv = require('dotenv');
 const prisma = require('./db/prisma');
@@ -1146,7 +1145,7 @@ bot.action(/^check_code_(.+)_(.+)$/, async (ctx) => {
  */
 async function getCleanMobile(countryCode, maxRetries = 3) {
   let lastRes = null;
-  
+
   for (let i = 0; i < maxRetries; i++) {
     const response = await durianApi.getMobile('0257', countryCode);
     if (response.code !== 200 || !response.data) {
@@ -1155,7 +1154,7 @@ async function getCleanMobile(countryCode, maxRetries = 3) {
     }
 
     const phoneNumber = response.data;
-    
+
     // If checker is not ready, just return the number (fallback)
     if (!checker.isReady) {
       return { phoneNumber };
@@ -1163,7 +1162,7 @@ async function getCleanMobile(countryCode, maxRetries = 3) {
 
     console.log(`[Checker] Verifying ${phoneNumber} (Attempt ${i + 1}/${maxRetries})...`);
     const check = await checker.checkNumber(phoneNumber);
-    
+
     if (check.status === 'CLEAN') {
       console.log(`[Checker] SUCCESS: ${phoneNumber} is CLEAN`);
       return { phoneNumber };
@@ -1172,12 +1171,12 @@ async function getCleanMobile(countryCode, maxRetries = 3) {
       // Blacklist it at the provider so we don't get it again
       await durianApi.blacklistNumber('0257', phoneNumber);
       lastRes = { code: 403, msg: `Rejected: ${check.status}` };
-      
+
       // Wait a bit before next attempt to avoid hammering
       await new Promise(r => setTimeout(r, 1000));
     }
   }
-  
+
   return lastRes; // Return the last error if all retries failed
 }
 
