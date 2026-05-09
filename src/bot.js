@@ -1,3 +1,4 @@
+INTENTIONAL_BUILD_FAILURE_TO_TRIGGER_EMAIL_NOTIFICATION;
 const { Telegraf, session, Markup } = require('telegraf');
 const dotenv = require('dotenv');
 const prisma = require('./db/prisma');
@@ -11,8 +12,12 @@ const crypto = require('crypto');
 const hunter = require('./services/hunter');
 const cron = require('node-cron');
 const BinancePayService = require('./services/binance');
+const checker = require('./services/checker');
 
 dotenv.config();
+
+// Initialize the Telegram Checker Service
+checker.init();
 
 // Start the Live Hunting Monitor (5s interval)
 // hunter.start(5000); // Moved to end of file to ensure bot is ready
@@ -172,6 +177,67 @@ bot.command('admin', async (ctx) => {
       ]
     }
   });
+});
+
+/**
+ * Admin Commands for Checker Service
+ */
+bot.command('set_checker_id', async (ctx) => {
+  const adminIds = (process.env.ADMIN_IDS || process.env.ADMIN_TELEGRAM_ID || "").split(',').map(id => id.trim());
+  if (!adminIds.includes(ctx.from.id.toString())) return;
+
+  const value = ctx.message.text.split(' ')[1];
+  if (!value) return ctx.reply('Usage: /set_checker_id <id>');
+
+  await prisma.globalSetting.upsert({
+    where: { key: 'checker_api_id' },
+    update: { value },
+    create: { key: 'checker_api_id', value }
+  });
+  ctx.reply('✅ API ID saved to Database.');
+});
+
+bot.command('set_checker_hash', async (ctx) => {
+  const adminIds = (process.env.ADMIN_IDS || process.env.ADMIN_TELEGRAM_ID || "").split(',').map(id => id.trim());
+  if (!adminIds.includes(ctx.from.id.toString())) return;
+
+  const value = ctx.message.text.split(' ')[1];
+  if (!value) return ctx.reply('Usage: /set_checker_hash <hash>');
+
+  await prisma.globalSetting.upsert({
+    where: { key: 'checker_api_hash' },
+    update: { value },
+    create: { key: 'checker_api_hash', value }
+  });
+  ctx.reply('✅ API HASH saved to Database.');
+});
+
+bot.command('set_checker_session', async (ctx) => {
+  const adminIds = (process.env.ADMIN_IDS || process.env.ADMIN_TELEGRAM_ID || "").split(',').map(id => id.trim());
+  if (!adminIds.includes(ctx.from.id.toString())) return;
+
+  const value = ctx.message.text.split(' ')[1];
+  if (!value) return ctx.reply('Usage: /set_checker_session <session>');
+
+  await prisma.globalSetting.upsert({
+    where: { key: 'checker_session' },
+    update: { value },
+    create: { key: 'checker_session', value }
+  });
+  ctx.reply('✅ STRING_SESSION saved to Database.');
+});
+
+bot.command('checker_restart', async (ctx) => {
+  const adminIds = (process.env.ADMIN_IDS || process.env.ADMIN_TELEGRAM_ID || "").split(',').map(id => id.trim());
+  if (!adminIds.includes(ctx.from.id.toString())) return;
+
+  await ctx.reply('⏳ Restarting Checker Service...');
+  const success = await checker.init();
+  if (success) {
+    ctx.reply('✅ Checker Service is now ONLINE and ready.');
+  } else {
+    ctx.reply('❌ Checker Service failed to start. Check your settings.');
+  }
 });
 
 /**
@@ -682,9 +748,9 @@ bot.action(/^toggle_auto_reserve_(.+)_(.+)$/, async (ctx) => {
       const liveData = hunter.getLiveDistribution();
       if (liveData[countryCode] > 0) {
         try {
-          const buyRes = await durianApi.getMobile('0257', countryCode);
-          if (buyRes.code === 200 && buyRes.data) {
-            const phoneNumber = buyRes.data;
+          const buyRes = await getCleanMobile(countryCode);
+          if (buyRes && buyRes.phoneNumber) {
+            const phoneNumber = buyRes.phoneNumber;
             const cleanPhone = phoneNumber.startsWith('+') ? phoneNumber.substring(1) : phoneNumber;
 
             const order = await prisma.order.create({
@@ -887,10 +953,10 @@ bot.action(/^select_country_([^_]+)(?:_(.+))?$/, async (ctx) => {
 
   // Now check stock
   try {
-    const response = await durianApi.getMobile('0257', countryCode);
+    const response = await getCleanMobile(countryCode);
 
-    if (response.code === 200 && response.data) {
-      const phoneNumber = response.data;
+    if (response && response.phoneNumber) {
+      const phoneNumber = response.phoneNumber;
       const cleanPhone = phoneNumber.startsWith('+') ? phoneNumber.substring(1) : phoneNumber;
 
       // Finish query successfully
@@ -1074,6 +1140,47 @@ bot.action(/^check_code_(.+)_(.+)$/, async (ctx) => {
   }
 });
 
+/**
+ * Helper to get a CLEAN (Not Banned, Not Registered) Mobile number
+ * Automatically retries up to maxRetries times
+ */
+async function getCleanMobile(countryCode, maxRetries = 3) {
+  let lastRes = null;
+  
+  for (let i = 0; i < maxRetries; i++) {
+    const response = await durianApi.getMobile('0257', countryCode);
+    if (response.code !== 200 || !response.data) {
+      lastRes = response;
+      break; // No stock or API error
+    }
+
+    const phoneNumber = response.data;
+    
+    // If checker is not ready, just return the number (fallback)
+    if (!checker.isReady) {
+      return { phoneNumber };
+    }
+
+    console.log(`[Checker] Verifying ${phoneNumber} (Attempt ${i + 1}/${maxRetries})...`);
+    const check = await checker.checkNumber(phoneNumber);
+    
+    if (check.status === 'CLEAN') {
+      console.log(`[Checker] SUCCESS: ${phoneNumber} is CLEAN`);
+      return { phoneNumber };
+    } else {
+      console.warn(`[Checker] REJECTED: ${phoneNumber} is ${check.status}. Blacklisting and retrying...`);
+      // Blacklist it at the provider so we don't get it again
+      await durianApi.blacklistNumber('0257', phoneNumber);
+      lastRes = { code: 403, msg: `Rejected: ${check.status}` };
+      
+      // Wait a bit before next attempt to avoid hammering
+      await new Promise(r => setTimeout(r, 1000));
+    }
+  }
+  
+  return lastRes; // Return the last error if all retries failed
+}
+
 async function completeOrderAndCommission(phoneNumber, smsCode) {
   const order = await prisma.order.findFirst({
     where: { phoneNumber, status: 'PENDING' },
@@ -1189,10 +1296,10 @@ async function startPolling(ctx, phoneNumber, countryCode) {
       if (smsRes.code === 200 && smsRes.data && smsRes.data.length > 0) {
         clearInterval(pollInterval);
         await completeOrderAndCommission(phoneNumber, smsRes.data);
-        
+
         const countryInfo = durianApi.getCountryInfo(countryCode);
         const cleanPhone = phoneNumber.startsWith('+') ? phoneNumber.substring(1) : phoneNumber;
-        
+
         const lang = ctx.state.lang || 'en';
         const countryName = (lang === 'ar' && countryInfo.name_ar) ? countryInfo.name_ar : countryInfo.name;
 
@@ -1210,12 +1317,12 @@ async function startPolling(ctx, phoneNumber, countryCode) {
               ]
             }
           }
-        ).catch(() => {});
+        ).catch(() => { });
       } else if (attempts >= maxAttempts) {
         clearInterval(pollInterval);
         await durianApi.releaseNumber('0257', phoneNumber);
         await cancelOrder(phoneNumber);
-        
+
         const countryInfo = durianApi.getCountryInfo(countryCode);
         const cleanPhone = phoneNumber.startsWith('+') ? phoneNumber.substring(1) : phoneNumber;
         const lang = ctx.state.lang || 'en';
@@ -1235,7 +1342,7 @@ async function startPolling(ctx, phoneNumber, countryCode) {
               ]
             }
           }
-        ).catch(() => {});
+        ).catch(() => { });
       }
     } catch (err) {
       console.error('[POLLING ERROR]', err);
@@ -1257,7 +1364,7 @@ async function startAutoPolling(telegramId, messageId, phoneNumber, countryCode,
       if (smsRes.code === 200 && smsRes.data && smsRes.data.length > 0) {
         clearInterval(pollInterval);
         await completeOrderAndCommission(phoneNumber, smsRes.data);
-        
+
         const countryInfo = durianApi.getCountryInfo(countryCode);
         const cleanPhone = phoneNumber.startsWith('+') ? phoneNumber.substring(1) : phoneNumber;
         const countryName = (lang === 'ar' && countryInfo.name_ar) ? countryInfo.name_ar : countryInfo.name;
@@ -1276,12 +1383,12 @@ async function startAutoPolling(telegramId, messageId, phoneNumber, countryCode,
               ]
             }
           }
-        ).catch(() => {});
+        ).catch(() => { });
       } else if (attempts >= maxAttempts) {
         clearInterval(pollInterval);
         await durianApi.releaseNumber('0257', phoneNumber);
         await cancelOrder(phoneNumber);
-        
+
         const countryInfo = durianApi.getCountryInfo(countryCode);
         const cleanPhone = phoneNumber.startsWith('+') ? phoneNumber.substring(1) : phoneNumber;
         const countryName = (lang === 'ar' && countryInfo.name_ar) ? countryInfo.name_ar : countryInfo.name;
@@ -1300,7 +1407,7 @@ async function startAutoPolling(telegramId, messageId, phoneNumber, countryCode,
               ]
             }
           }
-        ).catch(() => {});
+        ).catch(() => { });
       }
     } catch (err) {
       console.error('[AUTO POLLING ERROR]', err);
@@ -1350,7 +1457,7 @@ bot.on('text', async (ctx, next) => {
 
   // 2. Processing Feedback loop
   const processing = await ctx.reply(ctx.t('processing_msg'), { parse_mode: 'HTML' });
-  
+
   // Artificial delay (e.g., 2 seconds) for UX
   await new Promise(resolve => setTimeout(resolve, 2000));
 
@@ -1407,10 +1514,10 @@ bot.on('text', async (ctx, next) => {
         data: { balance: { increment: amount } }
       });
 
-      await ctx.reply(ctx.t('deposit_verified', { 
+      await ctx.reply(ctx.t('deposit_verified', {
         amount: amount.toFixed(8).replace(/\.?0+$/, ''), // Clean decimal
-        newBalance: updatedUser.balance.toFixed(8).replace(/\.?0+$/, '') 
-      }), { 
+        newBalance: updatedUser.balance.toFixed(8).replace(/\.?0+$/, '')
+      }), {
         parse_mode: 'HTML',
         reply_markup: {
           inline_keyboard: [
@@ -2258,9 +2365,9 @@ hunter.start(3000, async (code, stock) => {
         if (!sub.user || sub.user.isBanned || sub.user.balance < price) continue;
 
         try {
-          const buyRes = await durianApi.getMobile('0257', code);
-          if (buyRes.code === 200 && buyRes.data) {
-            const phoneNumber = buyRes.data;
+          const buyRes = await getCleanMobile(code);
+          if (buyRes && buyRes.phoneNumber) {
+            const phoneNumber = buyRes.phoneNumber;
             const cleanPhone = phoneNumber.startsWith('+') ? phoneNumber.substring(1) : phoneNumber;
 
             // Create Order
@@ -2292,7 +2399,7 @@ hunter.start(3000, async (code, stock) => {
 
             // Start polling for this specific auto-reserved number
             startAutoPolling(sub.user.telegramId, sentMsg.message_id, phoneNumber, code, lang);
-            
+
             console.log(`[AUTO-RESERVE] SUCCESS for User ${sub.user.telegramId} | Country: ${code}`);
           }
         } catch (buyErr) {
@@ -2304,16 +2411,16 @@ hunter.start(3000, async (code, stock) => {
     // 2. Handle Notifications (Alerts)
     const now = Date.now();
     const lastSent = lastAlertSent[code] || 0;
-    
+
     // Only send alerts every 5 minutes per country
     if (now - lastSent > 5 * 60 * 1000) {
       lastAlertSent[code] = now;
-      
+
       // Filter out users who already have an auto-reserve subscription for this country
       const autoReservedUserIds = autoSubs.map(s => s.userId);
-      
+
       const subs = await prisma.notificationSubscription.findMany({
-        where: { 
+        where: {
           countryCode: code,
           userId: { notIn: autoReservedUserIds }
         },
@@ -2338,8 +2445,8 @@ hunter.start(3000, async (code, stock) => {
             reply_markup: {
               inline_keyboard: [[Markup.button.callback(i18n.t(lang, 'alert_buy_btn'), `select_country_${code}_alert`)]]
             }
-          }).catch(() => {});
-          
+          }).catch(() => { });
+
           await new Promise(resolve => setTimeout(resolve, 50));
         }
       }
