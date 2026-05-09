@@ -40,6 +40,7 @@ class HunterService {
       const acc = await prisma.providerAccount.findFirst({ where: { isActive: true } });
       if (!acc) {
         console.warn('[Hunter] Skipping poll: No active provider accounts found.');
+        this.liveDistribution = {}; // Clear stock so countries disappear
         return;
       }
 
