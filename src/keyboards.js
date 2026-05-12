@@ -16,9 +16,6 @@ const keyboards = {
     [
       Markup.button.callback(i18n.b(lang, 'notifications'), 'action_settings'),
       Markup.button.callback(i18n.b(lang, 'invite'), 'action_invite')
-    ],
-    [
-      Markup.button.callback(i18n.b(lang, 'auto_reserve'), 'action_auto_reserve')
     ]
   ]),
 
@@ -139,56 +136,6 @@ const keyboards = {
     const navRow = [];
     if (page > 0) navRow.push(Markup.button.callback(i18n.t(lang, 'prev_page_btn'), `alert_page_${page - 1}`));
     if (page < totalPages - 1) navRow.push(Markup.button.callback(i18n.t(lang, 'next_page_btn'), `alert_page_${page + 1}`));
-    if (navRow.length > 0) rows.push(navRow);
-    
-    rows.push([Markup.button.callback(i18n.t(lang, 'main_menu_btn'), 'action_main_menu')]);
-    
-    return Markup.inlineKeyboard(rows);
-  },
-
-  /**
-   * Generates a paginated keyboard for Auto-Reserve settings
-   */
-  buildAutoReserveKeyboard: (lang, activeSubscriptions, configMap, page, userBalance) => {
-    const pageSize = 20;
-    const allCountries = durianApi.getAllCountries();
-    const codes = Object.keys(allCountries)
-      .filter(c => {
-        const cfg = configMap[c];
-        return cfg ? cfg.isEnabled : false;
-      })
-      .sort((a,b) => {
-        const infoA = durianApi.getCountryInfo(a, lang);
-        const infoB = durianApi.getCountryInfo(b, lang);
-        return infoA.localizedName.localeCompare(infoB.localizedName);
-      });
-    
-    const start = page * pageSize;
-    const paginated = codes.slice(start, start + pageSize);
-    const totalPages = Math.ceil(codes.length / pageSize);
-    
-    const buttons = paginated.map(code => {
-      const info = durianApi.getCountryInfo(code, lang);
-      const cfg = configMap[code] || { price: 0.25 };
-      const price = cfg.price;
-      const isSubscribed = activeSubscriptions.includes(code);
-      
-      let statusIcon = isSubscribed ? '✅' : '❌';
-      if (userBalance < price) statusIcon = '⛔';
-      
-      const label = `${info.flag} ${info.localizedName} ${statusIcon} ${price}$`;
-      return Markup.button.callback(label, `toggle_auto_reserve_${code}_${page}`);
-    });
-    
-    const rows = [];
-    for (let i = 0; i < buttons.length; i += 2) {
-      rows.push(buttons.slice(i, i + 2));
-    }
-    
-    // Pagination Row
-    const navRow = [];
-    if (page > 0) navRow.push(Markup.button.callback(i18n.t(lang, 'prev_page_btn'), `auto_reserve_page_${page - 1}`));
-    if (page < totalPages - 1) navRow.push(Markup.button.callback(i18n.t(lang, 'next_page_btn'), `auto_reserve_page_${page + 1}`));
     if (navRow.length > 0) rows.push(navRow);
     
     rows.push([Markup.button.callback(i18n.t(lang, 'main_menu_btn'), 'action_main_menu')]);

@@ -36,9 +36,7 @@ const texts = {
     use_code_now_hint: "You can use the code now",
     alert_settings_header: "<b>🎯 Alert Settings</b>\n\nChoose your notification method for countries:\n\n📰 What will you be alerted about?\n• Price changes\n• Country availability\n• Numbers out of stock",
     alert_settings_note: "\n\n\n<i>💡 Note: Disabled countries ⛔️ cannot be activated due to insufficient balance</i>",
-    auto_reserve_settings_header: "<b>⚡ Auto-Reserve Settings</b>\n\nSelect countries you want the bot to automatically buy numbers from the moment they become available:\n\n<i>💡 The bot will automatically deduct your balance and buy the number for you!</i>",
-    auto_reserve_enabled: "✅ {country}: Auto-Buy ON",
-    auto_reserve_disabled: "❌ {country}: Auto-Buy OFF",
+    alert_disabled: "✅ {country}: Disable",
     next_page_btn: "Next ➡️",
     prev_page_btn: "⬅️ Previous",
     main_menu_btn: "🔙 Back to Main",
@@ -98,9 +96,7 @@ const texts = {
     use_code_now_hint: "يمكنك استخدام الكود الآن",
     alert_settings_header: "<b>🎯 إعدادات التنبيهات</b>\n\nاختر طريقة إشعاراتك للدول:\n\n📰 ما الذي يتم تنبيهك به؟\n• تغيّر الأسعار\n• توفر الدولة\n• نفاد الأرقام",
     alert_settings_note: "\n\n\n<i>💡 ملاحظة: الدول المعطلة ⛔️ لا يمكن تفعيلها بسبب نقص الرصيد</i>",
-    auto_reserve_settings_header: "<b>⚡ إعدادات الحجز التلقائي</b>\n\nاختر الدول التي تريد من البوت شراء أرقام منها تلقائياً بمجرد توفرها:\n\n<i>💡 سيقوم البوت بشراء الرقم تلقائياً وخصم الرصيد فور توفره دون أي تدخل منك!</i>",
-    auto_reserve_enabled: "✅ {country}: حجز تلقائي (مفعل)",
-    auto_reserve_disabled: "❌ {country}: حجز تلقائي (معطل)",
+    alert_disabled: "✅ {country}: إيقاف",
     next_page_btn: "التالي ➡️",
     prev_page_btn: "⬅️ السابق",
     main_menu_btn: "🔙 العودة للرئيسية",
@@ -157,9 +153,7 @@ const texts = {
     use_code_now_hint: "اکنون می‌توانید از کد استفاده کنید",
     alert_settings_header: "<b>🎯 تنظیمات هشدارها</b>\n\nروش اطلاع‌رسانی خود را برای کشورها انتخاب کنید:\n\n📰 از چه چیزهایی مطلع خواهید شد؟\n• تغییرات قیمت\n• موجود بودن کشور\n• تمام شدن شماره‌ها",
     alert_settings_note: "\n\n\n<i>💡 توجه: کشورهای غیرفعال ⛔️ به دلیل موجودی ناکافی قابل فعال‌سازی نیستند</i>",
-    auto_reserve_settings_header: "<b>⚡ تنظیمات رزرو خودکار</b>\n\nکشورهایی را که می‌خواهید ربات به محض در دسترس قرار گرفتن شماره، به طور خودکار خریداری کند انتخاب کنید:\n\n<i>💡 ربات به طور خودکار موجودی شما را کسر می‌کند و شماره را برای شما می‌خرد!</i>",
-    auto_reserve_enabled: "✅ {country}: رزرو خودکار روشن",
-    auto_reserve_disabled: "❌ {country}: رزرو خودکار خاموش",
+    alert_disabled: "{country}: غیرفعال ✅",
     next_page_btn: "بعدی ➡️",
     prev_page_btn: "⬅️ قبلی",
     main_menu_btn: "🔙 بازگشت به منوى اصلى",
@@ -216,9 +210,7 @@ const texts = {
     use_code_now_hint: "আপনি এখন কোডটি ব্যবহার করতে পারেন",
     alert_settings_header: "<b>🎯 অ্যালার্ট সেটিংস</b>\n\nদেশগুলোর জন্য আপনার নোটিফিকেশন পদ্ধতি নির্বাচন করুন:\n\n📰 আপনি কি সম্পর্কে অ্যালার্ট পাবেন?\n• দাম পরিবর্তন\n• দেশের প্রাপ্যতা\n• নম্বর ফুরিয়ে যাওয়া",
     alert_settings_note: "\n\n\n<i>💡 নোট: নিষ্ক্রিয় দেশগুলি ⛔️ অপর্যাপ্ত ব্যালেন্সের কারণে সক্রিয় করা যাবে না</i>",
-    auto_reserve_settings_header: "<b>⚡ অটো-রিজার্ভ সেটিংস</b>\n\nআপনি যে দেশগুলো থেকে বট স্বয়ংক্রিয়ভাবে নম্বর কিনতে চান তা নির্বাচন করুন:\n\n<i>💡 বট স্বয়ংক্রিয়ভাবে আপনার ব্যালেন্স থেকে টাকা কাটবে এবং আপনার জন্য নম্বর কিনবে!</i>",
-    auto_reserve_enabled: "✅ {country}: অটো-রিজার্ভ চালু",
-    auto_reserve_disabled: "❌ {country}: অটো-রিজার্ভ বন্ধ",
+    alert_disabled: "✅ {country}: বন্ধ",
     next_page_btn: "পরবর্তী ➡️",
     prev_page_btn: "⬅️ আগের",
     main_menu_btn: "🔙 মূল মেনুতে ফিরুন",
@@ -250,7 +242,6 @@ const buttons = {
     deposit: "💳 Deposit",
     my_stats: "📊 My Statistics",
     notifications: "⚙️ Notification Settings",
-    auto_reserve: "⚡ Auto-Reserve",
     invite: "🗽 Invite Friend"
   },
   ar: {
@@ -259,7 +250,6 @@ const buttons = {
     deposit: "💳 شحن الرصيد",
     my_stats: "📊 إحصائياتي",
     notifications: "⚙️ إعدادات التنبيهات",
-    auto_reserve: "⚡ الحجز التلقائي",
     invite: "🗽 دعوه صديقك"
   },
   fa: {
@@ -268,7 +258,6 @@ const buttons = {
     deposit: "💳 شارژ حساب",
     my_stats: "📊 آمار من",
     notifications: "⚙️ تنظیمات هشدارها",
-    auto_reserve: "⚡ رزرو خودکار",
     invite: "🗽 دعوت دوست"
   },
   bn: {
@@ -277,7 +266,6 @@ const buttons = {
     deposit: "💳 ডিপোজিট",
     my_stats: "📊 আমার পরিসংখ্যান ",
     notifications: "⚙️ নোটিফিকেশন সেটিংস",
-    auto_reserve: "⚡ অটো-রিজার্ভ",
     invite: "🗽 বন্ধুকে আমন্ত্রণ জানান"
   }
 };
