@@ -918,18 +918,6 @@ bot.action(/^select_country_([^_]+)(?:_(.+))?$/, async (ctx) => {
     return ctx.answerCbQuery(msg, { show_alert: true });
   }
 
-
-  // Start the UX animation immediately (DON'T answer query yet)
-  const percentages = ['10%', '30%', '70%', '100%'];
-  for (let percent of percentages) {
-    await ctx.editMessageText(ctx.t('purchase_process'), {
-      reply_markup: {
-        inline_keyboard: [[{ text: percent, callback_data: 'ignore' }]]
-      }
-    }).catch(() => { });
-    await new Promise(r => setTimeout(r, 600));
-  }
-
   // Now check stock
   try {
     const response = await getCleanMobile(countryCode);
@@ -1518,17 +1506,6 @@ bot.action('action_settings', async (ctx) => {
   await ctx.answerCbQuery('Coming soon... ⚙️', { show_alert: true });
 });
 
-bot.launch().then(async () => {
-  try {
-    await bot.telegram.setMyCommands([
-      { command: 'start', description: '/start' },
-      { command: 'lang', description: '/lang' }
-    ]);
-  } catch (e) {
-    console.log('Failed to set commands', e);
-  }
-  console.log('[BOT] OzZoO SMS Bot started successfully.');
-});
 
 // --- EXPRESS SERVER FOR ADMIN WEB APP ---
 const app = express();
@@ -2488,7 +2465,15 @@ hunter.start(3000, async (code, stock) => {
 });
 
 // Launch the bot
-bot.launch().then(() => {
+bot.launch().then(async () => {
+  try {
+    await bot.telegram.setMyCommands([
+      { command: 'start', description: '/start' },
+      { command: 'lang', description: '/lang' }
+    ]);
+  } catch (e) {
+    console.log('Failed to set commands', e);
+  }
   console.log('[BOT] Pulse SMS Bot is now running!');
 }).catch(err => {
   console.error('[BOT ERROR] Failed to launch bot:', err);
