@@ -964,13 +964,8 @@ bot.action(/^select_country_([^_]+)(?:_(.+))?$/, async (ctx) => {
       startPolling(ctx, phoneNumber, countryCode, response.account);
 
     } else {
-      // 1. Show the actual error message if available
-      let errorMsg = ctx.t('no_numbers_error');
-      if (response && response.code && response.code !== 200 && response.msg) {
-        errorMsg = `❌ Provider: ${response.msg} (Code: ${response.code})`;
-      }
-      
-      await ctx.answerCbQuery(errorMsg, { show_alert: true }).catch(() => { });
+      // 1. Show the popup alert FIRST
+      await ctx.answerCbQuery(ctx.t('no_numbers_error'), { show_alert: true }).catch(() => { });
 
       // Mark the country as out of stock to make it disappear
       // We pass the current stock so hunter knows this specific amount is stuck/bugged
@@ -998,7 +993,7 @@ bot.action(/^select_country_([^_]+)(?:_(.+))?$/, async (ctx) => {
     }
   } catch (error) {
     console.error("Purchase error:", error);
-    await ctx.answerCbQuery(`❌ System Error: ${error.message || 'Unknown'}`, { show_alert: true }).catch(() => { });
+    await ctx.answerCbQuery(ctx.t('no_numbers_error'), { show_alert: true }).catch(() => { });
 
     const liveDist = hunter.getLiveDistribution();
     const currentStock = liveDist[countryCode] || 0;
