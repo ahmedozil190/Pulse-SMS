@@ -11,12 +11,8 @@ const crypto = require('crypto');
 const hunter = require('./services/hunter');
 const cron = require('node-cron');
 const BinancePayService = require('./services/binance');
-const checker = require('./services/checker');
 
 dotenv.config();
-
-// Initialize the Telegram Checker Service
-checker.init();
 
 // Start the Live Hunting Monitor (5s interval)
 // hunter.start(5000); // Moved to end of file to ensure bot is ready
@@ -176,67 +172,6 @@ bot.command('admin', async (ctx) => {
       ]
     }
   });
-});
-
-/**
- * Admin Commands for Checker Service
- */
-bot.command('set_checker_id', async (ctx) => {
-  const adminIds = (process.env.ADMIN_IDS || process.env.ADMIN_TELEGRAM_ID || "").split(',').map(id => id.trim());
-  if (!adminIds.includes(ctx.from.id.toString())) return;
-
-  const value = ctx.message.text.split(' ')[1];
-  if (!value) return ctx.reply('Usage: /set_checker_id <id>');
-
-  await prisma.globalSetting.upsert({
-    where: { key: 'checker_api_id' },
-    update: { value },
-    create: { key: 'checker_api_id', value }
-  });
-  ctx.reply('✅ API ID saved to Database.');
-});
-
-bot.command('set_checker_hash', async (ctx) => {
-  const adminIds = (process.env.ADMIN_IDS || process.env.ADMIN_TELEGRAM_ID || "").split(',').map(id => id.trim());
-  if (!adminIds.includes(ctx.from.id.toString())) return;
-
-  const value = ctx.message.text.split(' ')[1];
-  if (!value) return ctx.reply('Usage: /set_checker_hash <hash>');
-
-  await prisma.globalSetting.upsert({
-    where: { key: 'checker_api_hash' },
-    update: { value },
-    create: { key: 'checker_api_hash', value }
-  });
-  ctx.reply('✅ API HASH saved to Database.');
-});
-
-bot.command('set_checker_session', async (ctx) => {
-  const adminIds = (process.env.ADMIN_IDS || process.env.ADMIN_TELEGRAM_ID || "").split(',').map(id => id.trim());
-  if (!adminIds.includes(ctx.from.id.toString())) return;
-
-  const value = ctx.message.text.split(' ')[1];
-  if (!value) return ctx.reply('Usage: /set_checker_session <session>');
-
-  await prisma.globalSetting.upsert({
-    where: { key: 'checker_session' },
-    update: { value },
-    create: { key: 'checker_session', value }
-  });
-  ctx.reply('✅ STRING_SESSION saved to Database.');
-});
-
-bot.command('checker_restart', async (ctx) => {
-  const adminIds = (process.env.ADMIN_IDS || process.env.ADMIN_TELEGRAM_ID || "").split(',').map(id => id.trim());
-  if (!adminIds.includes(ctx.from.id.toString())) return;
-
-  await ctx.reply('⏳ Restarting Checker Service...');
-  const result = await checker.init();
-  if (result.success) {
-    ctx.reply(`✅ <b>Checker Service</b>: ${result.message}`, { parse_mode: 'HTML' });
-  } else {
-    ctx.reply(`❌ <b>Checker Service Failed</b>:\n<code>${result.message}</code>`, { parse_mode: 'HTML' });
-  }
 });
 
 /**
@@ -1186,15 +1121,15 @@ bot.action(/^check_code_(.+)_(.+)$/, async (ctx) => {
 });
 
 /**
- * Helper to get a CLEAN (Not Banned, Not Registered) Mobile number
- * Automatically retries up to maxRetries times
+ * Helper to get a Mobile number from the Pool
+ * Automatically retries across different accounts if one fails
  */
 async function getCleanMobile(countryCode, maxRetries = 3) {
   let lastRes = null;
-  
+
   // Fetch all active provider accounts
   let accounts = await prisma.providerAccount.findMany({ where: { isActive: true } });
-  
+
   // If no DB accounts, return error
   if (accounts.length === 0) {
     return { code: 500, msg: 'No active provider accounts configured in Admin Dashboard.' };
@@ -1203,37 +1138,14 @@ async function getCleanMobile(countryCode, maxRetries = 3) {
   for (let i = 0; i < maxRetries; i++) {
     // Pick an account (round robin by attempt index)
     const acc = accounts[i % accounts.length];
-    
+
     const response = await durianApi.getMobile('0257', countryCode, acc);
-    if (response.code !== 200 || !response.data) {
-      lastRes = response;
-      // If this account failed, we might want to try the next one immediately? 
-      // But we'll just let the loop continue to the next attempt/account.
-      continue; 
+    if (response.code === 200 && response.data) {
+      return { phoneNumber: response.data, account: acc };
     }
 
-    const phoneNumber = response.data;
-
-    // If checker is not ready, just return the number (fallback)
-    if (!checker.isReady) {
-      return { phoneNumber, account: acc };
-    }
-
-    console.log(`[Checker] Verifying ${phoneNumber} via ${acc ? acc.username : 'Default'} (Attempt ${i + 1}/${maxRetries})...`);
-    const check = await checker.checkNumber(phoneNumber);
-
-    if (check.status === 'CLEAN') {
-      console.log(`[Checker] SUCCESS: ${phoneNumber} is CLEAN`);
-      return { phoneNumber, account: acc };
-    } else {
-      console.warn(`[Checker] REJECTED: ${phoneNumber} is ${check.status}. Blacklisting on provider and retrying...`);
-      // Blacklist it on the specific account that gave it to us
-      await durianApi.blacklistNumber('0257', phoneNumber, acc);
-      lastRes = { code: 403, msg: `Rejected: ${check.status}` };
-
-      // Wait a bit before next attempt
-      await new Promise(r => setTimeout(r, 1000));
-    }
+    lastRes = response;
+    // If this account failed (e.g., out of balance), the loop continues to the next account
   }
 
   return lastRes;
