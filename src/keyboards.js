@@ -43,11 +43,11 @@ const keyboards = {
     
     // 1. Filter for 'Real-time' Low Stock (1-25) to avoid fake large stocks
     const codes = Object.keys(distribution)
-      .filter(c => c !== "" && distribution[c] > 0 && distribution[c] <= 25)
+      .filter(c => c !== "" && distribution[c] > 0)
       .filter(c => {
-        // If config exists, check if enabled. If no config, default to FALSE (hide unknown countries).
+        // If config exists, check if enabled. If no config, default to TRUE (show by default).
         const cfg = configMap[c];
-        return cfg ? cfg.isEnabled : false;
+        return cfg ? cfg.isEnabled : true;
       })
       .sort((a, b) => {
         // 2. Sort Logic: Fresh Arrivals (🔥) first, then by highest stock
@@ -102,7 +102,7 @@ const keyboards = {
     const codes = Object.keys(allCountries)
       .filter(c => {
         const cfg = configMap[c];
-        return cfg ? cfg.isEnabled : false;
+        return cfg ? cfg.isEnabled : true;
       })
       .sort((a,b) => {
         const infoA = durianApi.getCountryInfo(a, lang);
