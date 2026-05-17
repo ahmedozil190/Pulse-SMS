@@ -244,18 +244,26 @@ async function getOrCreateUser(ctx, referrerTelegramId = null) {
         detectedLang = 'ar';
       }
 
-      user = await prisma.user.create({
-        data: {
-          telegramId,
-          username: ctx.from.username || null,
-          firstName: ctx.from.first_name || null,
-          lastName: ctx.from.last_name || null,
-          balance: 0.0,
-          language: detectedLang,
-          referredById
+      try {
+        user = await prisma.user.create({
+          data: {
+            telegramId,
+            username: ctx.from.username || null,
+            firstName: ctx.from.first_name || null,
+            lastName: ctx.from.last_name || null,
+            balance: 0.0,
+            language: detectedLang,
+            referredById
+          }
+        });
+        ctx.session.isFirstTime = true;
+      } catch (createErr) {
+        if (createErr.code === 'P2002') {
+          user = await prisma.user.findUnique({ where: { telegramId } });
+        } else {
+          throw createErr;
         }
-      });
-      ctx.session.isFirstTime = true;
+      }
     } else {
       // PROMPT SYNC: Update user info if it changed since last interaction
       const currentFirstName = ctx.from.first_name || null;
@@ -2157,54 +2165,76 @@ const scanLowBalanceSubscriptions = async () => {
 // Run scanner every 5 minutes
 setInterval(scanLowBalanceSubscriptions, 5 * 60 * 1000);
 
-// Start the hunter service
-hunter.start(3000, async (code, stock) => {
+// Auto-seed/restore provider account from .env if empty (e.g. SQLite database reset on Railway deploy)
+async function seedDefaultProviderAccount() {
   try {
-    const countryConfig = await prisma.countryConfig.findUnique({ where: { countryCode: code } });
-    const price = countryConfig ? countryConfig.price : 0.25;
-
-    // Handle Notifications (Alerts)
-    const now = Date.now();
-    const lastSent = lastAlertSent[code] || 0;
-
-    // Only send alerts every 5 minutes per country
-    if (now - lastSent > 5 * 60 * 1000) {
-      lastAlertSent[code] = now;
-
-    const subs = await prisma.notificationSubscription.findMany({
-      where: {
-        countryCode: code
-      },
-      include: { user: true }
-    });
-
-      if (subs.length > 0) {
-        console.log(`[HUNTER ALERT] Stock for ${code} is ${stock}. Notifying ${subs.length} users...`);
-        for (const s of subs) {
-          if (!s.user || s.user.isBanned || s.user.balance < price) continue;
-
-          const lang = s.user.language || 'en';
-          const info = durianApi.getCountryInfo(code, lang);
-          const msg = i18n.t(lang, 'alert_notification', {
-            flag: info.flag,
-            name: info.localizedName,
-            price: price.toFixed(2)
-          });
-
-          bot.telegram.sendMessage(s.user.telegramId, msg, {
-            parse_mode: 'HTML',
-            reply_markup: {
-              inline_keyboard: [[Markup.button.callback(i18n.t(lang, 'alert_buy_btn'), `select_country_${code}_alert`)]]
-            }
-          }).catch(() => { });
-
-          await new Promise(resolve => setTimeout(resolve, 50));
+    const count = await prisma.providerAccount.count();
+    if (count === 0 && process.env.DURIAN_USERNAME && process.env.DURIAN_API_KEY) {
+      await prisma.providerAccount.create({
+        data: {
+          username: process.env.DURIAN_USERNAME,
+          apiKey: process.env.DURIAN_API_KEY,
+          isActive: true,
+          balance: 0.0
         }
-      }
+      });
+      console.log('[DATABASE] Seeded default ProviderAccount from .env credentials.');
     }
   } catch (err) {
-    console.error('[HUNTER BROADCAST ERROR]', err);
+    console.error('[DATABASE] Failed to seed default ProviderAccount:', err.message);
   }
+}
+
+// Start the hunter service after ensuring a provider account exists
+seedDefaultProviderAccount().finally(() => {
+  hunter.start(3000, async (code, stock) => {
+    try {
+      const countryConfig = await prisma.countryConfig.findUnique({ where: { countryCode: code } });
+      const price = countryConfig ? countryConfig.price : 0.25;
+
+      // Handle Notifications (Alerts)
+      const now = Date.now();
+      const lastSent = lastAlertSent[code] || 0;
+
+      // Only send alerts every 5 minutes per country
+      if (now - lastSent > 5 * 60 * 1000) {
+        lastAlertSent[code] = now;
+
+        const subs = await prisma.notificationSubscription.findMany({
+          where: {
+            countryCode: code
+          },
+          include: { user: true }
+        });
+
+        if (subs.length > 0) {
+          console.log(`[HUNTER ALERT] Stock for ${code} is ${stock}. Notifying ${subs.length} users...`);
+          for (const s of subs) {
+            if (!s.user || s.user.isBanned || s.user.balance < price) continue;
+
+            const lang = s.user.language || 'en';
+            const info = durianApi.getCountryInfo(code, lang);
+            const msg = i18n.t(lang, 'alert_notification', {
+              flag: info.flag,
+              name: info.localizedName,
+              price: price.toFixed(2)
+            });
+
+            bot.telegram.sendMessage(s.user.telegramId, msg, {
+              parse_mode: 'HTML',
+              reply_markup: {
+                inline_keyboard: [[Markup.button.callback(i18n.t(lang, 'alert_buy_btn'), `select_country_${code}_alert`)]]
+              }
+            }).catch(() => { });
+
+            await new Promise(resolve => setTimeout(resolve, 50));
+          }
+        }
+      }
+    } catch (err) {
+      console.error('[HUNTER BROADCAST ERROR]', err);
+    }
+  });
 });
 
 // Launch the bot
